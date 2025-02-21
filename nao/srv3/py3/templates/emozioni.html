@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emozioni</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-z9b+7oG5fWeAOeVG2HEoaFPiFjsxxhMbDSFOx6YLLEpAt52D74BlN/C2BZJKPXyBBo5HcAc2rZSXtITc8Unw/A==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.1.96/css/materialdesignicons.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF;
+            color: #000000;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swarovski {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #FFF8F8;
+            text-decoration: none;
+        }
+
+        .logo-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 70px;
+            height: 70px;
+        }
+
+        #header-text {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #number-container {
+            font-size: 200px;
+            margin-top: 20px;
+            transition: color 0.5s;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px; /* Altezza fissa */
+        }
+
+        #report-button {
+            font-size: 40px;
+            width: 150px; /* Larghezza fissa */
+            margin-top: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            background-color: #FFF8F8;
+            transition: background-color 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #report-button:hover {
+            background-color: #FF7370;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #D39C20;
+        }
+
+        /* Stili per la tabella */
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #FFF; /* Sfondo bianco */
+            border-radius: 15px; /* Angoli stondati */
+            margin-bottom: 200px; /* Margine di 200px sotto la tabella */
+        }
+
+        th, td {
+            border: 3px solid #0A0A0A; /* Bordo più spesso */
+            padding: 10px;
+            text-align: center;
+            font-weight: bold; /* Testo in grassetto */
+            color: black;
+        }
+
+        th {
+            background-color: #FFF8F8;
+            font-size: 20px;
+            border-radius: 15px; /* Angoli stondati */
+        }
+
+        #sortSelect{
+            border: 1px solid black;
+        }
+    </style>
+
+    <script>
+        function sortTable() {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("userTable");
+            switching = true;
+
+            var columnIndex = document.getElementById("sortSelect").value;
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("td")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                    if(columnIndex == 0 || columnIndex == 4){
+                        x = parseInt(rows[i].getElementsByTagName("td")[columnIndex].innerHTML, 10);
+                        y = parseInt(rows[i + 1].getElementsByTagName("td")[columnIndex].innerHTML, 10);
+                    }
+                    else{
+                        x = x.innerHTML.toLowerCase();
+                        y = y.innerHTML.toLowerCase()
+                    }
+                    if (x > y) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+    <a href="/dashboard" class="logo-link"><img src="{{url_for('static', filename='logo.png')}}" alt="Logo" width="100%" height="100%"></a>
+    <a href="/logout" class="logout-button">Logout</a>
+    <div>
+        <img src="{{url_for('static', filename='swarovski_logo.svg')}}" alt="Logo" class="swarovski">
+    </div>
+
+    <div id="header-text">Emozioni:</div>
+
+    <br><br>
+
+    <div class="sort-container">
+        <label class="sort-label" for="sortSelect">Ordina per:</label>
+        <select id="sortSelect" onchange="sortTable()">
+            <option value="0">ID</option>
+            <option value="1">Username</option>
+            <option value="2">Titolo</option>
+            <option value="3">Prezzo</option>
+            <option value="4">Età</option>
+            <option value="7">Indice Gradimento</option>
+        </select>
+    </div>
+    <br><br>
+
+    <table id="userTable">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Titolo</th>
+            <th>Prezzo</th>
+            <th>Età</th>
+            <th>Sesso</th>
+            <th>Foto</th>
+            <th>Indice Gradimento</th>
+        </tr>
+       
+       {% for item in data %}
+        <tr>
+            <td>{{item['id']}}</td>
+            <td>{{item['username']}}</td>
+            <td>{{item['titolo']}}</td>
+            <td>{{item['prezzo']}}</td>
+            <td>{{item['eta']}}</td>
+            <td>{{item['sesso']}}</td>
+            <td><img src="{{item['foto']}}" width="70px" height="70px"></td>
+            <td>{{item['indice_gradimento']}}</td>
+        </tr>
+        {% endfor %}
+    
+    </table>
+</body>
+
+</html>

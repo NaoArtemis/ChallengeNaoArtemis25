@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utenti</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-z9b+7oG5fWeAOeVG2HEoaFPiFjsxxhMbDSFOx6YLLEpAt52D74BlN/C2BZJKPXyBBo5HcAc2rZSXtITc8Unw/A==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.1.96/css/materialdesignicons.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF;
+            color: black;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swarovski {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #FFF8F8;
+            text-decoration: none;
+        }
+
+        .logo-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 70px;
+            height: 70px;
+        }
+
+        .text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 0px; /* Ridotto lo spazio sopra la tabella */
+			margin-bottom: 0px;
+        }
+
+        .text-border {
+            border: 10px solid #0A0A0A; /* Bordo più spesso */
+            border-radius: 15px; 
+            padding: 30px;
+            margin-bottom: 0px; /* Aggiunto margine sotto la tabella */
+        }
+
+        .small-text {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .large-text {
+            font-size: 200px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #D39C20;
+        }
+
+        /* Stili per la tabella */
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #FFF; /* Sfondo bianco */
+            border-radius: 15px; /* Angoli stondati */
+            margin-bottom: 200px; /* Margine di 200px sotto la tabella */
+        }
+
+        th, td {
+            border: 3px solid #0A0A0A; /* Bordo più spesso */
+            padding: 10px;
+            text-align: center;
+            font-weight: bold; /* Testo in grassetto */
+        }
+
+        th {
+            background-color: #FFF8F8;
+            font-size: 20px;
+            border-radius: 15px; /* Angoli stondati */
+        }
+
+        .sort-container {
+            margin-top: 0px;
+        }
+
+        .sort-label {
+            font-size: 20px;
+            color: #0A0A0A;
+            margin-right: 10px;
+        }
+
+        #sortSelect{
+            border: 1px solid black;
+        }
+    </style>
+    <script>
+        function sortTable() {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("userTable");
+            switching = true;
+
+            var columnIndex = document.getElementById("sortSelect").value;
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("td")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                    if(columnIndex == 0){
+                        x = parseInt(rows[i].getElementsByTagName("td")[columnIndex].innerHTML, 10);
+                        y = parseInt(rows[i + 1].getElementsByTagName("td")[columnIndex].innerHTML, 10);
+                    }
+                    else{
+                        x = x.innerHTML.toLowerCase();
+                        y = y.innerHTML.toLowerCase()
+                    }
+                    if (x > y) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        async function deleteUtente(url) {
+            await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            });
+
+            window.location.reload();
+        }
+    </script>
+</head>
+
+<body>
+    <a href="/dashboard" class="logo-link"><img src="{{url_for('static', filename='logo.png')}}" alt="Logo" width="100%" height="100%"></a>
+    <a href="/logout" class="logout-button">Logout</a>
+    <div>
+        <img src="{{url_for('static', filename='swarovski_logo.svg')}}" alt="Logo" class="swarovski">
+    </div>
+
+    <div class="text-container">
+        <div class="text-border">
+            <div class="small-text">Abbiamo raggiunto un totale di</div>
+            <div class="large-text">{{count_cliente['count']}}</div>
+            <div class="small-text">utenti</div>
+        </div>
+    </div>
+    <br>
+
+    <a class="flex flex-row space-x-2 mt-10 mx-auto px-4 py-2 w-fit rounded-md font-medium text-white tracking-wider bg-green-500" 
+            href="/nuovo_utente">NUOVO UTENTE<span class="mdi mdi-plus ml-1"></span></a>
+    <br>
+    <div class="sort-container">
+        <label class="sort-label" for="sortSelect">Ordina per:</label>
+        <select id="sortSelect" onchange="sortTable()">
+            <option value="0">ID</option>
+            <option value="1">Username</option>
+            <option value="2">Nome</option>
+            <option value="3">Cognome</option>
+        </select>
+    </div>
+    <br>
+
+    <table id="userTable">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Password</th>
+            <th>Modifica</th>
+            <th>Elimina</th>
+        </tr>
+       
+       {% for item in cliente %}
+        <tr>
+            <td>{{item['id']}}</td>
+            <td>{{item['username']}}</td>
+            <td>{{item['nome']}}</td>
+            <td>{{item['cognome']}}</td>
+            <td>{{item['password']}}</td>
+            <td><button class="rounded px-4 py-2 bg-sky-500 text-white hover:bg-sky-600 transition-all"><a href="/gestione_utente/{{item['id']}}"><span class="mdi mdi-pencil-outline mr-1"></span></a></button></td>
+            <td><button class="rounded px-4 py-2 bg-red-500 text-white hover:bg-red-600 transition-all"><a onclick="deleteUtente('/api/utente/{{item['id']}}')"><span class="mdi mdi-delete-outline mr-1"></span></a></button></td>
+        </tr>
+        {% endfor %}
+	
+    </table>
+
+</body>
+
+</html>

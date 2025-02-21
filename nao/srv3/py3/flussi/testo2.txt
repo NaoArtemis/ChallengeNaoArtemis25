@@ -1,0 +1,44 @@
+Buongiorno Giacomo Santi, sono peara, il nao del team naonecsus.
+Come posso aiutarti? Anche se sono un robot di gioielli ne so un bel po
+
+salve, vorrei fare un regalo a mia sorella
+
+E quanti anni ha?
+
+ha appena compiuto 50 anni
+
+Hai un bugget per lacquisto del gioiello?
+
+pensavo di stare sui 300 euro
+
+A quale tipologia di gioielli pensavi? Collane, bracciali, orecchini, anelli o orologi?
+orecchini
+
+['female', 50, 300, 'earrings']
+[39]
+
+Fammi pensare... io ti consiglierei: hyperbola drop earrings
+Gli orecchini Hyperbola sono il mezzo perfetto per aggiungere un tocco passionale al tuo stile. Placcati in rodio, presentano un design tridimensionale con Swarovski Zirconia trasparenti e una pietra danzante blu a forma di cuore. Abbinati a un pendente coordinato, enfatizzano il glamour e l originalita, offrendo una dichiarazione audace di stile e personalita.
+vuoi aggiungere hyperbola drop earrings al carrello?
+
+si
+
+Il prodotto scelto è in sconto e da  230.0 viene  207.0
+Vuoi che ti consigli qualche abbinamento da fare?
+
+si
+
+Perfetto, allora ti consiglierei di abbinarci angelic necklace con hyperbola drop earrings
+Il raffinato collier Angelic Swarovski si abbina perfettamente ad altre creazioni della linea. Ideale per occasioni speciali, e realizzato in Clear Crystal e metallo rodiato lucido. Con un design senza tempo, questo collier e un regalo prezioso e un elegante dichiarazione di stile, aggiungendo un tocco di grazia e brillantezza a qualsiasi look.
+vuoi aggiungere angelic necklace al carrello?
+
+si
+
+Il prodotto scelto è in sconto e da  230.0 viene  207.0
+Vuoi acquistare qualche altro prodotto?
+
+no grazie
+
+Controlla e conferma il tuo ordine nell'app
+i tuoi gioielli ti aspettano in cassa :)
+Spero di averti aiutato al meglio delle mie possibilita, grazie per aver acquistato da svaroschi utilizzando la tecnologia naonecsus!

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prodotto</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha512-z9b+7oG5fWeAOeVG2HEoaFPiFjsxxhMbDSFOx6YLLEpAt52D74BlN/C2BZJKPXyBBo5HcAc2rZSXtITc8Unw/A=="
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.1.96/css/materialdesignicons.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF;
+            color: #FFF8F8;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swarovski {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .logo-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 70px;
+            height: 70px;
+        }
+
+        /* Stili personalizzati per il menu a tendina */
+        label {
+            color: #000000;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 15px; /* Aumenta l'altezza */
+            font-size: 16px; /* Riduci la dimensione del testo */
+            border: none;
+            background-color: #FFF8F8;
+            color: #0A0A0A;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            appearance: none; /* Nasconde il default dropdown arrow su Firefox */
+        }
+
+        select:hover {
+            background-color: #FF7370;
+        }
+
+        select:focus {
+            outline: none;
+            border: 2px solid #FF7370;
+        }
+
+        /* Aggiungi eventuali stili specifici per la tua web app */
+        /* Ad esempio, puoi modificare colori, dimensioni, margini, ecc. */
+
+        canvas {
+            width: 80%;
+            height: 20px;
+            margin: 20px auto;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #D39C20;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/dashboard" class="logo-link"><img src="{{url_for('static', filename='logo.png')}}" alt="Logo" width="100%" height="100%"></a>
+    <a href="/logout" class="logout-button">Logout</a>
+    <div>
+        <img src="{{url_for('static', filename='swarovski_logo.svg')}}" alt="Logo" class="swarovski">
+    </div>
+
+    <div>
+        <label for="gioielli">Gioielli</label>
+        <select id="gioielli" name="gioielli" onchange="updateChart()" class="flex flex-row space-x-2 mt-10 mx-auto px-4 py-2 w-fit rounded-md font-medium text-white tracking-wider bg-green-500">
+            {% for k, v in vendite.items() %}
+            <option value="{{v['data_acquisto']}}">{{v['titolo']}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <canvas id="myChart"></canvas>
+
+    <script>
+        var salesData = {
+            //labels: ["1/01", "2/01", "3/01", "4/01", "5/01"],
+            lasels : [],
+            datasets: [{
+                label: "Vendite Gioiello",
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(0, 0, 0)',
+                borderColor: 'rgba(0, 0, 0)',
+                borderWidth: 2
+            }]
+        };
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        var myChart = new Chart(ctx, {
+            type: 'bar', // 'bar', 'line', 'pie'
+            data: salesData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        function updateChart() {
+            var date_acquisto = document.getElementById('gioielli').value;
+            date_acquisto = date_acquisto.replace(/'/g, '"');
+            date_acquisto = JSON.parse(date_acquisto)
+
+            labels = []
+            data   = []
+            for(var i = 0; i < date_acquisto.length; i++){
+                indice = labels.indexOf(date_acquisto[i]);
+                if (indice != -1) {
+                    data[indice] ++;
+                }
+                else{
+                    labels.push(date_acquisto[i])
+                    data.push(1)
+                }
+            }
+
+            var newData = {
+                //labels: ["1/01", "2/01", "3/01", "4/01", "5/01"],
+                labels: labels,
+                datasets: [{
+                    label: "Vendite Gioiello",
+                    //data: [15, 10, 18, 22, 12],
+                    data: data,
+                    backgroundColor: 'rgba(0, 0, 0)',
+                    borderColor: 'rgba(0, 0, 0)',
+                    borderWidth: 2
+                }]
+            };
+
+            myChart.data = newData;
+            myChart.update();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilancio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-z9b+7oG5fWeAOeVG2HEoaFPiFjsxxhMbDSFOx6YLLEpAt52D74BlN/C2BZJKPXyBBo5HcAc2rZSXtITc8Unw/A==" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.1.96/css/materialdesignicons.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF;
+            color: #FFF8F8;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swarovski {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .logo-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 70px;
+            height: 70px;
+        }
+
+        canvas {
+            width: 80%; 
+            height: 20px; 
+            margin: 20px auto; 
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #D39C20;
+        }
+
+        label {
+            color: #000000;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/dashboard" class="logo-link"><img src="{{url_for('static', filename='logo.png')}}" alt="Logo" width="100%" height="100%"></a>
+    <a href="/logout" class="logout-button">Logout</a>
+    <div>
+        <img src="{{url_for('static', filename='swarovski_logo.svg')}}" alt="Logo" class="swarovski">
+    </div>
+
+    <div>
+        <label for="gioielli">Vendite</label>
+        <button id="gioielli" name="gioielli" onclick="updateChart()" value="{{data_prezzo}}" class="flex flex-row space-x-2 mt-10 mx-auto px-4 py-2 w-fit rounded-md font-medium text-white tracking-wider bg-green-500">Calcola</button>
+    </div>
+    
+    <canvas id="myChart"></canvas>
+
+    <script>
+        var salesData = {
+            labels: [],
+            datasets: [{
+                label: "Vendite totali della giornata",
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(0, 0, 0)', 
+                borderColor: 'rgba(0, 0, 0)', 
+                borderWidth: 2 
+            }]
+        };
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        
+        var myChart = new Chart(ctx, {
+            type: 'bar', // 'bar', 'line', 'pie'
+            data: salesData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        function updateChart() {
+            var date_acquisto = document.getElementById('gioielli').value;
+            date_acquisto = date_acquisto.replace(/'/g, '"');
+            date_acquisto = JSON.parse(date_acquisto)
+
+            var newData = {
+                //labels: ["1/01", "2/01", "3/01", "4/01", "5/01"],
+                labels: Object.keys(date_acquisto),
+                datasets: [{
+                    label: "Vendite Gioiello",
+                    //data: [15, 10, 18, 22, 12],
+                    data: Object.values(date_acquisto),
+                    backgroundColor: 'rgba(0, 0, 0)',
+                    borderColor: 'rgba(0, 0, 0)',
+                    borderWidth: 2
+                }]
+            };
+
+            myChart.data = newData;
+            myChart.update();
+        }
+    </script>
+</body>
+
+</html>

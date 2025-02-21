@@ -1,0 +1,61 @@
+FLUSSI ONERETAIL: nao1, nao2, utente, store_manager
+
+utente  ->app   -login:send_msg_1.py                        -> {"username": "giovanni_bellorio", "password": "gb"}
+                /api/utente/app/                            <- data:{"id_cliente":9, "nome":"Giovanni", "cognome":"Bellorio"}
+
+                ->view_carrello:send_msg_2.py               -> {"id_cliente":9, "nome":"Giovanni", "cognome":"Bellorio"}
+                /api/carrello/                              <- data:{carrello}
+
+                -view_scelta                                -> qrcode o nao ?
+                                                            <- nao
+                
+                ->inizia_dialogo:send_msg_3.py              -> {"id_cliente":9, "nome":"Giovanni", "cognome":"Bellorio"}
+                /api/utente/dialogo/                        lettura emozioni, nao1 conduce il dialogo studiando il volto
+                /api/get_gioiello_consigliato               <- (get) data:{prodotto} o data:null
+
+                                                            <- data:{carrello}
+                    
+                ->view_carrello:send_msg_2.py               -> {"id_cliente":9, "nome":"Giovanni", "cognome":"Bellorio"}
+                /api/carrello/                              <- data:{carrello}     
+
+                ->ordina:send_msg_4.py                      -> {"id_cliente":9, "modalita_pagamento":"carta"}
+                /api/ordine/                                nao1 conferma l'ordine e fa il riepilogo.
+                                                            elimina oggetti del carrello, nao2 avvisa store store_manager di preparare 
+                                                            gli oggetti da ritirare in cassa, toglie l'oggetto dallo scaffale e avvisa
+                                                            di ripopolare lo scaffale
+                                                            <- data:{ordini}
+
+                ->view_ordini:send_msg_5.py                 -> {"id_cliente":9}
+                /api/ordine/                                <- data:{ordini}
+
+                ->view_catalogo:send_msg_6.py               -> get
+                /api/catalogo                               <- data:{catalogo}
+
+                ->descrizione:send_msg_7.py                 -> /id
+                /api/descrizione_prodotto/                  <- data:{oggetto} con nao1 che parla
+
+                # SOLO APP MOBILE
+                ->aggiungi_ogg_al_carrello:send_msg_8.py    -> {"id_cliente":9, "id_gioiello":1}  
+                /api/carrello/                              <- data:{message}
+
+                ->cancella_ogg_al_carrello:send_msg_9.py    -> {"id_cliente":9, "id_gioiello":1}  
+                /api/carrello/                              <- data:{message}
+
+                ->conferma_ordine                           -> {"id_cliente":9, "modalita_pagamento":"carta"}
+                /api/ordine_mobile/                         elimina oggetti del carrello, nao2 avvisa store store_manager di preparare 
+                                                            gli oggetti da ritirare in cassa, toglie l'oggetto dallo scaffale e avvisa
+                                                            <- data:{ordini}
+
+
+app qrcode      ->descrizione:send_msg_7.py                 -> {"id_oggetto":value}
+                /api/descrizione_prodotto/                  <- data:{oggetto} con nao che parla
+
+                /api/prodotto/id                            -> id
+                                                            <- prodotto
+
+
+store_manager -> webapp
+nao1 -> consulente cliente
+nao2 -> aiuto allo store_manager (->ordina:send_msg_4.py, report magazzino e scaffale)
+
+alla fine sull'app -> link questionario di gradimento

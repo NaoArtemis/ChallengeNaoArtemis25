@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Utente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha512-z9b+7oG5fWeAOeVG2HEoaFPiFjsxxhMbDSFOx6YLLEpAt52D74BlN/C2BZJKPXyBBo5HcAc2rZSXtITc8Unw/A=="
+        crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.1.96/css/materialdesignicons.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF;
+            color: #F5B92C;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swarovski {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+            text-align: center;
+        }
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #FFF8F8;
+            text-decoration: none;
+        }
+
+        .logo-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 70px;
+            height: 70px;
+        }
+
+        .text-border {
+            border: 10px solid #0A0A0A;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 0px;
+        }
+
+        .small-text {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #0A0A0A; /* Testo in nero */
+        }
+
+        .large-text {
+            font-size: 200px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 75px;
+           
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 300px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 2px solid #000; /* Aggiungi una cornice nera */
+        }
+
+        input[type="submit"] {
+            width: 150px;
+            padding: 20px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #000;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #D39C20;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/dashboard" class="logo-link"><img src="{{url_for('static', filename='logo.png')}}" alt="Logo" width="100%" height="100%"></a>
+    <a href="/logout" class="logout-button">Logout</a>
+    <div>
+        <img src="{{url_for('static', filename='swarovski_logo.svg')}}" alt="Logo" class="swarovski">
+    </div>
+    
+    <form action="{% if cliente['id'] %}/api/utente/{{cliente['id']}}{% else %}/api/nuovo_utente{% endif %}" method="POST">
+        <label class="small-text" for="nome">Nome: </label>
+        <input type="text" id="nome" name="nome" required value="{{cliente['nome']}}">
+
+        <label class="small-text" for="cognome">Cognome:</label>
+        <input type="text" id="cognome" name="cognome" required value="{{cliente['cognome']}}">
+
+        <label class="small-text" for="username">Username:</label>
+        <input type="text" id="username" name="username" required value="{{cliente['username']}}">
+
+        <label class="small-text" for="password">Password:</label>
+        <input type="password" id="password" name="password" required value="{{cliente['password']}}">
+
+        <input type="submit" value="Invia">
+    </form>
+</body>
+
+</html>

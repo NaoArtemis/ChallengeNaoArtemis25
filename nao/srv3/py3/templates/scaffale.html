@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaffale</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-z9b+7oG5fWeAOeVG2HEoaFPiFjsxxhMbDSFOx6YLLEpAt52D74BlN/C2BZJKPXyBBo5HcAc2rZSXtITc8Unw/A==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.1.96/css/materialdesignicons.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF;
+            color: #000000;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .swarovski {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #FFF8F8;
+            text-decoration: none;
+        }
+
+        .logo-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 70px;
+            height: 70px;
+        }
+
+        #header-text {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #number-container {
+            font-size: 200px;
+            margin-top: 20px;
+            transition: color 0.5s;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px; /* Altezza fissa */
+        }
+
+        #report-button {
+            font-size: 40px;
+            width: 150px; /* Larghezza fissa */
+            margin-top: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            background-color: #000;
+			color: #FFF;
+            transition: background-color 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #report-button:hover {
+            background-color: #000;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #000;
+            color: #FFF;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #D39C20;
+        }
+
+        /* Stili per la tabella */
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #FFF; /* Sfondo bianco */
+            border-radius: 15px; /* Angoli stondati */
+            margin-bottom: 200px; /* Margine di 200px sotto la tabella */
+        }
+
+        th, td {
+            border: 3px solid #0A0A0A; /* Bordo più spesso */
+            padding: 10px;
+            text-align: center;
+            font-weight: bold; /* Testo in grassetto */
+            color: black;
+        }
+
+        th {
+            background-color: #FFF;
+            font-size: 20px;
+            border-radius: 15px; /* Angoli stondati */
+        }
+    </style>
+    <script type="text/javascript">
+        async function updateScaffalePlus(url) {
+            await fetch(url, {
+                method: 'PLUS',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            });
+
+            window.location.reload();
+        }
+
+        async function updateScaffaleMinus(url) {
+            await fetch(url, {
+                method: 'MINUS',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            });
+
+            window.location.reload();
+        }
+    </script>
+</head>
+
+<body>
+    <a href="/dashboard" class="logo-link"><img src="{{url_for('static', filename='logo.png')}}" alt="Logo" width="100%" height="100%"></a>
+    <a href="/logout" class="logout-button">Logout</a>
+    <div>
+        <img src="{{url_for('static', filename='swarovski_logo.svg')}}" alt="Logo" class="swarovski">
+    </div>
+
+    <div id="header-text">Gioielli sullo scaffale:</div>
+
+    <div id="container">
+        <div id="number-container">{{count_scaffale}}</div>
+        <button id="report-button"><a href="/api/scaffale">Report</a></button>
+    </div>
+
+    <br><br>
+    <br><br>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Titolo</th>
+            <th>Categoria</th>
+            <th>Qtà Scaffale</th>
+            <th>Foto</th>
+            <th></th>
+        </tr>
+       
+       {% for item in oggetto %}
+        <tr>
+            <td>{{item['id']}}</td>
+            <td>{{item['titolo']}}</td>
+            <td>{{item['categoria']}}</td>
+            <td>{{item['qta_scaffale']}}</td>
+            <td><img src="{{item['foto']}}" width="70px" height="70px"></td>
+            <td>{% if item['qta_scaffale'] > 0 %}<button class="rounded px-4 py-2 bg-sky-500 text-white hover:bg-sky-600 transition-all"><a onclick="updateScaffaleMinus('/api/qta_scaffale/{{item['id']}}')"><span class="mdi mdi-tooltip-minus-outline mr-1"></span></a></button>{% endif %}
+                <button class="rounded px-4 py-2 bg-red-500 text-white hover:bg-red-600 transition-all"><a onclick="updateScaffalePlus('/api/qta_scaffale/{{item['id']}}')"><span class="mdi mdi-tooltip-plus-outline mr-1"></span></a></button></td>
+        </tr>
+        {% endfor %}
+    
+    </table>
+</body>
+
+</html>

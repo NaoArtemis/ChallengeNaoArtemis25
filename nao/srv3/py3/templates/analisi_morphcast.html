@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Webcam NAO Feed</title>
+        <style>
+        #myProgress {
+            width: 50%;
+            background-color: gray;
+        }
+
+        #myBar {
+            width: 1%;
+            height: 30px;
+            background-color: green;
+        }
+        </style>
+    </head>
+
+    <body>
+        <h1>Webcam NAO Feed</h1>
+        <img src="{{ url_for('webcam') }}" alt="Webcam Feed" id="video_feed" width="320" height="240">
+        <br><br>
+        <div><b>Results</b></div>
+        <div id="face_detect">Detect: -</div>
+        <div id="face_age">Age: -</div>
+        <div id="face_gender">Gender: -</div>
+        <div id="face_emotion">Emotion: -</div>
+        <span>Histogram of Emotions:</span>
+        <div id="chart"></div>
+        <span>Attention level:</span>
+        <div id="myProgress">
+            <div id="myBar"></div>
+        </div>
+
+
+        <!-- include radar chart -->
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <!-- include automatic alerts about browser and App compatibility -->
+        <script src="https://sdk.morphcast.com/mphtools/v1.1/mphtools.js" data-config="compatibilityUI, compatibilityAutoCheck"></script>
+        <!-- include MorphCast SDK -->
+        <script src="https://ai-sdk.morphcast.com/v1.16/ai-sdk.js"></script>
+        <!-- include Code MorphCast SDK -->
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </body>
+</html>
