@@ -539,9 +539,9 @@ def api_movement_left():
     return redirect('/joystick')
 
 @app.route('/api/movement/right', methods=['GET'])
-def api_movement_left():
+def api_movement_right():
     global theta_speed
-    theta_speed = -30
+    theta_speed = -10
     #nao_move_fast(-10)
     return redirect('/joystick')
 
