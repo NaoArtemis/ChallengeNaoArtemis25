@@ -456,7 +456,7 @@ class User(UserMixin):
         self.id = id
 
 users = {'1': {'id': '1', 'username': 'admin', 'password': '21232f297a57a5a743894a0e4a801fc3'}, #md5(admin)
-         '2': {'id': '2', 'username': 'naonexus', 'password': '898d0dc0895b537fc1732a03cba7aff4'}} #md5(naonexus)
+         '2': {'id': '2', 'username': 'naoartemis', 'password': '2df64731a8860a17abe3a28a5ccdb6ac'}} #md5(naoartemis)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -484,6 +484,11 @@ def logout():
     logout_user()
     return redirect('/')
 
+
+@app.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
 
 
 
@@ -523,55 +528,55 @@ def api_dialogo():
 @app.route('/api/movement/start', methods=['GET'])
 def api_movement_start():
     nao_move_fast(0)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 
 @app.route('/api/movement/stop', methods=['GET'])
 def api_movement_stop():
     nao_move_fast_stop()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/left', methods=['GET'])
 def api_movement_left():
     global theta_speed
     theta_speed = 10
     #nao_move_fast(10)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/right', methods=['GET'])
 def api_movement_right():
     global theta_speed
     theta_speed = -10
     #nao_move_fast(-10)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/back', methods=['GET'])
 def api_movement_back():
     nao_move_back(0)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/stand', methods=['GET'])
 def api_movement_stand():
     nao_stand()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/standInit', methods=['GET'])
 def api_movement_standInit():
     nao_standInit()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/nao_train_move', methods=['GET'])
 def api_movement_nao_train_move():
     global nao_train_move_start 
     nao_train_move_start = True
     nao_train_move()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/nao_train_move_stop', methods=['GET'])
 def api_movement_nao_train_move_stop():
     global nao_train_move_start 
     nao_train_move_start = False
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/nao_autonomous_life', methods=['GET'])
 def nao_autonomous_life():
@@ -597,14 +602,14 @@ def nao_eye_white():
     response = requests.get(url, json=data)
     logger.info(str(response.text))
 
+
+
 # SERVICES
 @app.route('/services', methods=['GET'])
 def services():
     return render_template('services.html')
 
-@app.route('/joystick', methods=['GET'])
-def joystick():
-    return render_template('joystick.html')
+
 
 
 
