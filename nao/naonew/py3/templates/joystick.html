@@ -18,7 +18,7 @@
     <div class="container">
         <div class="left_panel">
             <h2 class="h2">JOYSTICK</h2>
-            <div class="masterdiv"; style="margin-left: 145px;">
+            <div class="masterdiv"; style="margin-left: 150px;">
                 <button id="start" class="button" >Avanti</button>
                 <script>
                     document.querySelector("#start").addEventListener("click", function() {
@@ -41,7 +41,7 @@
                 });
                 </script>  
 
-                <button id= "stop" class="button" > Stop </button>
+                <button1 id= "stop" class="button1" style="margin-left:1em; margin-right:1em;"> Stop </button1>
                 <script>
                     document.querySelector("#stop").addEventListener("click", function() {
                         fetch("/api/movement/stop", { method: "GET" })
@@ -76,8 +76,8 @@
             </div>
 
 
-            <div class="masterdiv"; style="margin-top: 20px;">
-                <button id="white_eye" class="button">White Eye</button>
+            <div class="masterdiv"; style="margin-top: 20px;margin-left: 10px">
+                <button2 id="white_eye" class="button2">Color Eye</button2>
                 <script>
                     document.querySelector("#white_eye").addEventListener("click", function() {
                         fetch("/api/movement/nao_eye_white", { method: "GET" })
@@ -87,7 +87,7 @@
                 });
                 </script>
             
-                <button id="wakeup" class="button">Wakeup</button>
+                <button2 id="wakeup" class="button2" style="margin-left:5px;margin-right:5px">Wakeup</button2>
                 <script>
                     document.querySelector("#wakeup").addEventListener("click", function() {
                         fetch("/api/movement/nao_wakeup", { method: "GET" })
@@ -98,7 +98,7 @@
                 </script>
                 
             
-                <button id="autonomo" class="button">Sit Down</button>
+                <button2 id="autonomo" class="button2">Sit Down</button2>
                 <script>
                     document.querySelector("#autonomo").addEventListener("click", function() {
                         fetch("/api/movement/nao_autonomous_life", { method: "GET" })
@@ -109,8 +109,8 @@
                         </script>
             </div>
 
-            <div class="masterdiv"; style="margin-top: 20px;">
-                <button id="stand_init" class="button" >stand init</button>
+            <div class="masterdiv"; style="margin-top: 20px;margin-left: 10px">
+                <button2 id="stand_init" class="button2" >stand init</button2>
                 <script>
                     document.querySelector("#stand_init").addEventListener("click", function() {
                         fetch("/api/movement/standInit", { method: "GET" })
@@ -119,7 +119,7 @@
                             .catch(error => console.error("Errore:", error));
                 });
                         </script>
-                        <button id="start_train" class="button" >srart train</button>
+                        <button2 id="start_train" class="button2" >srart train</button2>
                         <script>
                             document.querySelector("#start_train").addEventListener("click", function() {
                                 fetch("/api/movement/nao_train_move", { method: "GET" })
@@ -128,7 +128,7 @@
                                     .catch(error => console.error("Errore:", error));
                         });
                                 </script>
-                        <button id="stop_train" class="button" >stop train</button>
+                        <button2 id="stop_train" class="button2" >stop train</button2>
                         <script>
                             document.querySelector("#stop_train").addEventListener("click", function() {
                                 fetch("/api/movement/nao_train_move", { method: "GET" })
@@ -141,9 +141,9 @@
 
         </div>
         <div class="right_panel">
-            <h2>Webcam NAO Feed</h2>
+            <h2 style="margin-right: 39%;">Webcam NAO Feed</h2>
             <div >
-                <img  src="{{ url_for('webcam') }}" alt="Webcam Feed" id="video_feed" width="320" height="240" style="margin-left: 39%;border: 2px solid black;">
+                <img  src="{{ url_for('webcam') }}" alt="Webcam Feed" id="video_feed" width="320" height="240" style="margin-right: 11.5em;border: 2px solid black;">
             </div>
         </div>
     </div>

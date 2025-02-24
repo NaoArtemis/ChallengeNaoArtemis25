@@ -26,7 +26,6 @@
 }
 
 body{
-	background: linear-gradient(270deg, #ff416c, #d8ff2b, #1e90ff);
     background-size: 400% 400%;
     animation: gradientBG 10s ease infinite; 
 
@@ -37,7 +36,7 @@ h1 {
 h2 {
 	font-family: "Helvetica";
 	text-align: center;
-	margin-left: 24%;
+	margin-left: 24.5%;
 }
 
 .masterdiv {
@@ -57,12 +56,42 @@ h2 {
 }
 
 .button {
-	background: #ff8f00;
+	background: #03256C;
 	color: #fff;
 	text-align: center;
 	border-radius: 0.5em;
-	padding: 0.65em 3em 0.65em 3em;
+	padding: 0.6em 3em ;
 	border: 0;
+	cursor: pointer;
+	outline: 0;
+	font-weight: 700;
+	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	}
+
+.button2 {
+	background: #92140C;
+	color: #fff;
+	text-align: center;
+	border-radius: 0.5em;
+	padding: 0.5em 2em ;
+	border: 0;
+	cursor: pointer;
+	outline: 0;
+	font-weight: 700;
+	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;	
+	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	}
+.button1 {
+	background: #7af80b;
+	color: #000000;
+	text-align: center;
+	border-radius: 0.5em;
+	padding: 0.6em 2em ;
 	cursor: pointer;
 	outline: 0;
 	font-weight: 700;
