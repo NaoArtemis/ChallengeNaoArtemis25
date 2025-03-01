@@ -6,6 +6,11 @@ from ultralytics import YOLO
 from sklearn.cluster import KMeans
 from scipy.signal import find_peaks
 from flask import Flask, request
+### quello da fare alle funzioni relative al video:
+    #fare in modo che la funzione da inserire manda l'ip e il nao port
+    # sistemare tutti gli try, in caso di erroe bisogna returnare i codici json non una print
+    # dare un occhiata al path in cui vengono salvati i chuck
+    # per capire cosa devo fare leggere i commenti 
 
 #requirements 
 '''
@@ -58,41 +63,35 @@ def nao_get_image(nao_ip, nao_port):
     video_proxy = ALProxy("ALVideoDevice", nao_ip, nao_port)
 
     # Configurazione della telecamera
-    name_id = "video_image_" + str(random.randint(0, 100))  # Nome univoco per la connessione
-    camera_id = 0  # 0 = telecamera superiore, 1 = telecamera inferiore
-    resolution = 1  # 320x240 px
+    name_id = "video_image_" + str(random.randint(0, 100))  #da un nome a caso al video 
+    camera_id = 0  # 0 = telecamera superiore, 1 = telecamera inferiore, 2 da aggiungere telecamera usb
+    resolution = 1  # 1 = 320x240 px
     color_space = 13  # RGB
     camera_fps = 15  # fps
     brightness_value = 55  # Luminosità predefinita
 
-    # Imposta la luminosità
-    video_proxy.setParameter(camera_id, 0, brightness_value)
 
-    # Sottoscrizione al flusso video
-    video_client = video_proxy.subscribeCamera(name_id, camera_id, resolution, color_space, camera_fps)
+    video_proxy.setParameter(camera_id, 0, brightness_value) # luminosità
+
+
+    video_client = video_proxy.subscribeCamera(name_id, camera_id, resolution, color_space, camera_fps)# prametri video mandati al nao
 
     try:
-        # Acquisisci un frame dalla telecamera
         image = video_proxy.getImageRemote(video_client)
         if image:
-            # Converti l'immagine in un formato utilizzabile da OpenCV
+            #converte l'immagine da opencv in un fromato utiizzabile
             image_width = image[0]
             image_height = image[1]
             image_data = np.frombuffer(image[6], dtype=np.uint8).reshape((image_height, image_width, 3))
 
-            # Ridimensiona l'immagine a 640x480
-            resized_image = cv2.resize(image_data, (640, 480))
+            resized_image = cv2.resize(image_data, (640, 480)) # da 320*240 al doppio
             return resized_image
     except Exception as e:
-        print(f"Errore durante l'acquisizione dell'immagine: {e}")
+        print(f"Errore durante l'acquisizione dell'immagine: {e}") # mettere codice json
     finally:
-        # Annulla la sottoscrizione al flusso video
         video_proxy.unsubscribe(video_client)
 
-def get_video_chunk(output_video, start_time, duration=300):
-    """
-    Registra un chunk di video dalla telecamera del NAO.
-    """
+def get_video_chunk(output_video, start_time, duration=300): # trasfroma il video i un chunk 
     global is_recording
 
     # Configura il VideoWriter per salvare il video
@@ -100,23 +99,18 @@ def get_video_chunk(output_video, start_time, duration=300):
     out = cv2.VideoWriter(output_video, fourcc, 15, (640, 480))
 
     while is_recording and (time.time() - start_time) < duration:
-        # Acquisisci un frame dalla telecamera del NAO
         frame = nao_get_image(nao_ip, nao_port)
         if frame is not None:
-            # Scrivi il frame nel video
             out.write(frame)
 
-    # Rilascia le risorse
     out.release()
 
 def send_video(video_path):
-    """
-    Invia il video al server Python 3.
-    """
+  # invia il video al server 3
     with open(video_path, "rb") as f:
         try:
             requests.post("http://localhost:5001/receive_video", files={"file": f})
-            print(f"Video {video_path} inviato al server Python 3.")
+            print(f"Video {video_path} inviato al server Python 3.") # mettere codice json
         except Exception as e:
             print(f"Errore durante l'invio del video: {e}")
 
@@ -137,11 +131,8 @@ def start_recording():
         else:
             return "La registrazione è già in corso!", 400
 
-@app.route('/stop_recording', methods=['POST'])
+@app.route('/stop_recording', methods=['POST']) # funzione che ferma la registrazione del video
 def stop_recording():
-    """
-    Ferma la registrazione del video e invia l'ultimo video al server Python 3.
-    """
     global is_recording, current_video_path
 
     with video_lock:
@@ -154,11 +145,8 @@ def stop_recording():
         else:
             return "Nessuna registrazione in corso!", 400
 
-@app.route('/get_video', methods=['POST'])
+@app.route('/get_video', methods=['POST']) # per ricevre video fruoi dai 5 minuti
 def get_video():
-    """
-    Richiede il video corrente e continua a registrare i frame successivi.
-    """
     global is_recording, current_video_path, last_send_time
 
     with video_lock:
@@ -176,14 +164,10 @@ def get_video():
         else:
             return "Nessun video disponibile!", 400
 
-def record_and_send_video(video_path):
-    """
-    Funzione che registra e invia i video in modo continuo.
-    """
+def record_and_send_video(video_path): # funzione per attivare aquisizione video
     global is_recording, current_video_path, last_send_time
 
     while is_recording:
-        # Registra i frame successivi all'ultimo invio
         get_video_chunk(video_path, last_send_time)
         send_video(video_path)
         if os.path.exists(video_path):
@@ -205,11 +189,8 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route('/receive_video', methods=['POST'])
+@app.route('/receive_video', methods=['POST']) # ricevere e salvare il video
 def receive_video():
-    """
-    Riceve il video dal server Python 2 e lo salva.
-    """
     file = request.files['file']
     filepath = os.path.join(UPLOAD_FOLDER, f"video_{int(time.time())}.mp4")
     
@@ -220,26 +201,20 @@ def receive_video():
     analyze_video(filepath)
     return "Video ricevuto!", 200
 
-def analyze_video(video_path):
-    """
-    Analizza il video utilizzando YOLO.
-    """
+def analyze_video(video_path): # sostituire questa funzione con il codice che contiene i 5 modellic che analizzao
     print(f"Analizzando {video_path}...")
     # Integra qui il tuo modello YOLO
     pass
 
-@app.route('/start_recording', methods=['POST'])
+@app.route('/start_recording', methods=['POST']) # per iniziare la regsitrazione
 def start_recording():
-    """
-    Invia una richiesta al server Python 2 per avviare la registrazione.
-    """
     try:
         response = requests.post("http://localhost:5000/start_recording")
         return response.text, response.status_code
     except Exception as e:
         return f"Errore durante la richiesta di avvio: {e}", 500
 
-@app.route('/stop_recording', methods=['POST'])
+@app.route('/stop_recording', methods=['POST'])  # per fermare la regsitrazione
 def stop_recording():
     """
     Invia una richiesta al server Python 2 per fermare la registrazione.
@@ -250,11 +225,8 @@ def stop_recording():
     except Exception as e:
         return f"Errore durante la richiesta di stop: {e}", 500
 
-@app.route('/get_video', methods=['POST'])
+@app.route('/get_video', methods=['POST']) # per rucevere video furoi dai 5 minuti
 def get_video():
-    """
-    Invia una richiesta al server Python 2 per ottenere il video corrente.
-    """
     try:
         response = requests.post("http://localhost:5000/get_video")
         return response.text, response.status_code
