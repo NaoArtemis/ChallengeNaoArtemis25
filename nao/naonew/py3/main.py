@@ -521,7 +521,25 @@ def api_dialogo():
         except Exception as e:
             logger.error(str(e))
             return jsonify({'code': 500, 'message': str(e)}), 500
+        
 
+@app.route('/tts_to_nao', methods=['POST'])
+def tts_to_nao():
+    if request.method == "POST":
+        text = request.form["message"]
+        nao_animatedSayText(text)
+
+        text = request.form["message"]
+        '''
+        #collegamento a chatgpt
+        client = OpenAI(api_key = nao_api_openai)
+        speech_file_path = Path(file).parent.parent / "py2/tts_audio/speech.mp3"
+        response = client.audio.speech.create(model="tts-1",voice="alloy",input=text)
+        response.stream_to_file(speech_file_path)
+        nao_tts_audiofile("speech.mp3")
+        '''
+
+    return redirect('/joystick')
 
 
 # MOVEMENTS

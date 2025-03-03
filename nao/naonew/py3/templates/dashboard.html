@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-	<title> BetterNao Homepage </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title> BetterNao Homepage </title>
+    <script>
+        function inviaTestoAlNAO() {
+            var testo = document.getElementById("testoInput").value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/tts_to_nao", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log("Testo inviato con successo al NAO!");
+                }
+            };
+
+            xhr.send("message=" + encodeURIComponent(testo));
+        }
+    </script>
 </head>
 <body>
 
-	<div class="masterdiv">
-		<img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" width="30%"; style="margin-left: 0%;border: 2px solid black;">
-	</div>
+    <div class="masterdiv">
+        <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" width="30%"; style="margin-left: 0%;border: 2px solid black;">
+    </div>
 
-	<div class="masterdiv">
-		<h1 class="mastertitle">Welcome to the Nao control Panel!</h1>
-	</div>
+    <div class="masterdiv">
+        <h1 class="mastertitle">Welcome to the Nao control Panel!</h1>
+    </div>
     <div class="container">
         <div class="left_panel">
             <h2 class="h2">JOYSTICK</h2>
@@ -23,44 +40,42 @@
                 <script>
                     document.querySelector("#start").addEventListener("click", function() {
                         fetch("/api/movement/start", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
                     });
-                        </script>
+                </script>
             </div>
             
             <div class="masterdiv"; style="margin-top: 10px;margin-left: 20px;">
                 <button id="sinistra" class="button">Sinistra</button>
                 <script>
-                document.querySelector("#sinistra").addEventListener("click", function() {
-                    fetch("/api/movement/left", { method: "GET" })
-                        .then(response => response.json()) // Se l'API restituisce JSON
-                        .then(data => console.log("Risposta API:", data))
-                        .catch(error => console.error("Errore:", error));
-                });
+                    document.querySelector("#sinistra").addEventListener("click", function() {
+                        fetch("/api/movement/left", { method: "GET" })
+                            .then(response => response.json())
+                            .then(data => console.log("Risposta API:", data))
+                            .catch(error => console.error("Errore:", error));
+                    });
                 </script>  
 
-                <button1 id= "stop" class="button1" style="margin-left:1em; margin-right:1em;"> Stop </button1>
+                <button1 id="stop" class="button1" style="margin-left:1em; margin-right:1em;"> Stop </button1>
                 <script>
                     document.querySelector("#stop").addEventListener("click", function() {
                         fetch("/api/movement/stop", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
-                        </script>
+                    });
+                </script>
                 <button id="destra" class="button" >Destra</button>
                 <script>
                     document.querySelector("#destra").addEventListener("click", function() {
                         fetch("/api/movement/right", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
-                        </script>
-            
-
+                    });
+                </script>
             </div>
             
             <div class="masterdiv"; style="margin-top: 10px; margin-left: 145px;">
@@ -68,45 +83,43 @@
                 <script>
                     document.querySelector("#back").addEventListener("click", function() {
                         fetch("/api/movement/back", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
-                        </script>
+                    });
+                </script>
             </div>
-
 
             <div class="masterdiv"; style="margin-top: 20px;margin-left: 10px">
                 <button2 id="white_eye" class="button2">Color Eye</button2>
                 <script>
                     document.querySelector("#white_eye").addEventListener("click", function() {
                         fetch("/api/movement/nao_eye_white", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
+                    });
                 </script>
             
                 <button2 id="wakeup" class="button2" style="margin-left:5px;margin-right:5px">Wakeup</button2>
                 <script>
                     document.querySelector("#wakeup").addEventListener("click", function() {
                         fetch("/api/movement/nao_wakeup", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
+                    });
                 </script>
                 
-            
                 <button2 id="autonomo" class="button2">Sit Down</button2>
                 <script>
                     document.querySelector("#autonomo").addEventListener("click", function() {
                         fetch("/api/movement/nao_autonomous_life", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
-                        </script>
+                    });
+                </script>
             </div>
 
             <div class="masterdiv"; style="margin-top: 20px;margin-left: 10px">
@@ -114,39 +127,47 @@
                 <script>
                     document.querySelector("#stand_init").addEventListener("click", function() {
                         fetch("/api/movement/standInit", { method: "GET" })
-                            .then(response => response.json()) // Se l'API restituisce JSON
+                            .then(response => response.json())
                             .then(data => console.log("Risposta API:", data))
                             .catch(error => console.error("Errore:", error));
-                });
-                        </script>
-                        <button2 id="start_train" class="button2" >srart train</button2>
-                        <script>
-                            document.querySelector("#start_train").addEventListener("click", function() {
-                                fetch("/api/movement/nao_train_move", { method: "GET" })
-                                    .then(response => response.json()) // Se l'API restituisce JSON
-                                    .then(data => console.log("Risposta API:", data))
-                                    .catch(error => console.error("Errore:", error));
-                        });
-                                </script>
-                        <button2 id="stop_train" class="button2" >stop train</button2>
-                        <script>
-                            document.querySelector("#stop_train").addEventListener("click", function() {
-                                fetch("/api/movement/nao_train_move", { method: "GET" })
-                                    .then(response => response.json()) // Se l'API restituisce JSON
-                                    .then(data => console.log("Risposta API:", data))
-                                    .catch(error => console.error("Errore:", error));
-                        });
-                                </script>
+                    });
+                </script>
+                <button2 id="start_train" class="button2" >start train</button2>
+                <script>
+                    document.querySelector("#start_train").addEventListener("click", function() {
+                        fetch("/api/movement/nao_train_move", { method: "GET" })
+                            .then(response => response.json())
+                            .then(data => console.log("Risposta API:", data))
+                            .catch(error => console.error("Errore:", error));
+                    });
+                </script>
+                <button2 id="stop_train" class="button2" >stop train</button2>
+                <script>
+                    document.querySelector("#stop_train").addEventListener("click", function() {
+                        fetch("/api/movement/nao_train_move", { method: "GET" })
+                            .then(response => response.json())
+                            .then(data => console.log("Risposta API:", data))
+                            .catch(error => console.error("Errore:", error));
+                    });
+                </script>
             </div>
 
+            <!-- Aggiunta del form per l'invio del testo al NAO -->
+            <div class="masterdiv"; style="margin-top: 20px;">
+                <h2 class="h2">Invia testo al NAO</h2>
+                <form onsubmit="event.preventDefault(); inviaTestoAlNAO();">
+                    <label for="testoInput">Testo:</label>
+                    <input type="text" id="testoInput" name="message" required>
+                    <button type="submit" class="button">Invia al NAO</button>
+                </form>
+            </div>
         </div>
         <div class="right_panel">
             <h2 style="margin-right: 39%;">Webcam NAO Feed</h2>
-            <div >
-                <img  src="{{ url_for('webcam') }}" alt="Webcam Feed" id="video_feed" width="320" height="240" style="margin-right: 11.5em;border: 2px solid black;">
+            <div>
+                <img src="{{ url_for('webcam') }}" alt="Webcam Feed" id="video_feed" width="320" height="240" style="margin-right: 11.5em;border: 2px solid black;">
             </div>
         </div>
     </div>
-        
 </body>
 </html>
