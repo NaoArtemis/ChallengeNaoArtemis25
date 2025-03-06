@@ -3,8 +3,6 @@ import cv2
 import numpy as np
 import pandas as pd
 from ultralytics import YOLO
-from sklearn.cluster import KMeans
-from scipy.signal import find_peaks
 from flask import Flask, request, jsonify
 import os
 import threading
@@ -12,29 +10,14 @@ import time
 import random
 from naoqi import ALProxy
 import requests
-#da fare:
-#        implementare: yolo(fatto), kmeans, optical flow, Perspective Transformation, speed and dsitance calculator.ss   
+import firebase_admin
+from firebase_admin import credentials, storage
 
-
-# Requirements
-'''
-opencv-python
-opencv-python-headless
-flask
-flask_login
-yieldfrom
-PyYAML
-numpy
-requests
-SpeechRecognition
-paramiko
-psycopg2
-psycopg2-binary
-pandas
-ultralytics
-scikit-learn
-scipy
-'''
+# Inizializzazione di Firebase
+cred = credentials.Certificate("path/to/your/firebase-key.json")  # Sostituisci con il percorso della tua chiave Firebase
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'your-bucket-name.appspot.com'  # Sostituisci con il nome del tuo bucket Firebase
+})
 
 #################################
 # FUNZIONI FLASK SERVER Python2 #
@@ -86,9 +69,7 @@ def nao_get_image(nao_ip, nao_port):
         video_proxy.unsubscribe(video_client)
 
 def get_video_chunk(output_video, nao_ip, nao_port, start_time, duration=300):
-    """
-    Registra un chunk di video dalla telecamera del NAO.
-    """
+
     global is_recording
 
     # Configura il VideoWriter per salvare il video
@@ -102,22 +83,16 @@ def get_video_chunk(output_video, nao_ip, nao_port, start_time, duration=300):
 
     out.release()
 
-def send_video(video_path):
-    """
-    Invia il video al server Python 3.
-    """
-    with open(video_path, "rb") as f:
-        try:
-            requests.post("http://localhost:5001/receive_video", files={"file": f})
-            return True
-        except Exception as e:
-            return False
+def upload_to_firebase(file_path, destination_name):
+
+    bucket = storage.bucket()
+    blob = bucket.blob(destination_name)
+    blob.upload_from_filename(file_path)
+    print(f"File {file_path} caricato su Firebase come {destination_name}.")
 
 @app_py2.route('/start_recording', methods=['POST'])
 def start_recording():
-    """
-    Avvia la registrazione del video.
-    """
+
     global is_recording, current_video_path, last_send_time
 
     data = request.json
@@ -139,9 +114,7 @@ def start_recording():
 
 @app_py2.route('/stop_recording', methods=['POST'])
 def stop_recording():
-    """
-    Ferma la registrazione del video e invia l'ultimo video al server Python 3.
-    """
+
     global is_recording, current_video_path
 
     with video_lock:
@@ -159,9 +132,6 @@ def stop_recording():
 
 @app_py2.route('/get_video', methods=['POST'])
 def get_video():
-    """
-    Richiede il video corrente e ricomincia un nuovo ciclo di registrazione.
-    """
     global is_recording, current_video_path, last_send_time
 
     with video_lock:
@@ -177,9 +147,6 @@ def get_video():
             return jsonify({"error": "Nessun video disponibile"}), 400
 
 def record_and_send_video(video_path, nao_ip, nao_port):
-    """
-    Funzione che registra e invia i video in modo continuo.
-    """
     global is_recording, current_video_path, last_send_time
 
     while is_recording:
@@ -201,9 +168,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app_py3.route('/receive_video', methods=['POST'])
 def receive_video():
-    """
-    Riceve il video dal server Python 2 e lo salva.
-    """
     file = request.files['file']
     filepath = os.path.join(UPLOAD_FOLDER, f"video_{int(time.time())}.mp4")
     
@@ -218,9 +182,6 @@ def receive_video():
     return jsonify({"message": "Video ricevuto"}), 200
 
 def analyze_video(video_path, color1, color2):
-    """
-    Analizza il video utilizzando YOLO e filtra i giocatori in base al colore della maglia.
-    """
     model = YOLO("yolov8n.pt")
     cap = cv2.VideoCapture(video_path)
     data = []  # Lista per memorizzare i dati
@@ -254,21 +215,22 @@ def analyze_video(video_path, color1, color2):
             data.append([player_id, (x1 + x2) // 2, (y1 + y2) // 2, color])
 
     # Salva i dati in un file CSV
+    csv_path = os.path.join(UPLOAD_FOLDER, f"data_{int(time.time())}.csv")
     df = pd.DataFrame(data, columns=["ID Giocatore", "Posizione X", "Posizione Y", "Colore"])
-    df.to_csv("output.csv", index=False)
+    df.to_csv(csv_path, index=False)
+
+    # Carica il video e il CSV su Firebase
+    upload_to_firebase(video_path, f"video_{int(time.time())}.mp4")
+    upload_to_firebase(csv_path, f"data_{int(time.time())}.csv")
 
 def is_color_close(color, target_color):
-    """
-    Verifica se il colore è vicino al colore target.
-    """
+
     # Implementa la logica per confrontare i colori
     return True  # Placeholder
 
 @app_py3.route('/start_recording', methods=['POST'])
 def start_recording():
-    """
-    Invia una richiesta al server Python 2 per avviare la registrazione.
-    """
+
     data = request.json
     nao_ip = data.get("nao_ip")
     nao_port = data.get("nao_port")
@@ -284,9 +246,7 @@ def start_recording():
 
 @app_py3.route('/stop_recording', methods=['POST'])
 def stop_recording():
-    """
-    Invia una richiesta al server Python 2 per fermare la registrazione.
-    """
+
     try:
         response = requests.post("http://localhost:5000/stop_recording")
         return response.text, response.status_code
@@ -295,11 +255,12 @@ def stop_recording():
 
 @app_py3.route('/get_video', methods=['POST'])
 def get_video():
-    """
-    Richiede il video corrente al server Python 2.
-    """
+
     try:
         response = requests.post("http://localhost:5000/get_video")
         return response.text, response.status_code
     except Exception as e:
         return jsonify({"error": f"Errore durante la richiesta del video: {e}"}), 500
+
+if __name__ == '__main__':
+    app_py3.run(port=5001, debug=True)
