@@ -1,25 +1,14 @@
-# Questo file contiene codici temporanei che poi verranno integrati nel main.py py2
-# Inizializzazione di Firebase
-cred = credentials.Certificate("path/to/your/firebase-key.json")  # Sostituisci con il percorso della tua chiave Firebase
-firebase_admin.initialize_app(cred, {
-    'storageBucket': 'your-bucket-name.appspot.com'  # Sostituisci con il nome del tuo bucket Firebase
-})
-
-#################################
-# FUNZIONI FLASK SERVER Python2 #
-#################################
 from flask import Flask, request, jsonify
 import os
 import threading
 import time
 import random
 from naoqi import ALProxy
-import requests
-import firebase_admin
-from firebase_admin import credentials, storage
 import cv2
 import numpy as np
-app_py2 = Flask(__name__)
+import requests
+
+app = Flask(__name__)
 
 # Variabili globali per gestire la registrazione
 is_recording = False
@@ -27,17 +16,14 @@ current_video_path = None
 video_lock = threading.Lock()
 last_send_time = 0
 
-# Cartella per salvare i chunk di video
-CHUNKS_FOLDER = "chunks"
-os.makedirs(CHUNKS_FOLDER, exist_ok=True)
 
-def nao_get_image(nao_ip, nao_port):
+def nao_get_image_vision():
     video_proxy = ALProxy("ALVideoDevice", nao_ip, nao_port)
 
     # Configurazione della telecamera
     name_id = "video_image_" + str(random.randint(0, 100))  # Nome univoco per la connessione
     camera_id = 0  # 0 = telecamera superiore, 1 = telecamera inferiore
-    resolution = 1  # 320x240 px
+    resolution = 1  # 1 = 320x240 px
     color_space = 13  # RGB
     camera_fps = 15  # fps
     brightness_value = 55  # Luminosità predefinita
@@ -57,11 +43,12 @@ def nao_get_image(nao_ip, nao_port):
             resized_image = cv2.resize(image_data, (640, 480))  # Da 320x240 a 640x480
             return resized_image
     except Exception as e:
+        print(f"Errore durante l'acquisizione dell'immagine: {e}")
         return None
     finally:
         video_proxy.unsubscribe(video_client)
 
-def get_video_chunk(output_video, nao_ip, nao_port, start_time, duration=300):
+def get_video_chunk(output_video, start_time, duration=300):
     global is_recording
 
     # Configura il VideoWriter per salvare il video
@@ -69,21 +56,39 @@ def get_video_chunk(output_video, nao_ip, nao_port, start_time, duration=300):
     out = cv2.VideoWriter(output_video, fourcc, 15, (640, 480))
 
     while is_recording and (time.time() - start_time) < duration:
-        frame = nao_get_image(nao_ip, nao_port)
+        frame = nao_get_image_vision()
         if frame is not None:
             out.write(frame)
 
     out.release()
 
-def upload_to_firebase(file_path, destination_name):
-    bucket = storage.bucket()
-    blob = bucket.blob(destination_name)
-    blob.upload_from_filename(file_path)
-    print(f"File {file_path} caricato su Firebase come {destination_name}.")
+from pathlib import Path
 
-@app_py2.route('/start_recording', methods=['POST'])
+def send_video(video_path):
+    try:
+        # Definisci il percorso di destinazione
+        video_file_path = Path(__file__).parent.parent / "py3/vision_video/video.mp4"
+        
+        # Copia il video nella directory specificata
+
+        os.replace(video_path, video_file_path)  # Sposta il video
+
+        # Invia il video al server Python 3
+        with open(video_file_path, "rb") as f:
+            response = requests.post("http://localhost:5001/receive_video", files={"file": f})
+            if response.status_code != 200:
+                print(f"Errore durante l'invio del video al server Python 3: {response.text}")
+                return False
+        return True
+    except Exception as e:
+        print(f"Errore durante l'invio del video: {e}")
+        return False
+
+
+@app.route('/start_recording', methods=['POST'])
 def start_recording():
-    global is_recording, current_video_path, last_send_time
+
+    global is_recording, current_video_path, last_send_time, nao_ip, nao_port
 
     data = request.json
     nao_ip = data.get("nao_ip")
@@ -95,15 +100,16 @@ def start_recording():
     with video_lock:
         if not is_recording:
             is_recording = True
-            current_video_path = os.path.join(CHUNKS_FOLDER, f"temp_chunk_{int(time.time())}.mp4")
+            current_video_path = os.path.join(SAVE_FOLDER, f"temp_chunk_{int(time.time())}.mp4")
             last_send_time = time.time()
-            threading.Thread(target=record_and_send_video, args=(current_video_path, nao_ip, nao_port)).start()
+            threading.Thread(target=record_and_send_video, args=(current_video_path,)).start()
             return jsonify({"message": "Registrazione avviata"}), 200
         else:
             return jsonify({"error": "La registrazione è già in corso"}), 400
 
-@app_py2.route('/stop_recording', methods=['POST'])
+@app.route('/stop_recording', methods=['POST'])
 def stop_recording():
+
     global is_recording, current_video_path
 
     with video_lock:
@@ -112,15 +118,16 @@ def stop_recording():
             if current_video_path and os.path.exists(current_video_path):
                 if send_video(current_video_path):
                     os.remove(current_video_path)
-                    return jsonify({"message": "Registrazione fermata e video inviato"}), 200
+                    return jsonify({"message": "Registrazione fermata"}), 200
                 else:
                     return jsonify({"error": "Errore durante l'invio del video"}), 500
             return jsonify({"error": "Nessun video disponibile"}), 400
         else:
             return jsonify({"error": "Nessuna registrazione in corso"}), 400
 
-@app_py2.route('/get_video', methods=['POST'])
+@app.route('/get_video', methods=['POST'])
 def get_video():
+
     global is_recording, current_video_path, last_send_time
 
     with video_lock:
@@ -128,23 +135,34 @@ def get_video():
             if send_video(current_video_path):
                 os.remove(current_video_path)
                 last_send_time = time.time()
-                current_video_path = os.path.join(CHUNKS_FOLDER, f"temp_chunk_{int(time.time())}.mp4")
+                current_video_path = os.path.join(SAVE_FOLDER, f"temp_chunk_{int(time.time())}.mp4")
                 return jsonify({"message": "Video corrente inviato. Continuo a registrare i frame successivi."}), 200
             else:
                 return jsonify({"error": "Errore durante l'invio del video"}), 500
         else:
             return jsonify({"error": "Nessun video disponibile"}), 400
 
-def record_and_send_video(video_path, nao_ip, nao_port):
+def record_and_send_video(video_path):
 
     global is_recording, current_video_path, last_send_time
 
+    chunk_counter = 1  # Contatore per i chunk di video
+
     while is_recording:
-        get_video_chunk(video_path, nao_ip, nao_port, last_send_time)
+        # Genera il nome del file video
+        video_name = f"video_{chunk_counter * 5:02d}.mp4"
+        video_path = os.path.join(SAVE_FOLDER, video_name)
+
+        # Registra il chunk di video
+        get_video_chunk(video_path, last_send_time)
+
+        # Invia il video
         if send_video(video_path):
             os.remove(video_path)
-        current_video_path = os.path.join(CHUNKS_FOLDER, f"temp_chunk_{int(time.time())}.mp4")
+            chunk_counter += 1  # Incrementa il contatore dei chunk
+
+        # Aggiorna il percorso del video corrente
+        current_video_path = os.path.join(SAVE_FOLDER, f"temp_chunk_{int(time.time())}.mp4")
 
 if __name__ == '__main__':
-    app_py2.run(port=5000, debug=True)
-
+    app.run(port=5000, debug=True)
