@@ -31,6 +31,9 @@ from helpers.config_helper import Config
 from helpers.logging_helper import logger
 from helpers.speech_recognition_helper import SpeechRecognition
 from helpers.db_helper import DB
+from openai import OpenAI
+from pathlib import Path
+
 
 
 
@@ -41,12 +44,15 @@ nao_ip         = config_helper.nao_ip
 nao_port       = config_helper.nao_port
 nao_user       = config_helper.nao_user
 nao_password   = config_helper.nao_password
+nao_api_openai        = config_helper.api_openai
 
 face_detection = True
 face_tracker   = True
 local_db_dialog = []
 local_rec       = []
 
+#api_key
+OpenAI.api_key = config_helper.api_openai
 
 app  = Flask(__name__)
 
@@ -527,20 +533,20 @@ def api_dialogo():
 @app.route('/tts_to_nao', methods=['POST'])
 def tts_to_nao():
     if request.method == "POST":
-        text = request.form["message"]
-        nao_animatedSayText(text)
+        #text = request.form["message"]
+        #nao_animatedSayText(text)
 
         text = request.form["message"]
-        '''
+        
         #collegamento a chatgpt
         client = OpenAI(api_key = nao_api_openai)
-        speech_file_path = Path(file).parent.parent / "py2/tts_audio/speech.mp3"
+        speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
         response = client.audio.speech.create(model="tts-1",voice="alloy",input=text)
         response.stream_to_file(speech_file_path)
         nao_tts_audiofile("speech.mp3")
-        '''
 
-    return redirect('/joystick')
+
+    return redirect('/dashboard')
 
 
 # MOVEMENTS
