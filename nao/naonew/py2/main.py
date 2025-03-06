@@ -18,7 +18,7 @@ import paramiko
 import utilities
 from logging_helper import logger
 import threading
-import firebase
+
 
 
 app  = Flask(__name__)

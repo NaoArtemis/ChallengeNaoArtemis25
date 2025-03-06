@@ -31,7 +31,7 @@ from helpers.config_helper import Config
 from helpers.logging_helper import logger
 from helpers.speech_recognition_helper import SpeechRecognition
 from helpers.db_helper import DB
-import firebase
+
 
 
 config_helper  = Config()
