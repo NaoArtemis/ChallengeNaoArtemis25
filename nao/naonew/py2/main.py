@@ -67,7 +67,29 @@ def nao_get_image(nao_ip, nao_port):
     finally:
         video_proxy.unsubscribe(video_client)
 
-        
+@app.route('/nao_battery/<params>', methods=['GET'])    
+def nao_battery(params):
+    if (params != None and params != ''):
+        if request.method == 'GET':
+            try:
+                #{"nao_ip":value, "nao_port":value, "battery_level":value}
+                json         = eval(params)
+                nao_ip       = json['nao_ip']
+                nao_port     = json['nao_port']
+
+                battery_proxy = ALProxy("ALBattery", nao_ip, nao_port)
+                battery_charge = battery_proxy.getBatteryCharge()
+                battery_proxy = None
+                return jsonify({'code': 200, 'function': 'nao_battery(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK', 'battery_level':battery_charge }), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            return jsonify({'code': 500, 'message': 'methods error'}), 500
+    else:
+        return jsonify({'code': 500, 'message': 'params error'}), 500
+
+
 @app.route('/nao_webcam/<params>', methods=['GET'])
 def nao_webcam(params):
     if (params != None and params != ''):

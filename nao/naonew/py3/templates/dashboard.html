@@ -21,6 +21,23 @@
 
             xhr.send("message=" + encodeURIComponent(testo));
         }
+
+
+        function updateBatteryLevel(event) {
+            event.preventDefault(); // Impedisce il comportamento predefinito del link
+
+            fetch('/nao/battery')
+                .then(response => response.json())
+                .then(data => {
+                    const batteryLevelElement = document.getElementById('battery-level');
+                    batteryLevelElement.textContent = `Livello batteria: ${data}%`;
+                })
+                .catch(error => {
+                    console.error('Errore durante il recupero del livello della batteria:', error);
+                    const batteryLevelElement = document.getElementById('battery-level');
+                    batteryLevelElement.textContent = 'Errore nel recupero del livello della batteria.';
+                });
+        }
     </script>
 </head>
 <body>
@@ -187,6 +204,15 @@
             <h2 style="margin-right: 39%;">Webcam NAO Feed</h2>
             <div>
                 <img src="{{ url_for('webcam') }}" alt="Webcam Feed" id="video_feed" width="320" height="240" style="margin-right: 11.5em;border: 2px solid black;">
+            </div>
+
+
+            <h2 style="margin-right: 39%; margin-top: 20px;">Batteria NAO</h2>
+            <div style="text-align: center;">
+                <a href="#" onclick="updateBatteryLevel(event)">
+                    <span id="battery-icon" style="font-size: 48px; cursor: pointer;"></span>
+                </a>
+                </div>
             </div>
         </div>
     </div>

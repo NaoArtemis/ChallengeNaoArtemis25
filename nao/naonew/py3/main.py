@@ -494,6 +494,7 @@ def logout():
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
+
 def dashboard():
     return render_template('dashboard.html')
 
@@ -540,7 +541,7 @@ def tts_to_nao():
 @app.route('/tts_to_nao_ai', methods=['POST'])
 def tts_to_nao_ai():
     if request.method == "POST":
-        #collegamento a chatgpt
+        #collegamento a openai
         
         client = OpenAI(api_key = nao_api_openai)
         speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
@@ -649,6 +650,15 @@ def nao_eye_white():
     url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))
+
+@app.route('/nao/battery',methods=['GET'])
+def nao_battery_level():
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_battery/" + str(data)
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+    battery_info = response.json()
+    return battery_info.get('battery_level', 'N/A')
 
 
 
