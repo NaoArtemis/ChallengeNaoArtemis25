@@ -622,10 +622,31 @@ def nao_wakeup():
 
 
 
-@app.route('/api/movement/nao_eye_white',methods=['GET'])
+@app.route('/api/movement/red_eye',methods=['GET'])
+def nao_eye_red():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 255, "g": 0, "b": 0}  # Red color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
+@app.route('/api/movement/green_eye',methods=['GET'])
+def nao_eye_green():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 0, "g": 255, "b": 0}  # Green color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
+@app.route('/api/movement/blue_eye',methods=['GET'])
+def nao_eye_blue():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 0, "g": 0, "b": 255}  # Blue color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
+@app.route('/api/movement/nao_eye',methods=['GET'])
 def nao_eye_white():
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    url      = "http://127.0.0.1:5011/nao_eye_white/" + str(data) 
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 255, "g": 255, "b": 255}  # White color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))
 

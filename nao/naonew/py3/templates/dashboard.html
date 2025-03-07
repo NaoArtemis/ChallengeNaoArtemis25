@@ -91,15 +91,34 @@
             </div>
 
             <div class="masterdiv"; style="margin-top: 20px;margin-left: 10px">
-                <button2 id="white_eye" class="button2">Color Eye</button2>
-                <script>
-                    document.querySelector("#white_eye").addEventListener("click", function() {
-                        fetch("/api/movement/nao_eye_white", { method: "GET" })
-                            .then(response => response.json())
-                            .then(data => console.log("Risposta API:", data))
-                            .catch(error => console.error("Errore:", error));
+                <button id="color_eye_button" class="button2">Color Eye</button>
+                    <select id="eye_color_dropdown" style="display: none; margin-top: 10px;">
+                    <option value="">Seleziona il colore</option>
+                    <option value="red_eye">Red Eye</option>
+                    <option value="blue_eye">Blue Eye</option>
+                    <option value="green_eye">Green Eye</option>
+                    <option value="nao_eye">White Eye</option>
+                    </select>
+
+                    <script>
+                    // Al clic sul bottone, mostra/nasconde il dropdown
+                    document.querySelector("#color_eye_button").addEventListener("click", function() {
+                        var dropdown = document.querySelector("#eye_color_dropdown");
+                        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
                     });
-                </script>
+
+                    // Al cambio del dropdown, effettua la chiamata fetch all'endpoint corrispondente
+                    document.querySelector("#eye_color_dropdown").addEventListener("change", function() {
+                        var selectedOption = this.value;
+                        if(selectedOption !== ""){
+                            fetch("/api/movement/" + selectedOption, { method: "GET" })
+                                .then(response => response.json())
+                                .then(data => console.log("Risposta API:", data))
+                                .catch(error => console.error("Errore:", error));
+                        }
+                    });
+                    </script>
+
             
                 <button2 id="wakeup" class="button2" style="margin-left:5px;margin-right:5px">Wakeup</button2>
                 <script>
