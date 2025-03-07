@@ -20,6 +20,7 @@ from logging_helper import logger
 import threading
 
 
+
 app  = Flask(__name__)
 
 
@@ -298,30 +299,35 @@ def nao_wakeup(params):
         return jsonify({'code': 500, 'message': 'params error'}), 500                                                
 
 
-@app.route('/nao_eye_white/<params>', methods=['GET'])  
+@app.route('/nao_eye/<params>', methods=['GET'])
 def nao_eye_white(params):
-    if (params != None and params != ''):
+    if params:
         if request.method == 'GET':
             try:
-                #{"nao_ip":value, "nao_port":value}
+                #{"nao_ip":value, "nao_port":value, "r":value, "g":value, "b":value}
                 json     = eval(params)
                 nao_ip   = json['nao_ip']
                 nao_port = json['nao_port']
+                r        = json['r']
+                g        = json['g']
+                b        = json['b']
 
                 leds_proxy = ALProxy("ALLeds", nao_ip, nao_port)                        
                 eye_group_name = "FaceLeds"                                             
-                eye_color = [255, 255, 255]                                             # RGB values for white
+                eye_color = [r, g, b]  # RGB values
                 value_color = 256*256*eye_color[0] + 256*eye_color[1] + eye_color[2]
-                leds_proxy.fadeRGB(eye_group_name, value_color, 0.5)                    # 0.5 is the duration in seconds
+                leds_proxy.fadeRGB(eye_group_name, value_color, 0.5)  # 0.5 is the duration in seconds
                 leds_proxy = None
-                return jsonify({'code': 200, 'function': 'nao_eye_white(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+                
+                return jsonify({'code': 200, 'function': f'nao_eye_white(ip:{nao_ip} port:{nao_port} r:{r} g:{g} b:{b})', 'status':'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': str(e)}), 500
         else:
             return jsonify({'code': 500, 'message': 'methods error'}), 500  
     else:
-        return jsonify({'code': 500, 'message': 'params error'}), 500                                                        
+        return jsonify({'code': 500, 'message': 'params error'}), 500
+                                                       
 
 
 @app.route('/nao_animatedSayText/<params>', methods=['GET'])  

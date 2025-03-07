@@ -31,6 +31,10 @@ from helpers.config_helper import Config
 from helpers.logging_helper import logger
 from helpers.speech_recognition_helper import SpeechRecognition
 from helpers.db_helper import DB
+from openai import OpenAI
+from pathlib import Path
+
+
 
 
 config_helper  = Config()
@@ -40,12 +44,15 @@ nao_ip         = config_helper.nao_ip
 nao_port       = config_helper.nao_port
 nao_user       = config_helper.nao_user
 nao_password   = config_helper.nao_password
+nao_api_openai        = config_helper.api_openai
 
 face_detection = True
 face_tracker   = True
 local_db_dialog = []
 local_rec       = []
 
+#api_key
+OpenAI.api_key = config_helper.api_openai
 
 app  = Flask(__name__)
 
@@ -456,7 +463,7 @@ class User(UserMixin):
         self.id = id
 
 users = {'1': {'id': '1', 'username': 'admin', 'password': '21232f297a57a5a743894a0e4a801fc3'}, #md5(admin)
-         '2': {'id': '2', 'username': 'naonexus', 'password': '898d0dc0895b537fc1732a03cba7aff4'}} #md5(naonexus)
+         '2': {'id': '2', 'username': 'naoartemis', 'password': '2df64731a8860a17abe3a28a5ccdb6ac'}} #md5(naoartemis)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -484,6 +491,11 @@ def logout():
     logout_user()
     return redirect('/')
 
+
+@app.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
 
 
 
@@ -518,60 +530,80 @@ def api_dialogo():
             return jsonify({'code': 500, 'message': str(e)}), 500
 
 
+@app.route('/tts_to_nao', methods=['POST'])
+def tts_to_nao():
+    if request.method == "POST":
+        text = request.form["message"]
+        nao_animatedSayText(text)
+    return redirect('/dashboard')
+
+@app.route('/tts_to_nao_ai', methods=['POST'])
+def tts_to_nao_ai():
+    if request.method == "POST":
+        #collegamento a chatgpt
+        
+        client = OpenAI(api_key = nao_api_openai)
+        speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
+        response = client.audio.speech.create(model="tts-1",voice="alloy",input=text)
+        response.stream_to_file(speech_file_path)
+        nao_tts_audiofile("speech.mp3")
+        
+    return redirect('/dashboard')
+
 
 # MOVEMENTS
 @app.route('/api/movement/start', methods=['GET'])
 def api_movement_start():
     nao_move_fast(0)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 
 @app.route('/api/movement/stop', methods=['GET'])
 def api_movement_stop():
     nao_move_fast_stop()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/left', methods=['GET'])
 def api_movement_left():
     global theta_speed
     theta_speed = 10
     #nao_move_fast(10)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/right', methods=['GET'])
 def api_movement_right():
     global theta_speed
     theta_speed = -10
     #nao_move_fast(-10)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/back', methods=['GET'])
 def api_movement_back():
     nao_move_back(0)
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/stand', methods=['GET'])
 def api_movement_stand():
     nao_stand()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/standInit', methods=['GET'])
 def api_movement_standInit():
     nao_standInit()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/nao_train_move', methods=['GET'])
 def api_movement_nao_train_move():
     global nao_train_move_start 
     nao_train_move_start = True
     nao_train_move()
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/nao_train_move_stop', methods=['GET'])
 def api_movement_nao_train_move_stop():
     global nao_train_move_start 
     nao_train_move_start = False
-    return redirect('/joystick')
+    return redirect('/dashboard')
 
 @app.route('/api/movement/nao_autonomous_life', methods=['GET'])
 def nao_autonomous_life():
@@ -590,21 +622,42 @@ def nao_wakeup():
 
 
 
-@app.route('/api/movement/nao_eye_white',methods=['GET'])
-def nao_eye_white():
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    url      = "http://127.0.0.1:5011/nao_eye_white/" + str(data) 
+@app.route('/api/movement/red_eye',methods=['GET'])
+def nao_eye_red():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 255, "g": 0, "b": 0}  # Red color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))
+
+@app.route('/api/movement/green_eye',methods=['GET'])
+def nao_eye_green():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 0, "g": 255, "b": 0}  # Green color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
+@app.route('/api/movement/blue_eye',methods=['GET'])
+def nao_eye_blue():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 0, "g": 0, "b": 255}  # Blue color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
+@app.route('/api/movement/nao_eye',methods=['GET'])
+def nao_eye_white():
+    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 255, "g": 255, "b": 255}  # White color
+    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
+
 
 # SERVICES
 @app.route('/services', methods=['GET'])
 def services():
     return render_template('services.html')
 
-@app.route('/joystick', methods=['GET'])
-def joystick():
-    return render_template('joystick.html')
+
 
 
 
