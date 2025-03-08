@@ -340,8 +340,7 @@ def nao_eye_white(params):
                 value_color = 256*256*eye_color[0] + 256*eye_color[1] + eye_color[2]
                 leds_proxy.fadeRGB(eye_group_name, value_color, 0.5)  # 0.5 is the duration in seconds
                 leds_proxy = None
-                
-                return jsonify({'code': 200, 'function': f'nao_eye_white(ip:{nao_ip} port:{nao_port} r:{r} g:{g} b:{b})', 'status':'OK'}), 200
+                return jsonify({'code': 200, 'function': 'nao_eye_white(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ' r:' + str(r) + ' g:' + str(g) + ' b:' + str(b) + ')','status': 'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': str(e)}), 500
