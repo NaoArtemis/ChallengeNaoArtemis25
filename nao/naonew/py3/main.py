@@ -463,7 +463,7 @@ class User(UserMixin):
         self.id = id
 
 users = {'1': {'id': '1', 'username': 'admin', 'password': '21232f297a57a5a743894a0e4a801fc3'}, #md5(admin)
-         '2': {'id': '2', 'username': 'naoartemis', 'password': '2df64731a8860a17abe3a28a5ccdb6ac'}} #md5(naoartemis)
+         '2': {'id': '2', 'username': '1', 'password': 'c4ca4238a0b923820dcc509a6f75849b'}} #md5(1)
 
 @login_manager.user_loader
 def load_user(user_id):
