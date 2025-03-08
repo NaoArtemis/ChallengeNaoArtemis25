@@ -44,7 +44,7 @@ nao_ip         = config_helper.nao_ip
 nao_port       = config_helper.nao_port
 nao_user       = config_helper.nao_user
 nao_password   = config_helper.nao_password
-nao_api_openai        = config_helper.api_openai
+nao_api_openai = config_helper.api_openai
 
 face_detection = True
 face_tracker   = True
@@ -494,10 +494,13 @@ def logout():
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
-
 def dashboard():
     return render_template('dashboard.html')
 
+@app.route('/computer_vision', methods=['GET'])
+@login_required
+def computer_vision():
+    return render_template()
 
 
 # API
@@ -660,7 +663,7 @@ def nao_battery_level():
     battery_info = response.json()
     return battery_info.get('battery_level', 'N/A')
 
-
+#computer vision
 
 # SERVICES
 @app.route('/services', methods=['GET'])

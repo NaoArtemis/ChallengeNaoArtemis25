@@ -12,6 +12,15 @@ class Config:
     db_user: str
     db_password: str
 
+    fb_type: str
+    fb_project_id: str
+    fb_key_id: str
+    fb_key: str
+    fb_email: str
+    fb_client_id: str
+    fb_uri: str
+    fb_url: str
+
     nao_ip: str
     nao_port: int
     nao_user: str
@@ -45,6 +54,15 @@ class Config:
             self.db_name = config['database']['name']
             self.db_user = config['database']['user']
             self.db_password = config['database']['password']
+
+            self.fb_type = config['firebase']['type']
+            self.fb_project_id = config['firebase']['project_id']
+            self.fb_key_id = config['firebase']['private_key_id']
+            self.fb_key = config['firebase']['private_key']
+            self.fb_email = config['firebase']['client_email']
+            self.fb_client_id = config['firebase']['client_id']
+            self.fb_uri = config['firebase']['token_uri']
+            self.fb_url = config['firebase']['database_url']
 
             self.nao_ip = config['nao']['ip']
             self.nao_port = config['nao']['port']
