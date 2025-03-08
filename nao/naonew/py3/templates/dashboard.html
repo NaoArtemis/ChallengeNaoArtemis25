@@ -240,6 +240,20 @@
                     </script>
 
                 </div>
+                <div class="masterdiv"; style="margin-left: 150px; margin-top: 30px;">
+                    <button id="stand" class="button">Stand</button>
+                    <script>
+                    document.querySelector("#stand").addEventListener("click", function() {
+                        fetch("/api/movement/stand", { method: "GET" })
+                        .then(response => {
+                            if (response.redirected) {
+                            window.location.href = response.url;
+                            }
+                        })
+                        .catch(error => console.error("Errore:", error));
+                    });
+                    </script>
+                </div>
             </div>
         </div>
         <div class="right_panel">
