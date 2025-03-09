@@ -1,134 +1,194 @@
-.container {
+/* Reset CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #fff; /* Colore di sfondo scuro */
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Barra superiore */
+.top-bar {
+    width: 100%;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Allinea in alto */
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logo img {
+    height: 40px;
+}
+
+.top-bar-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Bottoni */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-logout {
+    background: #ff4b4b;
+    color: #fff;
+}
+
+.btn-logout:hover {
+    background: #ff1c1c;
+}
+
+.btn-volume {
+    background: #4b6cb7;
+    color: #fff;
+}
+
+.btn-volume:hover {
+    background: #3a56a3;
+}
+
+.btn-joystick {
+    background: #4b6cb7;
+    color: #fff;
+}
+
+.btn-joystick:hover {
+    background: #3a56a3;
+}
+
+.btn-stop {
+    background: #ffcc00;
+    color: #000;
+}
+
+.btn-stop:hover {
+    background: #e6b800;
+}
+
+/* Contenuto principale */
+.main-content {
     width: 90%;
-    margin: auto;
-	
+    max-width: 1200px;
+    margin-top: 20px;
 }
 
+.main-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-.left_panel {
+.dashboard {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.joystick-panel, .webcam-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 300px;
+}
+
+.joystick-controls {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    flex: 1;
-    padding-left: 20px;
+    gap: 10px;
+    align-items: center;
 }
-.center_panel {
+
+.joystick-middle {
+    display: flex;
+    gap: 10px;
+}
+
+.webcam-feed {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+}
+
+/* Pannello aggiuntivo per i bottoni mancanti */
+.additional-panel {
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    flex: 1;
-    padding-left: 20px;
+    gap: 20px;
+    align-items: center;
 }
 
-
-.right_panel {
+.button-row {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    flex: 1;
-    padding-right: 20px;
+    gap: 10px;
+    justify-content: center;
 }
 
-body{
-    background-size: 400% 400%;
-    animation: gradientBG 10s ease infinite; 
-
-}
-h1 {
-	font-family: "Helvetica";
-}
-h2 {
-	font-family: "Helvetica";
-	text-align: center;
-	margin-left: 24.5%;
-}
-
-.masterdiv {
-	display: flex;
-	justify-content: center;
+/* Controllo del volume */
+.volume-control {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 
-.mastertitle{
-	text-align: center;
-	margin-top: 3%;
+.volume-control label {
+    font-size: 14px;
+    color: #333;
 }
 
-.joystick{
-	width: 5%;
-	padding: 10px;
-	margin: 5px;
+.volume-control input[type="range"] {
+    width: 100%;
 }
 
-.button {
-	background: #03256C;
-	color: #fff;
-	text-align: center;
-	border-radius: 0.5em;
-	padding: 0.6em 3em ;
-	border: 0;
-	cursor: pointer;
-	outline: 0;
-	font-weight: 700;
-	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	}
-.button6 {
-	background: #03256C;
-	color: #fff;
-	text-align: center;
-	width: 60px;
-	height: 20px;
-	border-radius: 20px;
-	padding: 0px 0px ;
-	border: 0;
-	cursor: pointer;
-	outline: 0;
-	font-weight: 700;
-	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	}
+.volume-control #volume_value {
+    font-size: 14px;
+    color: #333;
+}
 
-.button2 {
-	background: #92140C;
-	color: #fff;
-	text-align: center;
-	border-radius: 0.5em;
-	padding: 0.5em 2em ;
-	border: 0;
-	cursor: pointer;
-	outline: 0;
-	font-weight: 700;
-	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;	
-	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	}
-.button1 {
-	background: #7af80b;
-	color: #000000;
-	text-align: center;
-	border-radius: 0.5em;
-	padding: 0.6em 2em ;
-	cursor: pointer;
-	outline: 0;
-	font-weight: 700;
-	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
-	}
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+    }
 
-.webcam {
-		width: 320px; /* Larghezza specificata */
-		height: 240px; /* Altezza specificata */
-		border: 3px solid black; /* Bordo continuo nero */
-		margin-left: 39%; /* Spostamento a destra */
-		display: block; /* Evita spazi indesiderati */
+    .joystick-panel, .webcam-panel {
+        width: 100%;
+    }
+
+    .main-title {
+        font-size: 2rem;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
 }
