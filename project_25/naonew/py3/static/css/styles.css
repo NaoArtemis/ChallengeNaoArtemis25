@@ -192,3 +192,18 @@ body {
         flex-direction: column;
     }
 }
+
+#battery-level {
+    display: none; /* Nascondi inizialmente il tooltip */
+    position: absolute;
+    top: 100%; /* Posiziona il tooltip sotto l'icona della batteria */
+    left: 95%;
+    transform: translateX(-50%);
+    background: #03256C;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1000; /* Assicurati che il tooltip sia sopra altri elementi */
+}
