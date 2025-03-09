@@ -48,9 +48,9 @@
                     batteryLevelElement.textContent = `Livello batteria: ${data}%`;
                 })
                 .catch(error => {
-                    console.error('Errore durante il recupero del livello della batteria:', error);
+                    console.error('Errore durante il recupero:', error);
                     const batteryLevelElement = document.getElementById('battery-level');
-                    batteryLevelElement.textContent = 'Errore nel recupero del livello della batteria.';
+                    batteryLevelElement.textContent = 'Errore nel recupero.';
                 });
         }
     </script>
@@ -298,7 +298,6 @@
                     <span id="battery-icon" style="font-size: 48px; cursor: pointer;">🔋</span>
                 </a>
                 <div id="battery-level" style="font-size: 24px; margin-top: 10px;">
-                    Clicca sull'icona per aggiornare il livello della batteria.
                 </div>
             </div>
         </div>
