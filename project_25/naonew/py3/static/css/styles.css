@@ -77,6 +77,23 @@ h2 {
 	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
 	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
 	}
+.button6 {
+	background: #03256C;
+	color: #fff;
+	text-align: center;
+	width: 60px;
+	height: 20px;
+	border-radius: 20px;
+	padding: 0px 0px ;
+	border: 0;
+	cursor: pointer;
+	outline: 0;
+	font-weight: 700;
+	-moz-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	-webkit-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	-ms-transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	transition: background-color 0.35s ease-in-out, color 0.35s ease-in-out, border-bottom-color 0.35s ease-in-out;
+	}
 
 .button2 {
 	background: #92140C;
