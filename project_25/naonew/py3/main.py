@@ -4,7 +4,6 @@
 python3 64 bit
 pip3 install -r requirements.txt
 python3 main.py
-
 versione Python 3.12.0 64 bit
 
 NOTA BENE!!!  
@@ -571,14 +570,14 @@ def api_movement_stop():
 def api_movement_left():
     global theta_speed
     theta_speed = 10
-    #nao_move_fast(10)
+    nao_move_fast(10)
     return redirect('/dashboard')
 
 @app.route('/api/movement/right', methods=['GET'])
 def api_movement_right():
     global theta_speed
     theta_speed = -10
-    #nao_move_fast(-10)
+    nao_move_fast(-10)
     return redirect('/dashboard')
 
 @app.route('/api/movement/back', methods=['GET'])
