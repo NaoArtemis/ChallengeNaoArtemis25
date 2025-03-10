@@ -49,39 +49,47 @@ body {
 }
 
 .btn-logout {
-    background: #ff4b4b;
+    background: #92140C;
     color: #fff;
 }
 
 .btn-logout:hover {
-    background: #ff1c1c;
+    background: #92140C;
+}
+.btn-battery {
+    background: #1cdf02;
+    color: #fff;
+}
+
+.btn-battery:hover {
+    background: #18c701;
 }
 
 .btn-volume {
-    background: #4b6cb7;
+    background: #03256C;
     color: #fff;
 }
 
 .btn-volume:hover {
-    background: #3a56a3;
+    background: #03256C;
 }
 
 .btn-joystick {
-    background: #4b6cb7;
+    background: #03256C;
     color: #fff;
 }
 
 .btn-joystick:hover {
-    background: #3a56a3;
+    background: #03256C;
 }
 
 .btn-stop {
-    background: #ffcc00;
+    background: #ffe600;
     color: #000;
 }
 
 .btn-stop:hover {
-    background: #e6b800;
+    background: #e1ca00;
 }
 
 /* Contenuto principale */
@@ -197,9 +205,9 @@ body {
     display: none; /* Nascondi inizialmente il tooltip */
     position: absolute;
     top: 100%; /* Posiziona il tooltip sotto l'icona della batteria */
-    left: 91%;
+    left: 85%;
     transform: translateX(-50%);
-    background: #03256C;
+    background: #1cdf02;
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
