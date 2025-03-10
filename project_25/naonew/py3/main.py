@@ -554,10 +554,10 @@ def tts_to_nao():
 def tts_to_nao_ai():
     if request.method == "POST":
         #collegamento a openai
-        
+        text = request.form["message_ai"]
         client = OpenAI(api_key = nao_api_openai)
         speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
-        response = client.audio.speech.create(model="tts-1",voice="alloy",input="text")
+        response = client.audio.speech.create(model="tts-1",voice="alloy",input=text)
         response.stream_to_file(speech_file_path)
         nao_tts_audiofile("speech.mp3")
         
@@ -686,7 +686,8 @@ def nao_battery_level():
     response = requests.get(url, json=data)
     logger.info(str(response.text))
     battery_info = response.json()
-    return jsonify({'battery_level': battery_info.get('battery_level', 'N/A')}), 200
+    battery_level = battery_info["battery_level"]
+    return jsonify({'battery_level': battery_level}), 200
 
 
 #computer vision

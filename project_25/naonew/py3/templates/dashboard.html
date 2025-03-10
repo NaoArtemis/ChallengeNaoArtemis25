@@ -58,8 +58,8 @@
                     </div>
                     <div class="button-row">
                         <form onsubmit="event.preventDefault(); inviaTestoAlNAOai();">
-                            <label for="testoInput">Testo:</label>
-                            <input type="text" id="testoInput" name="message" required>
+                            <label for="testoInput_ai">Testo:</label>
+                            <input type="text" id="testoInput_ai" name="message_ai" required>
                             <button type="submit" class="btn btn-joystick">Invia al NAO con AI</button>
                         </form>
                     </div>
@@ -123,7 +123,7 @@
             return response.json();
         })
         .then(data => {
-                onsole.log("Risposta del server Python 3:", data);
+                console.log("Risposta del server Python 3:", data);
         })
         .catch(error => {
             console.error("Errore:", error);
@@ -142,7 +142,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    batteryLevelElement.textContent = `Livello batteria: ${data}%`;
+                    batteryLevelElement.textContent = 'Livello batteria:'+ data.battery_level+'%x';
                     batteryLevelElement.style.display = "block";
                 })
                 .catch(error => {
@@ -280,11 +280,11 @@
         }
 
         function inviaTestoAlNAOai() {
-            const testo = document.getElementById("testoInput").value;
+            const testo = document.getElementById("testoInput_ai").value;
             fetch("/tts_to_nao_ai", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "message=" + encodeURIComponent(testo)
+                body: "message_ai=" + encodeURIComponent(testo)
             })
             .then(response => response.json())
             .then(data => console.log("Testo inviato con successo al NAO con AI!"))
