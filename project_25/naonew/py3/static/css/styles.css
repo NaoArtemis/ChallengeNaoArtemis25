@@ -197,7 +197,7 @@ body {
     display: none; /* Nascondi inizialmente il tooltip */
     position: absolute;
     top: 100%; /* Posiziona il tooltip sotto l'icona della batteria */
-    left: 95%;
+    left: 91%;
     transform: translateX(-50%);
     background: #03256C;
     color: white;

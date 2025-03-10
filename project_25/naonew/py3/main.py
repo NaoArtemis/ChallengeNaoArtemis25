@@ -563,6 +563,22 @@ def tts_to_nao_ai():
         
     return redirect('/dashboard')
 
+@app.route('/set_volume', methods=['POST'])
+def set_volume():
+    data = request.get_json()
+    volume_level = data.get('volume_level')
+    
+    if volume_level is None:
+        return jsonify({"error": "Missing volume level"}), 400
+    
+    # Chiama la funzione che manda la richiesta al server Py2
+    try:
+        nao_volume_sound(volume_level)
+        return jsonify({"status": "Volume aggiornato", "volume": volume_level}), 200
+    except Exception as e:
+        logger.error("Errore nel settaggio del volume: " + str(e))
+        return jsonify({"error": "Errore interno"}), 500
+
 
 # MOVEMENTS
 @app.route('/api/movement/start', methods=['GET'])
@@ -670,7 +686,8 @@ def nao_battery_level():
     response = requests.get(url, json=data)
     logger.info(str(response.text))
     battery_info = response.json()
-    return battery_info.get('battery_level', 'N/A')
+    return jsonify({'battery_level': battery_info.get('battery_level', 'N/A')}), 200
+
 
 #computer vision
 

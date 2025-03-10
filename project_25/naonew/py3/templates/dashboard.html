@@ -74,7 +74,7 @@
             </div>
             <div class="joystick-panel">
                 <h2>Webcam NAO</h2>
-                <img src="{{ url_for('webcam') }}" alt="Webcam Feed" class="webcam-feed">
+                <img src="{{ url_for('webcam_aruco') }}" alt="Webcam Feed" class="webcam-feed">
             </div>
         </div>
 
@@ -104,13 +104,34 @@
         });
 
         
-        document.querySelector("#volume_slider").addEventListener("input", function () {
+                document.querySelector("#volume_slider").addEventListener("input", function () {
             const volume = this.value;
             document.querySelector("#volume_value").textContent = volume;
+
+            
+        fetch("/set_volume", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ volume_level: volume })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Errore nella richiesta");
+            }
+            return response.json();
+        })
+        .then(data => {
+                onsole.log("Risposta del server Python 3:", data);
+        })
+        .catch(error => {
+            console.error("Errore:", error);
+        });
         });
 
-        // Tooltip per la batteria
-        // Tooltip per la batteria
+
+
         document.querySelector("#battery-icon").addEventListener("mouseover", function () {
             const batteryLevelElement = document.querySelector("#battery-level");
             fetch('/nao/battery')
