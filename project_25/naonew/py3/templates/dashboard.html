@@ -73,10 +73,18 @@
                 </div>
             </div>
             <div class="joystick-panel">
-                <h2>Webcam NAO</h2>
-                <img src="{{ url_for('webcam_aruco') }}" alt="Webcam Feed" class="webcam-feed">
+                <div class="btn-group">
+                    <!-- Usa virgolette doppie per onclick e singole per i valori interni -->
+                    <button class="btn" onclick="changeFeed('{{ url_for('webcam') }}')">Web NAO</button>
+                    <button class="btn" onclick="changeFeed('{{ url_for('webcam_aruco') }}')">Web ArUco</button>
+                </div>
+                <!-- Aggiungi un gestore di errori per l'immagine e un alt dinamico -->
+                <img id="webcam-image" 
+                     src="{{ url_for('webcam') }}" 
+                     alt="Webcam Feed - {{ url_for('webcam') }}" 
+                     class="webcam-feed" 
+                     onerror="this.src='{{ url_for('static', filename='fallback-image.jpg') }}';">
             </div>
-        </div>
 
         
 
