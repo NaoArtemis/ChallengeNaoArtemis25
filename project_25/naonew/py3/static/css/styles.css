@@ -49,39 +49,47 @@ body {
 }
 
 .btn-logout {
-    background: #ff4b4b;
+    background: #92140C;
     color: #fff;
 }
 
 .btn-logout:hover {
-    background: #ff1c1c;
+    background: #92140C;
+}
+.btn-battery {
+    background: #1cdf02;
+    color: #fff;
+}
+
+.btn-battery:hover {
+    background: #18c701;
 }
 
 .btn-volume {
-    background: #4b6cb7;
+    background: #03256C;
     color: #fff;
 }
 
 .btn-volume:hover {
-    background: #3a56a3;
+    background: #03256C;
 }
 
 .btn-joystick {
-    background: #4b6cb7;
+    background: #03256C;
     color: #fff;
 }
 
 .btn-joystick:hover {
-    background: #3a56a3;
+    background: #03256C;
 }
 
 .btn-stop {
-    background: #ffcc00;
+    background: #ffe600;
     color: #000;
 }
 
 .btn-stop:hover {
-    background: #e6b800;
+    background: #e1ca00;
 }
 
 /* Contenuto principale */
@@ -125,12 +133,55 @@ body {
     gap: 10px;
 }
 
+.split-button {
+    display: flex;
+    width: 200px;
+    height: 50px;
+    border: 2px solid #333;
+    overflow: hidden;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+}
+
+.half {
+    flex: 1;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.left {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.right {
+    background-color: #f44336;
+    color: white;
+}
+
+.left:hover {
+    background-color: #45a049;
+}
+
+.right:hover {
+    background-color: #d32f2f;
+}
+
+.webcam-container {
+    margin-top: 20px;
+    display: none; /* Inizialmente nascosto */
+    text-align: center;
+}
+
 .webcam-feed {
     width: 100%;
     max-width: 320px;
     border-radius: 10px;
     border: 2px solid #fff;
 }
+
 
 /* Pannello aggiuntivo per i bottoni mancanti */
 .additional-panel {
@@ -191,4 +242,19 @@ body {
     .button-row {
         flex-direction: column;
     }
+}
+
+#battery-level {
+    display: none; /* Nascondi inizialmente il tooltip */
+    position: absolute;
+    top: 100%; /* Posiziona il tooltip sotto l'icona della batteria */
+    left: 85%;
+    transform: translateX(-50%);
+    background: #1cdf02;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1000; /* Assicurati che il tooltip sia sopra altri elementi */
 }

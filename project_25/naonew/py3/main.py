@@ -4,7 +4,6 @@
 python3 64 bit
 pip3 install -r requirements.txt
 python3 main.py
-
 versione Python 3.12.0 64 bit
 
 NOTA BENE!!!  
@@ -462,8 +461,9 @@ class User(UserMixin):
     def __init__(self, id = None, username = ''):
         self.id = id
 
-users = {'1': {'id': '1', 'username': 'admin', 'password': '21232f297a57a5a743894a0e4a801fc3'}, #md5(admin)
-         '2': {'id': '2', 'username': '1', 'password': 'c4ca4238a0b923820dcc509a6f75849b'}} #md5(1)
+users = {'1': {'id': '1', 'username': 'admin', 'password': '21232f297a57a5a743894a0e4a801fc3'},  # md5(admin)
+        '2': {'id': '2', 'username': '1', 'password': 'c4ca4238a0b923820dcc509a6f75849b'},     # md5(1)
+        '3': {'id': '3', 'username': '2', 'password': 'c81e728d9d4c2f636f067f89cc14862c'}}      # md5(2)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -475,15 +475,20 @@ def login():
         username = request.form["username"]
         password = make_md5(request.form["password"])
 
-        # Verifica credenziali utente
         user = next((u for u in users.values() if u['username'] == username and u['password'] == password), None)
         if user:
             user_obj = User(user['id'])
             login_user(user_obj)
-            return redirect(url_for('dashboard')) # DA MODIFICARE
-
+            # Reindirizza in base allo username
+            if username == "1":
+                return redirect(url_for('dashboard'))
+            elif username == "2":
+                return redirect(url_for('dashboard2'))
+            else:
+                # Default: se lo username non corrisponde alle condizioni specificate
+                return redirect(url_for('dashboard'))
+                
     return render_template('login.html')
-
 
 @app.route("/logout", methods=['GET'])
 @login_required
@@ -491,11 +496,15 @@ def logout():
     logout_user()
     return redirect('/')
 
-
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+
+@app.route('/dashboard2', methods=['GET'])
+@login_required
+def dashboard2():
+    return render_template('dashboard2.html')
 
 @app.route('/computer_vision', methods=['GET'])
 @login_required
@@ -554,6 +563,22 @@ def tts_to_nao_ai():
         
     return redirect('/dashboard')
 
+@app.route('/set_volume', methods=['POST'])
+def set_volume():
+    data = request.get_json()
+    volume_level = data.get('volume_level')
+    
+    if volume_level is None:
+        return jsonify({"error": "Missing volume level"}), 400
+    
+    # Chiama la funzione che manda la richiesta al server Py2
+    try:
+        nao_volume_sound(volume_level)
+        return jsonify({"status": "Volume aggiornato", "volume": volume_level}), 200
+    except Exception as e:
+        logger.error("Errore nel settaggio del volume: " + str(e))
+        return jsonify({"error": "Errore interno"}), 500
+
 
 # MOVEMENTS
 @app.route('/api/movement/start', methods=['GET'])
@@ -571,14 +596,14 @@ def api_movement_stop():
 def api_movement_left():
     global theta_speed
     theta_speed = 10
-    #nao_move_fast(10)
+    nao_move_fast(10)
     return redirect('/dashboard')
 
 @app.route('/api/movement/right', methods=['GET'])
 def api_movement_right():
     global theta_speed
     theta_speed = -10
-    #nao_move_fast(-10)
+    nao_move_fast(-10)
     return redirect('/dashboard')
 
 @app.route('/api/movement/back', methods=['GET'])
@@ -661,7 +686,8 @@ def nao_battery_level():
     response = requests.get(url, json=data)
     logger.info(str(response.text))
     battery_info = response.json()
-    return battery_info.get('battery_level', 'N/A')
+    return jsonify({'battery_level': battery_info.get('battery_level', 'N/A')}), 200
+
 
 #computer vision
 
@@ -715,3 +741,11 @@ if __name__ == "__main__":
 
     app.secret_key = os.urandom(12)
     app.run(host=config_helper.srv_host, port=config_helper.srv_port, debug=config_helper.srv_debug)
+
+
+
+
+
+
+
+    
