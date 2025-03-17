@@ -15,7 +15,82 @@ class HealthApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: const HealthScreen(),
+      home: const LoginPage(),
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  // Credenziali predefinite
+  final String _username = "Mattia";
+  final String _password = "12345";
+
+  void _login() {
+    // Verifica le credenziali
+    if (_usernameController.text == _username && _passwordController.text == _password) {
+      // Naviga alla schermata principale
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HealthScreen()),
+      );
+    } else {
+      // Mostra errore se le credenziali sono sbagliate
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Credenziali errate!')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Login"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Nome utente',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
+              ),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _login,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+              child: const Text('Accedi'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -43,7 +118,7 @@ class _HealthScreenState extends State<HealthScreen> {
   }
 
   void _getStepCount() {
-    Pedometer.stepCountStream.listen((StepCount stepCount) {
+    Pedometer.stepCountStream.listen((stepCount) {
       setState(() {
         _stepCount = stepCount.steps;
       });
@@ -71,14 +146,22 @@ class _HealthScreenState extends State<HealthScreen> {
 
   Future<void> _getHeartRate() async {
     Health health = Health();
+
+    // Definiamo il tipo di dati da richiedere
     List<HealthDataType> types = [HealthDataType.HEART_RATE];
 
+    // Richiediamo l'autorizzazione per accedere ai dati
     bool authorized = await health.requestAuthorization(types);
+
     if (authorized) {
+      DateTime now = DateTime.now();
+      DateTime startTime = now.subtract(const Duration(minutes: 10));
+
+      // Ottieni i dati relativi alla frequenza cardiaca
       List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-      types: types,
-      startTime: DateTime.now().subtract(const Duration(minutes: 5)),
-      endTime: DateTime.now(),
+        types: types,
+        startTime: startTime,
+        endTime: now,
       );
 
       if (healthData.isNotEmpty) {
@@ -86,6 +169,8 @@ class _HealthScreenState extends State<HealthScreen> {
           _heartRate = (healthData.last.value as double).round();
         });
       }
+    } else {
+      print("Permessi negati per l'accesso ai dati sanitari");
     }
   }
 
@@ -100,8 +185,6 @@ class _HealthScreenState extends State<HealthScreen> {
           children: [
             _buildCard("Passi", "$_stepCount", Icons.directions_walk, Colors.green),
             _buildCard("Velocità", "${_speed?.toStringAsFixed(2) ?? "N/A"} m/s", Icons.speed, Colors.blue),
-            _buildCard("Latitudine", "${_latitude?.toStringAsFixed(5) ?? "N/A"}", Icons.map, Colors.orange),
-            _buildCard("Longitudine", "${_longitude?.toStringAsFixed(5) ?? "N/A"}", Icons.map_outlined, Colors.purple),
             _buildCard("Frequenza Cardiaca", "${_heartRate ?? "N/A"} bpm", Icons.favorite, Colors.red),
           ],
         ),

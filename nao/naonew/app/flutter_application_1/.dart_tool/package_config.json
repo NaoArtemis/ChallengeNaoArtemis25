@@ -51,7 +51,7 @@
     },
     {
       "name": "flutter_joystick",
-      "rootUri": "file:///C:/Users/matti/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_joystick-0.1.0",
+      "rootUri": "file:///C:/Users/matti/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_joystick-0.2.1",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -66,6 +66,18 @@
       "rootUri": "file:///C:/src/flutter/packages/flutter_test",
       "packageUri": "lib/",
       "languageVersion": "3.7"
+    },
+    {
+      "name": "http",
+      "rootUri": "file:///C:/Users/matti/AppData/Local/Pub/Cache/hosted/pub.dev/http-0.13.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "http_parser",
+      "rootUri": "file:///C:/Users/matti/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "leak_tracker",
@@ -158,6 +170,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "typed_data",
+      "rootUri": "file:///C:/Users/matti/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
       "name": "vector_math",
       "rootUri": "file:///C:/Users/matti/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
       "packageUri": "lib/",
@@ -176,10 +194,10 @@
       "languageVersion": "3.1"
     }
   ],
-  "generated": "2025-03-02T11:01:53.290873Z",
+  "generated": "2025-03-16T21:37:39.736343Z",
   "generator": "pub",
   "generatorVersion": "3.7.0",
   "flutterRoot": "file:///C:/src/flutter",
-  "flutterVersion": "3.29.0",
+  "flutterVersion": "3.29.1",
   "pubCache": "file:///C:/Users/matti/AppData/Local/Pub/Cache"
 }
