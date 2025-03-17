@@ -1,0 +1,35 @@
+server:
+  debug: false
+  host: "0.0.0.0" # Current machine ip
+  port: 5010
+  drivers: 'drivers/chromedriver_mac'
+
+database:
+  host: "localhost"
+  name: "naochallenge2024"
+  user: "postgres"
+  password: "postgres"
+
+firebase: # dopo sostituire i dati con l'account di naoartemis
+  type: "service_account"
+  project_id: "naoartmeis-25"
+  private_key_id: "e64c68f8e2d1fcf73191af3a17b590b149ba7851"
+  private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBAD...\n-----END PRIVATE KEY-----\n"
+  client_email: "firebase-adminsdk-fbsvc@naoartmeis-25.iam.gserviceaccount.com"
+  client_id: "100095726232439970317"
+  token_uri: "https://oauth2.googleapis.com/token"
+  database_url: "https://naoartmeis-25.firebaseio.com"
+
+nao:
+  ip: "192.168.0.118"
+  port: 9559
+  user: "nao"
+  password: "nao"
+  api_openai: "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"
+
+nao2:
+  ip: "192.168.0.108"
+  port: 9559
+  user: "nao"
+  password: "KarlTarNAO6."
+ 

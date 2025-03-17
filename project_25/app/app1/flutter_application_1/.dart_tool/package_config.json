@@ -176,18 +176,10 @@
       "languageVersion": "3.1"
     }
   ],
-<<<<<<< HEAD
-  "generated": "2025-03-10T14:27:49.388718Z",
-  "generator": "pub",
-  "generatorVersion": "3.7.0",
-  "flutterRoot": "file:///C:/src/flutter",
-  "flutterVersion": "3.29.1",
-=======
   "generated": "2025-03-02T11:01:53.290873Z",
   "generator": "pub",
   "generatorVersion": "3.7.0",
   "flutterRoot": "file:///C:/src/flutter",
   "flutterVersion": "3.29.0",
->>>>>>> c53a97d4f6b54000455fe8bb7653562da00de7e8
   "pubCache": "file:///C:/Users/matti/AppData/Local/Pub/Cache"
 }

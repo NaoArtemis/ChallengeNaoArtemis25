@@ -14,9 +14,6 @@
   },
   {
     "level_": 0,
-<<<<<<< HEAD
-    "message_": "JSON \u0027C:\\Users\\matti\\Desktop\\Prova\\flutter_application_1\\android\\app\\.cxx\\Debug\\283o0407\\arm64-v8a\\android_gradle_build.json\u0027 was up-to-date",
-=======
     "message_": "rebuilding JSON C:\\Users\\matti\\Desktop\\Prova\\flutter_application_1\\android\\app\\.cxx\\Debug\\283o0407\\arm64-v8a\\android_gradle_build.json due to:",
     "file_": "C:\\src\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt",
     "tag_": "profile|arm64-v8a",
@@ -122,7 +119,6 @@
   {
     "level_": 0,
     "message_": "done executing cmake",
->>>>>>> c53a97d4f6b54000455fe8bb7653562da00de7e8
     "file_": "C:\\src\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt",
     "tag_": "profile|arm64-v8a",
     "diagnosticCode_": 0,
