@@ -158,7 +158,7 @@ def nao_get_audio(params):
     
 
 service_active = False
-@app.route('/nao_touch_head_audiorecorder/<params>', methods=['GET'])  
+'''@app.route('/nao_touch_head_audiorecorder/<params>', methods=['GET'])  
 def nao_touch_head_audiorecorder(params):
     if (params != None and params != ''):
         if request.method == 'GET':
@@ -223,7 +223,7 @@ def nao_touch_head_audiorecorder(params):
             return jsonify({'code': 500, 'message': 'methods error'}), 500  
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
-
+'''
 
 @app.route('/nao_face_tracker/<params>', methods=['GET'])  
 def nao_face_tracker(params):

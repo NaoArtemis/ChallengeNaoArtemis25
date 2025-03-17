@@ -689,7 +689,9 @@ def nao_battery_level():
     battery_level = battery_info["battery_level"]
     return jsonify({'battery_level': battery_level}), 200
 
-
+@app.route('/', methods=['GET'])
+def receive_touch_notification():
+    print("Ricevuta notifica: la testa è stata toccata!")
 #computer vision
 
 # SERVICES
