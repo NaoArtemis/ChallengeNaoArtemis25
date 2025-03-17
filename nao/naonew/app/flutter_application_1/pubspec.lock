@@ -66,10 +66,17 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_joystick
+<<<<<<< Updated upstream
       sha256: "84178c47aee3080599b8b38c44be31a69d50358aaa8213222f7833ea2e1641a2"
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
+=======
+      sha256: adea7571e05fcbdfc490b8fbc1dfa841e563e123c33456ee8aaa24fd905563ac
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+>>>>>>> Stashed changes
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -83,6 +90,7 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+<<<<<<< Updated upstream
   http:
     dependency: "direct main"
     description:
@@ -99,6 +107,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+=======
+>>>>>>> Stashed changes
   leak_tracker:
     dependency: transitive
     description:
@@ -216,6 +226,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
+<<<<<<< Updated upstream
   typed_data:
     dependency: transitive
     description:
@@ -224,6 +235,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+=======
+>>>>>>> Stashed changes
   vector_math:
     dependency: transitive
     description:
