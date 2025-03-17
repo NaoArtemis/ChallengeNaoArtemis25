@@ -10,7 +10,7 @@ from firebase_admin import credentials, storage
 import time
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = "vid"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/receive_video', methods=['POST'])

@@ -258,3 +258,26 @@ body {
     white-space: nowrap;
     z-index: 1000; /* Assicurati che il tooltip sia sopra altri elementi */
 }
+
+
+.btn-group {
+    display: flex;
+}
+.btn {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+}
+.btn:hover {
+    background-color: #0056b3;
+}
+.webcam-feed {
+    display: block;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 640px;
+    border: 2px solid #333;
+}
