@@ -1,0 +1,1 @@
+ C:\\Users\\matti\\Desktop\\Prova\\flutter_application_1\\.dart_tool\\flutter_build\\09796599c4ae98e9872bcd00211a2fd6\\native_assets.json: 
