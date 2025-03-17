@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetterNao Control Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Collega il file CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra superiore -->
+    <div class="top-bar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" alt="BetterNao Logo">
+        </div>
+        <div class="top-bar-buttons">
+            <div class="btn btn-battery">
+                <span id="battery-icon" class="battery-icon">Battery</span>
+                <div id="battery-level" class="battery-level"></div>
+            </div>
+            <button id="volume" class="btn btn-volume">Volume</button>
+            <button id="logout" class="btn btn-logout">Logout</button>
+        </div>
+    </div>
+
+
+    <!-- Contenuto principale -->
+    <div class="main-content">
+        <h1 class="main-title">Nao Control Panel</h1>
+        <div class="dashboard">
+            <div class="joystick-panel">
+                <h2>JOYSTICK</h2>
+                <div class="joystick-controls">
+                    <button id="start" class="btn btn-joystick">Avanti</button>
+                    <div class="joystick-middle">
+                        <button id="sinistra" class="btn btn-joystick">Sinistra</button>
+                        <button id="stop" class="btn btn-stop">Stop</button>
+                        <button id="destra" class="btn btn-joystick">Destra</button>
+                    </div>
+                    <button id="back" class="btn btn-joystick">Indietro</button>
+                    <div class="button-row">
+                        <button id="color_eye_button" class="btn btn-joystick">Color Eye</button>
+                        <select id="eye_color_dropdown" style="display: none;">
+                            <option value="">Seleziona il colore</option>
+                            <option value="red_eye">Red Eye</option>
+                            <option value="blue_eye">Blue Eye</option>
+                            <option value="green_eye">Green Eye</option>
+                            <option value="nao_eye">White Eye</option>
+                        </select>
+                        <button id="wakeup" class="btn btn-joystick">Wakeup</button>
+                        <button id="autonomo" class="btn btn-joystick">Sit Down</button>
+                        <button id="stand_init" class="btn btn-joystick">Stand Init</button>
+                    </div>
+                    <div class="button-row">
+                        <button id="start_train" class="btn btn-joystick">Start Train</button>
+                        <button id="stop_train" class="btn btn-joystick">Stop Train</button>
+                        <button id="stand" class="btn btn-joystick">Stand</button>
+                    </div>
+                    <div class="button-row">
+                        <form onsubmit="event.preventDefault(); inviaTestoAlNAOai();">
+                            <label for="testoInput">Testo:</label>
+                            <input type="text" id="testoInput" name="message" required>
+                            <button type="submit" class="btn btn-joystick">Invia al NAO con AI</button>
+                        </form>
+                    </div>
+                    <div class="button-row">
+                        <form onsubmit="event.preventDefault(); inviaTestoAlNAO();">
+                            <label for="testoInput">Testo:</label>
+                            <input type="text" id="testoInput" name="message" required>
+                            <button type="submit" class="btn btn-joystick">Invia al NAO</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="joystick-panel">
+                <div class="btn-group">
+                    <!-- Usa virgolette doppie per onclick e singole per i valori interni -->
+                    <button class="btn" onclick="changeFeed('{{ url_for('webcam') }}')">Web NAO</button>
+                    <button class="btn" onclick="changeFeed('{{ url_for('webcam_aruco') }}')">Web ArUco</button>
+                </div>
+                <!-- Aggiungi un gestore di errori per l'immagine e un alt dinamico -->
+                <img id="webcam-image" 
+                     src="{{ url_for('webcam') }}" 
+                     alt="Webcam Feed - {{ url_for('webcam') }}" 
+                     class="webcam-feed" 
+                     onerror="this.src='{{ url_for('static', filename='fallback-image.jpg') }}';">
+            </div>
+
+        
+
+    </div>
+
+    
+    <div id="volume-control" class="volume-control">
+        <label for="volume_slider">Volume:</label>
+        <input type="range" id="volume_slider" min="0" max="100" value="50" />
+        <span id="volume_value">50</span>
+    </div>
+
+    <script>
+
+        document.querySelector("#volume").addEventListener("click", function (event) {
+            event.stopPropagation();
+            const volumeControl = document.querySelector("#volume-control");
+            volumeControl.style.display = volumeControl.style.display === "block" ? "none" : "block";
+        });
+
+        
+        document.addEventListener("click", function () {
+            const volumeControl = document.querySelector("#volume-control");
+            volumeControl.style.display = "none";
+        });
+
+        
+                document.querySelector("#volume_slider").addEventListener("input", function () {
+            const volume = this.value;
+            document.querySelector("#volume_value").textContent = volume;
+
+            
+        fetch("/set_volume", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ volume_level: volume })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Errore nella richiesta");
+            }
+            return response.json();
+        })
+        .then(data => {
+                onsole.log("Risposta del server Python 3:", data);
+        })
+        .catch(error => {
+            console.error("Errore:", error);
+        });
+        });
+
+
+
+        document.querySelector("#battery-icon").addEventListener("mouseover", function () {
+            const batteryLevelElement = document.querySelector("#battery-level");
+            fetch('/nao/battery')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Errore nel recupero del livello di batteria');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    batteryLevelElement.textContent = `Livello batteria: ${data}%`;
+                    batteryLevelElement.style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Errore durante il recupero:', error);
+                    batteryLevelElement.textContent = 'Errore nel recupero.';
+                    batteryLevelElement.style.display = "block"; // Mostra il tooltip anche in caso di errore
+                });
+        });
+
+        document.querySelector("#battery-icon").addEventListener("mouseout", function () {
+            const batteryLevelElement = document.querySelector("#battery-level");
+            batteryLevelElement.style.display = "none";
+        });
+        
+        document.querySelector("#logout").addEventListener("click", function() {
+                fetch("/logout", { method: "GET" })
+                .then(response => {
+                    if (response.redirected) {
+                    window.location.href = response.url;
+                    }
+                })
+                .catch(error => console.error("Errore:", error));
+            });
+
+        document.querySelector("#battery-icon").addEventListener("mouseout", function () {
+            const batteryLevelElement = document.querySelector("#battery-level");
+            batteryLevelElement.style.display = "none";
+        });
+
+        
+        document.querySelector("#color_eye_button").addEventListener("click", function () {
+            const dropdown = document.querySelector("#eye_color_dropdown");
+            dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+        });
+
+        document.querySelector("#eye_color_dropdown").addEventListener("change", function () {
+            const selectedOption = this.value;
+            if (selectedOption !== "") {
+                fetch("/api/movement/" + selectedOption, { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+        });
+
+        document.querySelector("#wakeup").addEventListener("click", function () {
+            fetch("/api/movement/nao_wakeup", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#autonomo").addEventListener("click", function () {
+            fetch("/api/movement/nao_autonomous_life", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#stand_init").addEventListener("click", function () {
+            fetch("/api/movement/standInit", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#start_train").addEventListener("click", function () {
+            fetch("/api/movement/nao_train_move", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#stop_train").addEventListener("click", function () {
+            fetch("/api/movement/nao_train_move", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#stand").addEventListener("click", function () {
+            fetch("/api/movement/stand", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        // Funzioni per i tasti del joystick
+        document.querySelector("#start").addEventListener("click", function () {
+            fetch("/api/movement/start", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#sinistra").addEventListener("click", function () {
+            fetch("/api/movement/left", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#stop").addEventListener("click", function () {
+            fetch("/api/movement/stop", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#destra").addEventListener("click", function () {
+            fetch("/api/movement/right", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#back").addEventListener("click", function () {
+            fetch("/api/movement/back", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        });
+
+        // Funzioni per inviare testo al NAO
+        function inviaTestoAlNAO() {
+            const testo = document.getElementById("testoInput").value;
+            fetch("/tts_to_nao", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "message=" + encodeURIComponent(testo)
+            })
+            .then(response => response.json())
+            .then(data => console.log("Testo inviato con successo al NAO!"))
+            .catch(error => console.error("Errore:", error));
+        }
+
+        function inviaTestoAlNAOai() {
+            const testo = document.getElementById("testoInput").value;
+            fetch("/tts_to_nao_ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "message=" + encodeURIComponent(testo)
+            })
+            .then(response => response.json())
+            .then(data => console.log("Testo inviato con successo al NAO con AI!"))
+            .catch(error => console.error("Errore:", error));
+        }
+    </script>
+</body>
+</html>
