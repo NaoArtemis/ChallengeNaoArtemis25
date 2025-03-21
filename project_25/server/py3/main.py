@@ -689,12 +689,7 @@ def nao_battery_level():
     battery_level = battery_info["battery_level"]
     return jsonify({'battery_level': battery_level}), 200
 
-@app.route('/', methods=['GET'])
-def receive_touch_notification():
-    data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 255, "g": 0, "b": 0}  # Red color
-    url      = "http://127.0.0.1:5011/nao_eye/" + str(data) 
-    response = requests.get(url, json=data)
-    logger.info(str(response.text))
+
 #computer vision
 
 # SERVICES

@@ -224,32 +224,6 @@ def nao_touch_head_audiorecorder(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 '''
-@app.route('/monitor_head_touch_and_notify/<params>', methods=['POST']) 
-def monitor_head_touch_and_notify(nao_ip, nao_port, server_url="http://192.168.238.156:5010/"):
-    
-    try:
-        memory_proxy = ALProxy("ALMemory", nao_ip, nao_port)
-    except Exception as e:
-        print("Errore nella connessione ad ALMemory: {}".format(e))
-        return
-    try:
-        while True:
-            # Recupera lo stato del sensore tattile centrale ("MiddleTactilTouched")
-            touch_value = memory_proxy.getData("MiddleTactilTouched")
-            if touch_value == 1.0:
-                print("Testa toccata!")
-                try:
-                    # Invia una richiesta GET al server per segnalare il tocco
-                    response = requests.get(server_url)
-                    print("Segnale inviato. Risposta dal server: {}".format(response.text))
-                except Exception as http_e:
-                    print("Errore durante l'invio del segnale: {}".format(http_e))
-                break  # Esci dal ciclo una volta inviato il segnale
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        print("Monitoraggio interrotto manualmente.")
-    except Exception as e:
-        print("Errore durante il monitoraggio: {}".format(e))
 
 @app.route('/nao_face_tracker/<params>', methods=['GET'])  
 def nao_face_tracker(params):
