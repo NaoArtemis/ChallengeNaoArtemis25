@@ -215,3 +215,111 @@ body {
     white-space: nowrap;
     z-index: 1000; /* Assicurati che il tooltip sia sopra altri elementi */
 }
+/* Contenitore della webcam */
+.webcam-container {
+    position: relative;
+    width: 640px; /* Larghezza fissa */
+    height: 480px; /* Altezza fissa */
+    overflow: hidden; /* Nasconde il contenuto che esce dal contenitore */
+    border: 2px solid #ccc;
+    border-radius: 15px; /* Bordi più arrotondati */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Ombra più marcata */
+    margin: 0 auto; /* Centrato orizzontalmente */
+    background-color: #f9f9f9; /* Sfondo leggero */
+}
+
+/* Slider per le immagini */
+.webcam-slider {
+    display: flex;
+    width: 200%; /* Due immagini affiancate */
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Transizione fluida */
+}
+
+/* Immagine della webcam */
+.webcam-feed {
+    width: 640px; /* Larghezza fissa */
+    height: 480px; /* Altezza fissa */
+    object-fit: cover; /* Adatta l'immagine al contenitore */
+    border-radius: 15px; /* Bordi arrotondati */
+    transition: opacity 0.3s ease; /* Transizione fluida per l'opacità */
+}
+
+/* Contenitore del pulsante di toggle */
+.toggle-button-container {
+    position: relative;
+    width: 220px; /* Larghezza leggermente aumentata */
+    height: 60px; /* Altezza leggermente aumentata */
+    margin: 30px auto 0; /* Margine superiore aumentato */
+    overflow: hidden;
+    border-radius: 30px; /* Bordi più arrotondati */
+    background-color: #f0f0f0; /* Colore di sfondo */
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombra interna più marcata */
+}
+
+/* Pulsante di toggle */
+#toggle-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%; /* Occupa metà del contenitore */
+    height: 100%;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 600; /* Testo più spesso */
+    cursor: pointer;
+    background: linear-gradient(135deg, #03256C, #02113A); /* Gradiente blu scuro */
+    color: white;
+    border: none;
+    border-radius: 30px; /* Bordi più arrotondati */
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; /* Transizioni fluide */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Ombra più marcata */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Effetto al passaggio del mouse sul pulsante */
+#toggle-button:hover {
+    transform: scale(1.05); /* Leggero zoom */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombra più marcata */
+}
+
+/* Testo del pulsante */
+.toggle-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    font-size: 14px; /* Dimensione del testo */
+    white-space: nowrap; /* Evita il ritorno a capo */
+    color: white; /* Colore del testo non attivo */
+}
+
+/* Testo attivo */
+#toggle-button.active .toggle-text:first-child,
+#toggle-button:not(.active) .toggle-text:last-child {
+    color: white; /* Colore del testo attivo */
+}
+
+/* Nasconde il secondo testo inizialmente */
+.toggle-text:last-child {
+    opacity: 0;
+}
+
+/* Effetto di scorrimento per il pulsante */
+#toggle-button.active {
+    transform: translateX(100%); /* Scorre a destra */
+}
+
+/* Cambia il testo visibile quando il pulsante è attivo */
+#toggle-button.active .toggle-text:first-child {
+    opacity: 0;
+}
+
+#toggle-button.active .toggle-text:last-child {
+    opacity: 1;
+}
