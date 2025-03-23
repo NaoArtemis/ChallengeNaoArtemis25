@@ -225,6 +225,7 @@ def nao_touch_head_audiorecorder(params):
                 model = whisper.load_model("base")
                 result = model.transcribe(local_path)
                 ORDINE = result['text']
+                control_str(ORDINE)
 
                 return send_file(local_path, as_attachment=True)
             except Exception as e:
@@ -236,6 +237,13 @@ def nao_touch_head_audiorecorder(params):
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
 
+def control_str(input_string):
+    if input_string == 'a':
+        nao_seat()
+    elif input_string == 'b':
+        nao_cronac()
+    elif input_string == 'c':
+        nao_stats()
 
 @app.route('/nao_face_tracker/<params>', methods=['GET'])  
 def nao_face_tracker(params):
