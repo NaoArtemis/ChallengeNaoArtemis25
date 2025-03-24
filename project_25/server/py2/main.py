@@ -235,8 +235,12 @@ def nao_touch_head_audiorecorder(params):
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
 
+def nao_seat():
+    params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
+    nao_animatedSayText(params)
+
 def control_str(input_string):
-    if input_string == 'a':
+    if input_string == 'dove posso sedermi':
         nao_seat()
     elif input_string == 'b':
         nao_cronac()
