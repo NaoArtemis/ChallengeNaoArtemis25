@@ -434,7 +434,7 @@ def nao_stand():
 
 
 def nao_volume_sound(volume_level):
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port, "volume_level":volume_level}
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port, "volume_level":str(volume_level)}
     url      = "http://127.0.0.1:5011/nao_volume_sound/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))
@@ -573,7 +573,7 @@ def set_volume():
     
     # Chiama la funzione che manda la richiesta al server Py2
     try:
-        nao_volume_sound(volume_level)
+        nao_volume_sound(int(volume_level))
         return jsonify({"status": "Volume aggiornato", "volume": volume_level}), 200
     except Exception as e:
         logger.error("Errore nel settaggio del volume: " + str(e))

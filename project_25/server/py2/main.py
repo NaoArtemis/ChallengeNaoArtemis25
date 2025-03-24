@@ -9,6 +9,7 @@ python2 main.py
 # Modules
 from naoqi import ALProxy
 from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, send_file
+import json
 import cv2
 import time
 import math

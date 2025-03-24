@@ -131,7 +131,7 @@
 
         
                 document.querySelector("#volume_slider").addEventListener("input", function () {
-            const volume = this.value;
+            const volume = parseInt(this.value, 10);
             document.querySelector("#volume_value").textContent = volume;
 
             
