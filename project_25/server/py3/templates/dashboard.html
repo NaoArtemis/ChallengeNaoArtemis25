@@ -74,7 +74,18 @@
             </div>
             <div class="joystick-panel">
                 <h2>Webcam NAO</h2>
-                <img src="{{ url_for('webcam_aruco') }}" alt="Webcam Feed" class="webcam-feed">
+                <div class="webcam-container">
+                    <div class="webcam-slider">
+                        <img id="webcam-feed-1" src="{{ url_for('webcam') }}" alt="Webcam Feed" class="webcam-feed">
+                        <img id="webcam-feed-2" src="{{ url_for('webcam_aruco') }}" alt="Webcam Feed" class="webcam-feed">
+                    </div>
+                </div>
+                <div class="toggle-button-container">
+                    <button id="toggle-button" class="btn btn-joystick">
+                        <span class="toggle-text">Cam Nao</span>
+                        <span class="toggle-text">Cam Aruco</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -90,6 +101,21 @@
     </div>
 
     <script>
+        document.getElementById('toggle-button').addEventListener('click', function () {
+            const webcamSlider = document.querySelector('.webcam-slider');
+            const toggleButton = document.getElementById('toggle-button');
+            const isFirstImageActive = webcamSlider.style.transform === 'translateX(0%)' || !webcamSlider.style.transform;
+
+            // Applica la trasformazione per lo scorrimento delle immagini
+            if (isFirstImageActive) {
+                webcamSlider.style.transform = 'translateX(-50%)'; // Scorre a sinistra
+                toggleButton.classList.add('active'); // Attiva lo scorrimento del pulsante
+            } else {
+                webcamSlider.style.transform = 'translateX(0%)'; // Torna alla prima immagine
+                toggleButton.classList.remove('active'); // Disattiva lo scorrimento del pulsante
+            }
+        });
+
 
         document.querySelector("#volume").addEventListener("click", function (event) {
             event.stopPropagation();

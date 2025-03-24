@@ -164,7 +164,6 @@ def nao_touch_head_audiorecorder(params):
     if (params != None and params != ''):
         if request.method == 'GET':
             try:
-                # {"nao_ip":value, "nao_port":value, "nao_user":value, "nao_password":value}
                 json         = eval(params)
                 nao_ip       = json['nao_ip']
                 nao_port     = json['nao_port']
@@ -176,12 +175,11 @@ def nao_touch_head_audiorecorder(params):
                 remote_path        = "/data/home/nao/recordings/microphones/microphone_audio.wav"  # sul nao
                 sample_rate        = 16000
 
-                # Variabile globale per gestire lo stato del servizio
+                # var globali
                 global service_active
                 service_active = False
 
                 def on_middle_tactil_touched(value):
-                    nonlocal service_active
                     if value == 1.0:
                         print("Middle Tactil Touched - attivato.")
 
