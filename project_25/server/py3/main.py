@@ -143,7 +143,7 @@ def webcam_aruco():
         for chunk in response.iter_content(chunk_size=1024):
             frame_data += chunk
             if boundary in frame_data:
-                # Estrai il frame
+                # Estrai il frame   
                 parts = frame_data.split(boundary)
                 for part in parts[:-1]:                    
                     if content_type in part:
@@ -469,7 +469,7 @@ users = {'1': {'id': '1', 'username': 'admin', 'password': '21232f297a57a5a74389
 def load_user(user_id):
     return User(user_id)
 
-@app.route("/", methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
         username = request.form["username"]
@@ -481,12 +481,12 @@ def login():
             login_user(user_obj)
             # Reindirizza in base allo username
             if username == "1":
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('home'))
             elif username == "2":
-                return redirect(url_for('dashboard2'))
+                return redirect(url_for('home2'))
             else:
                 # Default: se lo username non corrisponde alle condizioni specificate
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('home'))
                 
     return render_template('login.html')
 
@@ -496,20 +496,21 @@ def logout():
     logout_user()
     return redirect('/')
 
-@app.route('/dashboard', methods=['GET'])
-@login_required
-def dashboard():
-    return render_template('dashboard.html')
 
-@app.route('/dashboard2', methods=['GET'])
+@app.route('/home', methods=['GET'])
 @login_required
-def dashboard2():
-    return render_template('dashboard2.html')
+def home():
+    return render_template('home.html')
 
-@app.route('/computer_vision', methods=['GET'])
+@app.route('/home2', methods=['GET'])
 @login_required
-def computer_vision():
-    return render_template()
+def home2():
+    return render_template('home2.html')
+
+@app.route('/joystick', methods=['GET'])
+@login_required
+def joystcik():
+    return render_template('joystick.html')
 
 
 # API
@@ -548,7 +549,7 @@ def tts_to_nao():
     if request.method == "POST":
         text = request.form["message"]
         nao_animatedSayText(text)
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/tts_to_nao_ai', methods=['POST'])
 def tts_to_nao_ai():
@@ -561,7 +562,7 @@ def tts_to_nao_ai():
         response.stream_to_file(speech_file_path)
         nao_tts_audiofile("speech.mp3")
         
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/set_volume', methods=['POST'])
 def set_volume():
@@ -584,55 +585,55 @@ def set_volume():
 @app.route('/api/movement/start', methods=['GET'])
 def api_movement_start():
     nao_move_fast(0)
-    return redirect('/dashboard')
+    return redirect('/home')
 
 
 @app.route('/api/movement/stop', methods=['GET'])
 def api_movement_stop():
     nao_move_fast_stop()
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/left', methods=['GET'])
 def api_movement_left():
     global theta_speed
     theta_speed = 10
     nao_move_fast(10)
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/right', methods=['GET'])
 def api_movement_right():
     global theta_speed
     theta_speed = -10
     nao_move_fast(-10)
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/back', methods=['GET'])
 def api_movement_back():
     nao_move_back(0)
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/stand', methods=['GET'])
 def api_movement_stand():
     nao_stand()
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/standInit', methods=['GET'])
 def api_movement_standInit():
     nao_standInit()
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/nao_train_move', methods=['GET'])
 def api_movement_nao_train_move():
     global nao_train_move_start 
     nao_train_move_start = True
     nao_train_move()
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/nao_train_move_stop', methods=['GET'])
 def api_movement_nao_train_move_stop():
     global nao_train_move_start 
     nao_train_move_start = False
-    return redirect('/dashboard')
+    return redirect('/home')
 
 @app.route('/api/movement/nao_autonomous_life', methods=['GET'])
 def nao_autonomous_life():
