@@ -29,7 +29,7 @@
         <h1 class="main-title">Nao Control Panel</h1>
         <div class="dashboard">
             <div class="joystick-panel">
-                <h2>JOYSTICK</h2>
+                <h1 class="text">Joystick</h1>
                 <div class="joystick-controls">
                     <button id="start" class="btn btn-joystick">Avanti</button>
                     <div class="joystick-middle">
@@ -73,24 +73,21 @@
                 </div>
             </div>
             <div class="joystick-panel">
-                <h2>Webcam NAO</h2>
+                <h1 class="text">Webcam</h1>
                 <div class="webcam-container">
-                    <div class="webcam-slider">
+                    <div id="nao-cam" class="cam-feed active">
                         <img id="webcam-feed-1" src="{{ url_for('webcam') }}" alt="Webcam Feed" class="webcam-feed">
+                    </div>
+                    <div id="aruco-cam" class="cam-feed">
                         <img id="webcam-feed-2" src="{{ url_for('webcam_aruco') }}" alt="Webcam Feed" class="webcam-feed">
                     </div>
                 </div>
-                <div class="toggle-button-container">
-                    <button id="toggle-button" class="btn btn-joystick">
-                        <span class="toggle-text">Cam Nao</span>
-                        <span class="toggle-text">Cam Aruco</span>
-                    </button>
+                <div class="webcam-controls">
+                    <button id="nao-cam-btn" class="cam-btn active"><span>NAO Cam</span></button>
+                    <button id="aruco-cam-btn" class="cam-btn"><span>Aruco Cam</span></button>
                 </div>
             </div>
         </div>
-
-        
-
     </div>
 
     
@@ -101,22 +98,6 @@
     </div>
 
     <script>
-        document.getElementById('toggle-button').addEventListener('click', function () {
-            const webcamSlider = document.querySelector('.webcam-slider');
-            const toggleButton = document.getElementById('toggle-button');
-            const isFirstImageActive = webcamSlider.style.transform === 'translateX(0%)' || !webcamSlider.style.transform;
-
-            // Applica la trasformazione per lo scorrimento delle immagini
-            if (isFirstImageActive) {
-                webcamSlider.style.transform = 'translateX(-50%)'; // Scorre a sinistra
-                toggleButton.classList.add('active'); // Attiva lo scorrimento del pulsante
-            } else {
-                webcamSlider.style.transform = 'translateX(0%)'; // Torna alla prima immagine
-                toggleButton.classList.remove('active'); // Disattiva lo scorrimento del pulsante
-            }
-        });
-
-
         document.querySelector("#volume").addEventListener("click", function (event) {
             event.stopPropagation();
             const volumeControl = document.querySelector("#volume-control");
@@ -316,6 +297,40 @@
             .then(data => console.log("Testo inviato con successo al NAO con AI!"))
             .catch(error => console.error("Errore:", error));
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const naoBtn = document.getElementById('nao-cam-btn');
+            const arucoBtn = document.getElementById('aruco-cam-btn');
+            const naoCam = document.getElementById('nao-cam');
+            const arucoCam = document.getElementById('aruco-cam');
+
+            function toggleCam(selectedCam) {
+                if((selectedCam === 'nao' && naoCam.classList.contains('active')) || 
+                (selectedCam === 'aruco' && arucoCam.classList.contains('active'))) {
+                    naoCam.classList.remove('active');
+                    arucoCam.classList.remove('active');
+                    naoBtn.classList.remove('active');
+                    arucoBtn.classList.remove('active');
+                    return;
+                }
+                
+                        naoCam.classList.remove('active');
+                        arucoCam.classList.remove('active');
+                        naoBtn.classList.remove('active');
+                        arucoBtn.classList.remove('active');
+                        
+                        if(selectedCam === 'nao') {
+                            naoCam.classList.add('active');
+                            naoBtn.classList.add('active');
+                        } else {
+                            arucoCam.classList.add('active');
+                            arucoBtn.classList.add('active');
+                        }
+                    }
+
+                    naoBtn.addEventListener('click', () => toggleCam('nao'));
+                    arucoBtn.addEventListener('click', () => toggleCam('aruco'));
+                });
     </script>
 </body>
 </html>
