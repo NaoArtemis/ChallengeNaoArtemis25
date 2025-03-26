@@ -32,7 +32,7 @@ from helpers.speech_recognition_helper import SpeechRecognition
 from helpers.db_helper import DB
 from openai import OpenAI
 from pathlib import Path
-
+from flask_cors import CORS
 
 
 
@@ -54,7 +54,7 @@ local_rec       = []
 OpenAI.api_key = config_helper.api_openai
 
 app  = Flask(__name__)
-
+CORS(app)
 # flask-login
 login_manager = LoginManager()
 login_manager.init_app(app)
