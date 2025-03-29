@@ -263,7 +263,6 @@ body {
 }
 
 /* =============== WEBCAM STYLES =============== */
-/* =============== WEBCAM STYLES =============== */
 .webcam-container {
     position: relative;
     width: 100%;
@@ -540,3 +539,28 @@ body {
     background-color: #4CAF50;
     color: white;
 }
+
+/* =============== moving strap =============== */
+
+.logo-strap {
+    overflow: hidden;
+    white-space: nowrap;
+    background: #f5f5f5;
+    padding: 20px 0;
+  }
+  .logo-scroll {
+    display: inline-block;
+    animation: scroll 12s linear infinite;
+  }
+  .logo-scroll img {
+    height: 50px;
+    margin: 0 30px;
+    vertical-align: middle;
+  }
+  .logo-scroll:hover {
+    animation-play-state: paused;
+  }
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
