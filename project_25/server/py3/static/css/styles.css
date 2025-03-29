@@ -530,3 +530,13 @@ body {
         height: auto;
     }
 }
+/* =============== widget =============== */
+.widget-container {
+    display: none;
+    margin: 20px auto;
+    text-align: center;
+}
+.widget-active {
+    background-color: #4CAF50;
+    color: white;
+}

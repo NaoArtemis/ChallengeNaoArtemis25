@@ -20,6 +20,7 @@
                 <div id="battery-level" class="battery-level"></div>
             </div>
             <button id="volume" class="btn btn-volume">Volume</button>
+            <button id="home" class="btn btn-logout">Home</button>
             <button id="logout" class="btn btn-logout">Logout</button>
         </div>
     </div>
@@ -99,6 +100,20 @@
     </div>
 
     <script>
+
+        document.querySelector("#home").addEventListener("click", function() {
+            fetch("/home", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = "/home";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+
         document.querySelector("#volume").addEventListener("click", function (event) {
             event.stopPropagation();
             const volumeControl = document.querySelector("#volume-control");

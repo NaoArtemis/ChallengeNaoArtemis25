@@ -26,7 +26,7 @@
         </h1>
         <div class="large-buttons-container">
             <button class="large-homebutton"><span>Team</span></button>
-            <button class="large-homebutton"><span>Competition</span></button>
+            <button id="competition" class="large-homebutton"><span>Competition</span></button>
             <button id="joystick" class="large-homebutton"><span>Joystick</span></button>
         </div>
     </div>
@@ -50,6 +50,18 @@
                     window.location.href = response.url;
                 } else {
                     window.location.href = "/joystick";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#competition").addEventListener("click", function() {
+            fetch("/competition", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = "/competition";
                 }
             })
             .catch(error => console.error("Errore:", error));

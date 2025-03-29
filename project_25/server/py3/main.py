@@ -512,6 +512,10 @@ def home2():
 def joystcik():
     return render_template('joystick.html')
 
+@app.route('/competition', methods=['GET'])
+@login_required
+def competition():
+    return render_template('competition.html')
 
 # API
 @app.route('/api', methods=['GET'])
