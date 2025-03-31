@@ -33,8 +33,7 @@ app  = Flask(__name__)
 #################################
 def computer_vision(nao_ip, nao_port):
     #richiamo alla funzione nao_get_image per ottenre frame
-    ciao
-
+    return None
 
 def nao_get_image(nao_ip, nao_port):
     video_proxy = ALProxy("ALVideoDevice", nao_ip, nao_port)            # NAO webcam
