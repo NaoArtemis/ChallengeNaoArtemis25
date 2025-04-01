@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ongoing Match</title>
+    <link rel="website icon" type="png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Collega il file CSS -->
+</head>
+<body>
+    <!-- barra superiore-->
+    <div class="top-bar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" alt="BetterNao Logo">
+        </div>
+        <div class="top-bar-buttons">
+            <button id="home" class="btn btn-logout">Home</button>
+            <button id="logout" class="btn btn-logout">Logout</button>
+        </div>
+    </div>
+    
+    <!--main-->
+    <div class = "main-content">
+        <div class = "joystick-panel">
+
+        </div>
+    </div>
+    <!--javascript-->
+    <script>
+        document.querySelector("#home").addEventListener("click", function() {
+            fetch("/home", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = "/home";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+        
+        document.querySelector("#logout").addEventListener("click", function() {
+            fetch("/logout", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+    </script>
+</body>
+</html>
