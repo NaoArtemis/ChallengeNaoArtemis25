@@ -75,6 +75,12 @@ def make_sha256(s):
 #################################
 # FUNZIONI FLASK SERVER Python2 #
 #################################
+def inizio_partita():
+    nao_animatedSayText("Inizio Partita")
+
+
+
+
 def detect_faces(frame):
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')     # Carica il classificatore Haar per il rilevamento dei volti
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)                                                    # Converti il frame in scala di grigi
@@ -162,6 +168,9 @@ def webcam_aruco():
                         if marker_ids is not None:
                             # Disegna i marker rilevati sul frame
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
+
+                            if 181 in marker_ids.flatten():
+                                inizio_partita()
                         
                         # Codifica di nuovo il frame 
                         _, buffer = cv2.imencode('.jpg', frame)
@@ -574,6 +583,7 @@ def tts_to_nao_ai():
         
     return redirect('/home')
 
+
 @app.route('/set_volume', methods=['POST'])
 def set_volume():
     data = request.get_json()
@@ -591,7 +601,7 @@ def set_volume():
         return jsonify({"error": "Errore interno"}), 500
 
 
-# MOVEMENTS
+# MOVEMENTS (Haseeb ha pagato gente per lavorare al suo posto)
 @app.route('/api/movement/start', methods=['GET'])
 def api_movement_start():
     nao_move_fast(0)
