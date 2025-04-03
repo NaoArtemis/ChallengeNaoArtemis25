@@ -231,8 +231,8 @@
                 .catch(error => console.error("Errore:", error));
         });
 
-        document.querySelector("#start_train").addEventListener("click", function () {
-            fetch("/api/movement/nao_train_move", { method: "GET" })
+        document.querySelector("#audiorecorder").addEventListener("click", function () {
+            fetch("/nao_touch_head_audiorecorder", { method: "GET" })
                 .then(response => response.json())
                 .then(data => console.log("Risposta API:", data))
                 .catch(error => console.error("Errore:", error));

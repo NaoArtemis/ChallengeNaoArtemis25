@@ -865,7 +865,7 @@ def nao_get_sensor_data(params):
                 data   = [gyro_x, gyro_y, acc_x, acc_y, acc_z]
                 memory_proxy = None
 
-                return jsonify({'code': 200, 'function': 'nao_get_sensor_data(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK', 'data':data}), 200
+                time.sleep(10)
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': str(e)}), 500
