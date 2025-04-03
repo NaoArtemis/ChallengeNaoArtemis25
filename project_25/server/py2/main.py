@@ -450,24 +450,22 @@ def nao_volume_sound(params):
     if params:
         if request.method == 'GET':
             try:
-                import json
-                json_data = json.loads(params)
+                #{"nao_ip":value, "nao_port":value}
+                json     = eval(params)
+                nao_ip   = json['nao_ip']
+                nao_port = json['nao_port']
+                volume_level = int(json["volume_level"])
                 
-                if 'nao_ip' not in json_data or 'nao_port' not in json_data or 'volume_level' not in json_data:
-                    return jsonify({'code': 500, 'message': 'Missing required parameters'}), 500
-                
-                nao_ip = json_data['nao_ip']
-                nao_port = json_data['nao_port']
-                volume_level = int(json_data['volume_level'])
+
 
                 if not (0 <= volume_level <= 100):
-                    return jsonify({'code': 500, 'message': 'Invalid volume level'}), 500
+                    return jsonify({"code": 500, "message": "Invalid volume level"}), 500
 
                 audio_proxy = ALProxy("ALAudioDevice", nao_ip, nao_port)
                 audio_proxy.setOutputVolume(volume_level)
                 audio_proxy = None
                 
-                return jsonify({'code': 200, 'function': 'nao_volume_sound(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status': 'OK'}), 200
+                return jsonify({"code": 200, "function": "nao_volume_sound(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')", "status": "OK"}), 200
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': 'Internal server error', 'error': str(e)}), 500

@@ -131,7 +131,7 @@
 
         
                 document.querySelector("#volume_slider").addEventListener("input", function () {
-            const volume = parseInt(this.value, 10);
+            
             document.querySelector("#volume_value").textContent = volume;
 
             
@@ -140,7 +140,7 @@
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ volume_level: volume })
+            body: JSON.stringify({ volume_level: volume+20 })
         })
         .then(response => {
             if (!response.ok) {
