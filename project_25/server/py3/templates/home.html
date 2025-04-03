@@ -25,7 +25,7 @@
             <object type="image/svg+xml" data="{{ url_for('static', filename='img/ball.svg') }}"></object>
         </h1>
         <div class="large-buttons-container">
-            <button class="large-homebutton"><span>Team</span></button>
+            <button id="partita" class="large-homebutton"><span>partita</span></button>
             <button id="competition" class="large-homebutton"><span>Competition</span></button>
             <button id="joystick" class="large-homebutton"><span>Joystick</span></button>
         </div>
@@ -50,6 +50,18 @@
                     window.location.href = response.url;
                 } else {
                     window.location.href = "/joystick";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#partita").addEventListener("click", function() {
+            fetch("/partita", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = "/partita";
                 }
             })
             .catch(error => console.error("Errore:", error));

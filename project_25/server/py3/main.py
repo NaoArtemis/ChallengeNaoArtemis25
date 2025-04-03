@@ -517,6 +517,12 @@ def joystcik():
 def competition():
     return render_template('competition.html')
 
+
+@app.route('/partita', methods=['GET'])
+@login_required
+def partita():
+    return render_template('partita.html')
+
 # API
 @app.route('/api', methods=['GET'])
 def api():
