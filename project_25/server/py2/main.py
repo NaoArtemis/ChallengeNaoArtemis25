@@ -31,6 +31,10 @@ app  = Flask(__name__)
 #################################
 # FUNZIONI FLASK SERVER Python2 #
 #################################
+def computer_vision(nao_ip, nao_port):
+    #richiamo alla funzione nao_get_image per ottenre frame
+    return None
+
 def nao_get_image(nao_ip, nao_port):
     video_proxy = ALProxy("ALVideoDevice", nao_ip, nao_port)            # NAO webcam
 
@@ -236,9 +240,20 @@ def nao_touch_head_audiorecorder(params):
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
 
-def nao_seat():
-    params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
+def nao_seat(params):
+    #params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
+    '''ricordati che params è un dizionario json, per estrarre i dati prima lo trasfromi in eval, json = eval(params)
+     poi estrai come se fosse un dict nromale; nao_ip = json["nao_ip]......
+    ''' 
     nao_animatedSayText(params)
+
+def nao_cronac():
+    #bisogna chiamare la funzione tts_to_nao_ai con una get dal server py3, dagli la text, dobbiamo ancora trovare un modo per farlo
+    return None # messa per non creare problemi, da tolgiere
+
+def nao_stats():
+    #bisogna chiamare la funzione tts_to_nao_ai con una get dal server py3, per il risultato ho già il widget di tutto campo, quindi possiamo rpederlo da li senza complicarci la vita, però richiede conessione internet
+    return None # messa per non creare problemi, da tolgiere
 
 def control_str(input_string):
     if input_string == 'dove posso sedermi':

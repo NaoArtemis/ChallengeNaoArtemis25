@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nao-artemis</title>
+    <link rel="website icon" type="png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra superiore -->
+    <div class="top-bar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" alt="BetterNao Logo">
+        </div>
+        <div class="top-bar-buttons">
+            <button id="home" class="btn btn-logout">Home</button>
+            <button id="logout" class="btn btn-logout">Logout</button>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h1 class="main-text">Audace</h1>
+
+        <div class="large-buttons-container">
+            <button id="risultati" class="large-homebutton"><span>Giornata</span></button>
+            <button id="classifica" class="large-homebutton"><span>Classifica</span></button>
+            <button id="giocatori" class="large-homebutton"><span>Giocatori</span></button>
+            <button id="ultima-partita" class="large-homebutton"><span>Ultima partita</span></button>
+            <button id="prossima-partita" class="large-homebutton"><span>Partita in arrivo</span></button>
+        </div>
+
+        <!-- Widget containers -->
+        <div id="risultati-widget" class="widget-container">
+            <iframe src='https://www.tuttocampo.it/WidgetV2/Risultati/c9208332-d447-47bb-8815-af2997e9f004' width='500' height='600' scrolling='no' frameborder='0' loading='lazy'></iframe>
+        </div>
+
+        <div id="classifica-widget" class="widget-container">
+            <iframe src='https://www.tuttocampo.it/WidgetV2/Classifica/c9208332-d447-47bb-8815-af2997e9f004' width='500' height='800' scrolling='no' frameborder='0' loading='lazy'></iframe>
+        </div>
+
+        <div id="giocatori-widget" class="widget-container">
+            <iframe src='https://www.tuttocampo.it/WidgetV2/Marcatori/c9208332-d447-47bb-8815-af2997e9f004' width='500' height='700' scrolling='no' frameborder='0' loading='lazy'></iframe>
+        </div>
+
+        <div id="ultima-partita-widget" class="widget-container">
+            <iframe src='https://www.tuttocampo.it/WidgetV2/Partita/c9208332-d447-47bb-8815-af2997e9f004' width='500' height='350' scrolling='no' frameborder='0' loading='lazy'></iframe>
+        </div>
+
+        <div id="prossima-partita-widget" class="widget-container">
+            <iframe src='https://www.tuttocampo.it/WidgetV2/ProssimaPartita/c9208332-d447-47bb-8815-af2997e9f004' width='500' height='350' scrolling='no' frameborder='0' loading='lazy'></iframe>
+        </div>
+    </div>
+
+    <div class="logo-strap">
+        <div class="logo-scroll">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+        </div>
+      </div>
+
+
+    <!-- Javascript -->
+    <script>
+        document.querySelector("#home").addEventListener("click", function() {
+            fetch("/home", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = "/home";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+        
+        document.querySelector("#logout").addEventListener("click", function() {
+            fetch("/logout", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        
+        const buttons = {
+            'risultati': 'risultati-widget',
+            'classifica': 'classifica-widget',
+            'giocatori': 'giocatori-widget',
+            'ultima-partita': 'ultima-partita-widget',
+            'prossima-partita': 'prossima-partita-widget'
+        };
+
+        
+        Object.values(buttons).forEach(widgetId => {
+            document.getElementById(widgetId).style.display = 'none';
+        });
+
+        
+        Object.keys(buttons).forEach(buttonId => {
+            document.getElementById(buttonId).addEventListener('click', function() {
+                const widgetId = buttons[buttonId];
+                const widget = document.getElementById(widgetId);
+                
+                
+                Object.values(buttons).forEach(id => {
+                    document.getElementById(id).style.display = 'none';
+                    document.querySelector(`[id="${id.replace('-widget', '')}"]`).classList.remove('widget-active');
+                });
+                
+                // Toggle current widget
+                if (widget.style.display === 'none') {
+                    widget.style.display = 'block';
+                    this.classList.add('widget-active');
+                } else {
+                    widget.style.display = 'none';
+                    this.classList.remove('widget-active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

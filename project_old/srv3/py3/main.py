@@ -335,7 +335,7 @@ def logout():
 
 
 @app.route("/dashboard", methods=['GET', 'POST'])
-@login_required
+
 def dashboard():
     if request.method == "POST":
         pagina = request.form.get("pagina")
