@@ -16,4 +16,29 @@ class DB:
         except Exception as e:
             logger.error(str(e))
 
-    
+
+    def select_utenti(self):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute('''
+                            SELECT * 
+                            FROM utenti;
+                            ''')
+                if (cur.rowcount == 0):
+                    return 0
+                else:
+                    lista = []
+                    for tupla in cur:
+                        lista.append({'id': tupla[0], 'username': tupla[1], 'password': tupla[2], 'nome':tupla[3], 'cognome':tupla[4]})
+                    return lista
+                
+    def insert_cliente(self, username, password, nome, cognome):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute('''
+                            INSERT INTO utenti(username,password,nome,cognome)
+                            VALUES (%s, %s, %s, %s)
+                            RETURNING id;
+                            ''', (username, password, nome, cognome))
+                nuovo_id = cur.fetchone()[0]
+                return cur.statusmessage, nuovo_id
