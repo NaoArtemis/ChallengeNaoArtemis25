@@ -37,7 +37,7 @@ from flask_cors import CORS
 
 
 config_helper  = Config()
-#db_helper      = DB(config_helper)
+db_helper      = DB(config_helper)
 
 nao_ip         = config_helper.nao_ip
 nao_port       = config_helper.nao_port
@@ -75,6 +75,12 @@ def make_sha256(s):
 #################################
 # FUNZIONI FLASK SERVER Python2 #
 #################################
+def inizio_partita():
+    nao_animatedSayText("Inizio Partita")
+
+
+
+
 def detect_faces(frame):
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')     # Carica il classificatore Haar per il rilevamento dei volti
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)                                                    # Converti il frame in scala di grigi
@@ -162,6 +168,9 @@ def webcam_aruco():
                         if marker_ids is not None:
                             # Disegna i marker rilevati sul frame
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
+
+                            if 181 in marker_ids.flatten():
+                                inizio_partita()
                         
                         # Codifica di nuovo il frame 
                         _, buffer = cv2.imencode('.jpg', frame)
@@ -371,7 +380,7 @@ def nao_audiorecorder(sec_sleep):
     logger.info("nao_audiorecorder: " + str(speech_recognition.result))
     return str(speech_recognition.result)
 
-@app.route('/nao_touch_head_audiorecorder', methods=['GET'])
+
 def nao_touch_head_audiorecorder():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password}
     url      = "http://127.0.0.1:5011/nao_touch_head_audiorecorder/" + str(data) 
@@ -574,6 +583,7 @@ def tts_to_nao_ai():
         
     return redirect('/home')
 
+
 @app.route('/set_volume', methods=['POST'])
 def set_volume():
     data = request.get_json()
@@ -591,7 +601,7 @@ def set_volume():
         return jsonify({"error": "Errore interno"}), 500
 
 
-# MOVEMENTS
+# MOVEMENTS (Haseeb ha pagato gente per lavorare al suo posto)
 @app.route('/api/movement/start', methods=['GET'])
 def api_movement_start():
     nao_move_fast(0)
@@ -749,6 +759,12 @@ if __name__ == "__main__":
     #nao_touch_head_audiorecorder()
     #nao_audiorecorder(5)
     #nao_train_move()
+
+    oggetto, id = db_helper.insert_cliente("nabihaseeb","1","nabi","haseeb")
+    logger.info("Result query: %s , id=%s", oggetto, id)
+
+    utenti = db_helper.select_utenti()
+    print(utenti)
     
 
     app.secret_key = os.urandom(12)
