@@ -225,7 +225,7 @@ def nao_touch_head_audiorecorder(params):
                 audio_device_proxy = None
 
                 # Utilizzo della libreria openai-whisper per eseguire lo speech-to-text
-                model = whisper.load_model("base")
+                model=None
                 result = model.transcribe(local_path)
                 ORDINE = result['text']
                 control_str(ORDINE)
