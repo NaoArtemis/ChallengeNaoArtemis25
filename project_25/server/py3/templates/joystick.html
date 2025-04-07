@@ -49,11 +49,11 @@
                             <option value="nao_eye">White Eye</option>
                         </select>
                         <button id="wakeup" class="btn btn-joystick">Wakeup</button>
-                        <button id="autonomo" class="btn btn-joystick">Vita Autonoma</button>
+                        <button id="autonomo" class="btn btn-joystick">Sit down</button>
                         <button id="stand_init" class="btn btn-joystick">Stand Init</button>
                     </div>
                     <div class="button-row">
-                        <button id="start_train" class="btn btn-joystick">Start Train</button>
+                        <button id="start_train" class="btn btn-joystick">head touch</button>
                         <button id="stop_train" class="btn btn-joystick">Stop Train</button>
                         <button id="stand" class="btn btn-joystick">Stand</button>
                     </div>
@@ -231,7 +231,7 @@
                 .catch(error => console.error("Errore:", error));
         });
 
-        document.querySelector("#start_train").addEventListener("click", function () {
+        document.querySelector("#audiorecorder").addEventListener("click", function () {
             fetch("/nao_touch_head_audiorecorder", { method: "GET" })
                 .then(response => response.json())
                 .then(data => console.log("Risposta API:", data))
