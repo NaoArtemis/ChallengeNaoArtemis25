@@ -161,7 +161,7 @@ def nao_get_audio(params):
             return jsonify({'code': 500, 'message': 'methods error'}), 500  
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
-    
+
 
 service_active = False
 @app.route('/nao_touch_head_audiorecorder/<params>', methods=['GET'])

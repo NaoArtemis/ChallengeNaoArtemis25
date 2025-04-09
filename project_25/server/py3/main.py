@@ -760,11 +760,11 @@ if __name__ == "__main__":
     #nao_audiorecorder(5)
     #nao_train_move()
 
-    oggetto, id = db_helper.insert_cliente("nabihaseeb","1","nabi","haseeb")
-    logger.info("Result query: %s , id=%s", oggetto, id)
+    #oggetto, id = db_helper.insert_cliente("nabihaseeb","1","nabi","haseeb")
+    #logger.info("Result query: %s , id=%s", oggetto, id)
 
-    utenti = db_helper.select_utenti()
-    print(utenti)
+    #utenti = db_helper.select_utenti()
+
     
 
     app.secret_key = os.urandom(12)
