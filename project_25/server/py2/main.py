@@ -19,8 +19,6 @@ import paramiko
 import utilities
 from logging_helper import logger
 import threading
-import whisper
-
 
 
 app  = Flask(__name__)
@@ -224,11 +222,6 @@ def nao_touch_head_audiorecorder(params):
 
                 audio_device_proxy = None
 
-                # Utilizzo della libreria openai-whisper per eseguire lo speech-to-text
-                model = whisper.load_model("base")
-                result = model.transcribe(local_path)
-                ORDINE = result['text']
-                control_str(ORDINE)
 
                 return send_file(local_path, as_attachment=True)
             except Exception as e:

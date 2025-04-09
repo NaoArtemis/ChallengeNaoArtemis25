@@ -33,6 +33,7 @@ from helpers.db_helper import DB
 from openai import OpenAI
 from pathlib import Path
 from flask_cors import CORS
+import whisper
 
 
 
@@ -380,7 +381,7 @@ def nao_audiorecorder(sec_sleep):
     logger.info("nao_audiorecorder: " + str(speech_recognition.result))
     return str(speech_recognition.result)
 
-
+@app.route('/nao_touch_head_audiorecorder', methods=['GET'])
 def nao_touch_head_audiorecorder():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password}
     url      = "http://127.0.0.1:5011/nao_touch_head_audiorecorder/" + str(data) 
@@ -396,13 +397,11 @@ def nao_touch_head_audiorecorder():
     else:
         logger.error("File audio non ricevuto: " + str(response.status_code))
 
-    while True:
-        speech_recognition = SpeechRecognition(local_path)
-        if (speech_recognition.result != None or speech_recognition.result != ''):
-            break
-    
-    logger.info("nao_touch_head_audiorecorder: " + str(speech_recognition.result))
-    return str(speech_recognition.result)
+    # Utilizzo della libreria openai-whisper per eseguire lo speech-to-text
+    model=whisper.load_model("base")
+    result = model.transcribe(local_path)
+    ORDINE = result['text']
+    print(ORDINE)
 
 
 def nao_face_tracker():
@@ -594,7 +593,7 @@ def set_volume():
     
     # Chiama la funzione che manda la richiesta al server Py2
     try:
-        nao_volume_sound(int(volume_level)+20)
+        nao_volume_sound(int(volume_level))
         return jsonify({"status": "Volume aggiornato", "volume": volume_level}), 200
     except Exception as e:
         logger.error("Errore nel settaggio del volume: " + str(e))
