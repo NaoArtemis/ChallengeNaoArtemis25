@@ -593,7 +593,7 @@ def set_volume():
     
     # Chiama la funzione che manda la richiesta al server Py2
     try:
-        nao_volume_sound(int(volume_level)+20)
+        nao_volume_sound(int(volume_level))
         return jsonify({"status": "Volume aggiornato", "volume": volume_level}), 200
     except Exception as e:
         logger.error("Errore nel settaggio del volume: " + str(e))
