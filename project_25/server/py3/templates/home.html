@@ -44,12 +44,12 @@
         });
 
         document.querySelector("#joystick").addEventListener("click", function() {
-            fetch("/joystick", { method: "GET" })
+            fetch("/joystick_MT", { method: "GET" })
             .then(response => {
                 if (response.redirected) {
                     window.location.href = response.url;
                 } else {
-                    window.location.href = "/joystick";
+                    window.location.href = "/joystick_MT";
                 }
             })
             .catch(error => console.error("Errore:", error));

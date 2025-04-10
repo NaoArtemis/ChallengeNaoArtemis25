@@ -515,10 +515,10 @@ def home():
 def home2():
     return render_template('home2.html')
 
-@app.route('/joystick', methods=['GET'])
+@app.route('/joystick_MT', methods=['GET'])
 @login_required
 def joystcik():
-    return render_template('joystick.html')
+    return render_template('joystick_MT.html')
 
 @app.route('/competition', methods=['GET'])
 @login_required
