@@ -763,7 +763,7 @@ if __name__ == "__main__":
     #logger.info("Result query: %s , id=%s", oggetto, id)
 
     #utenti = db_helper.select_utenti()
-    #print(utenti)
+
     
 
     app.secret_key = os.urandom(12)
