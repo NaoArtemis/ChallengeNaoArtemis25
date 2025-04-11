@@ -211,6 +211,22 @@ function inviaTestoAlNAOai() {
     .catch(error => console.error("Errore:", error));
 }
 
+function showNaoCam() {
+    document.getElementById("webcam-feed").src = naoCamUrl;
+}
+
+function showArucoCam() {
+    document.getElementById("webcam-feed").src = arucoCamUrl;
+}
+
+function stopCam() {
+    document.getElementById("webcam-feed").src = noCamUrl;
+}
+
+window.onload = function() {
+    stopCam();
+};
+
 
 
 

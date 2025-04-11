@@ -76,20 +76,19 @@
             <div class="joystick-panel">
                 <h1 class="text">Webcam</h1>
                 <div class="webcam-container">
-                    <div id="nao-cam" class="cam-feed active">
-                        <img id="webcam-feed-1" src="{{ url_for('webcam') }}" alt="Webcam Feed" class="webcam-feed">
+                    <div id="webcam-display"> <!--parte da no-feed e poi varria grazie al script.js-->
+                        <img id="webcam-feed" src="{{ url_for('static', filename='img/no_feed.jpg') }}" alt="Webcam Feed" class="webcam-feed">
                     </div>
-                    <div id="aruco-cam" class="cam-feed">
-                        <img id="webcam-feed-2" src="{{ url_for('webcam_aruco') }}" alt="Webcam Feed" class="webcam-feed">
-                    </div>
-                    <div id="aruco-cam" class="cam-feed">
-                        <img id="webcam-feed-2" src="{{ url_for('static', filename='img/no_feed.jpg') }}" alt="Webcam Feed" class="webcam-feed">
-                    </div>
+                    <script> // passo qua i link perchè java non interpreta jinja2
+                        const naoCamUrl = "{{ url_for('webcam') }}";
+                        const arucoCamUrl = "{{ url_for('webcam_aruco') }}";
+                        const noCamUrl = "{{ url_for('static', filename='img/no_feed.jpg') }}";
+                    </script>
                 </div>
                 <div class="webcam-controls">
-                    <button id="nao-cam-btn" class="cam-btn active"><span>NAO Cam</span></button>
-                    <button id="aruco-cam-btn" class="cam-btn"><span>Aruco Cam</span></button>
-                    <button id="stop-cam-btn" class="cam-btn"><span>Aruco Cam</span></button>
+                    <button id="nao-cam-btn" class="cam-btn active" onclick="showNaoCam()"><span>NAO Cam</span></button>
+                    <button id="aruco-cam-btn" class="cam-btn" onclick="showArucoCam()"><span>Aruco Cam</span></button>
+                    <button id="stop-cam-btn" class="cam-btn" onclick="stopCam()"><span>Stop Cam</span></button>
                 </div>
             </div>
         </div>
