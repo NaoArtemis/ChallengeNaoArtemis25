@@ -1,4 +1,3 @@
-
 document.querySelector("#home").addEventListener("click", function() {
     fetch("/home", { method: "GET" })
     .then(response => {
@@ -212,7 +211,12 @@ function inviaTestoAlNAOai() {
     .catch(error => console.error("Errore:", error));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+
+
+
+        /* script fatto prima
+        #webcam
+                document.addEventListener('DOMContentLoaded', function() {
     const naoBtn = document.getElementById('nao-cam-btn');
     const arucoBtn = document.getElementById('aruco-cam-btn');
     const naoCam = document.getElementById('nao-cam');
@@ -245,3 +249,9 @@ document.addEventListener('DOMContentLoaded', function() {
             naoBtn.addEventListener('click', () => toggleCam('nao'));
             arucoBtn.addEventListener('click', () => toggleCam('aruco'));
         });
+
+
+        
+        
+        
+        */
