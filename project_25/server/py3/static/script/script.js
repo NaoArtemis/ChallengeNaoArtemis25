@@ -17,38 +17,39 @@ document.querySelector("#volume").addEventListener("click", function (event) {
     volumeControl.style.display = volumeControl.style.display === "block" ? "none" : "block";
 });
 
-
 document.addEventListener("click", function () {
     const volumeControl = document.querySelector("#volume-control");
     volumeControl.style.display = "none";
 });
 
-
-        document.querySelector("#volume_slider").addEventListener("input", function () {
-    
+document.querySelector("#volume_slider").addEventListener("input", function () {
+    // Otteniamo il valore dello slider
+    const volume = this.value;
+    // Aggiorniamo l'elemento che mostra il valore del volume
     document.querySelector("#volume_value").textContent = volume;
 
-    
-fetch("/set_volume", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ volume_level: volume+20 })
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error("Errore nella richiesta");
-    }
-    return response.json();
-})
-.then(data => {
-        console.log("Risposta del server Python 3:", data);
-})
-.catch(error => {
-    console.error("Errore:", error);
+    // Inviamo il valore (modificato, ad esempio volume + 20) al server
+    fetch("/set_volume", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ volume_level: parseInt(volume) + 20 })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Errore nella richiesta");
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Risposta del server:", data);
+    })
+    .catch(error => {
+        console.error("Errore:", error);
+    });
 });
-});
+
 
 
 
