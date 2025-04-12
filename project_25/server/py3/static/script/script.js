@@ -130,11 +130,10 @@ document.querySelector("#stand_init").addEventListener("click", function () {
         .catch(error => console.error("Errore:", error));
 });
 
-document.querySelector("#audiorecorder").addEventListener("click", function () {
+document.querySelector("#head_touch").addEventListener("click", function () {
     fetch("/nao_touch_head_audiorecorder", { method: "GET" })
         .then(response => response.json())
-        .then(data => console.log("Risposta API:", data))
-        .catch(error => console.error("Errore:", error));
+        .then(data => console.log("Risposta API:", data));
 });
 
 document.querySelector("#stop_train").addEventListener("click", function () {

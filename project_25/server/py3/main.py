@@ -386,7 +386,7 @@ def nao_touch_head_audiorecorder():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password}
     url      = "http://127.0.0.1:5011/nao_touch_head_audiorecorder/" + str(data) 
     response = requests.get(url, json=data, stream=True)
-
+    print("Ordine ricevuto")
     local_path = f'recordings/microphone_audio.wav'
     if response.status_code == 200:
         with open(local_path, 'wb') as f:
