@@ -223,11 +223,6 @@ function stopCam() {
     document.getElementById("webcam-feed").src = noCamUrl;
 }
 
-
-
-
-
-
         /* script fatto prima
         
         */

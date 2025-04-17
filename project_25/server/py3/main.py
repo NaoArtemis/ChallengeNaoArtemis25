@@ -73,6 +73,15 @@ def make_sha256(s):
     return sha256(s.encode(encoding)).hexdigest()
 
 
+
+
+# variabili blobali per gestire gli aruco 
+partita_iniziata = False
+partita_pausa = False
+partita_secondo_tempo = False
+partita_finita = False
+
+
 #################################
 # FUNZIONI FLASK SERVER Python2 #
 #################################
@@ -170,14 +179,38 @@ def webcam_aruco():
                             # Disegna i marker rilevati sul frame
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
 
-                            if 181 in marker_ids.flatten():
+                            #gestione inzio partita
+                            global partita_iniziata
+                            if 180 in marker_ids.flatten() and not partita_iniziata:
+                                partita_iniziata = True
                                 inizio_partita()
-                            if 182 in marker_ids.flatten():
-                                return None
-                            if 183 in marker_ids.flatten():
-                                return None
+                            
+                            #pausa partita
+                            global partita_pausa
+                            if 181 in marker_ids.flatten() and not partita_pausa:
+                                partita_pausa = True
+                                inizio_partita()
+                            
+                            #inzio secodno tempo
+                            global partita_pausa
+                            if 182 in marker_ids.flatten() and not partita_secondo_tempo and partita_pausa:
+                                partita_secondo_tempo = True 
+                                inizio_partita()
+
+                            #pausa partita
+                            global partita_pausa
+                            if 183 in marker_ids.flatten() and not partita_finita:
+                                partita_finita = True 
+                                inizio_partita()
+                            
                             if 184 in marker_ids.flatten():
                                 return None
+                            if 185 in marker_ids.flatten():
+                                return None
+                            if 186 in marker_ids.flatten():
+                                return None
+                            
+
                         # Codifica di nuovo il frame 
                         _, buffer = cv2.imencode('.jpg', frame)
                         yield (b'--frame\r\n'
