@@ -172,6 +172,11 @@ def webcam_aruco():
 
                             if 181 in marker_ids.flatten():
                                 inizio_partita()
+                            if 182 in marker_ids.flatten():
+                            
+                            elif 183 in marker_ids.flatten():
+
+                            elif 184 in marker_ids.flatten():
                         
                         # Codifica di nuovo il frame 
                         _, buffer = cv2.imencode('.jpg', frame)
@@ -381,7 +386,7 @@ def nao_audiorecorder(sec_sleep):
     logger.info("nao_audiorecorder: " + str(speech_recognition.result))
     return str(speech_recognition.result)
 
-@app.route('/nao_touch_head_audiorecorder', methods=['GET'])
+@app.route('/nao_touch_head_audiorecorder', methods=['GET' f])
 def nao_touch_head_audiorecorder():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password}
     url      = "http://127.0.0.1:5011/nao_touch_head_audiorecorder/" + str(data) 

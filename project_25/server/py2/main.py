@@ -232,7 +232,7 @@ def nao_touch_head_audiorecorder(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
-
+@app.route('/nao_seat/<params>', methods=['GET'])  
 def nao_seat(params):
     #params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
     '''ricordati che params è un dizionario json, per estrarre i dati prima lo trasfromi in eval, json = eval(params)
@@ -240,13 +240,15 @@ def nao_seat(params):
     ''' 
     nao_animatedSayText(params)
 
+@app.route('/nao_cronac', methods=['GET'])  
 def nao_cronac():
     #bisogna chiamare la funzione tts_to_nao_ai con una get dal server py3, dagli la text, dobbiamo ancora trovare un modo per farlo
-    return None # messa per non creare problemi, da tolgiere
+    return None # messa per non creare problemi, da togliere
 
+@app.route('/nao_stats', methods=['GET'])  
 def nao_stats():
     #bisogna chiamare la funzione tts_to_nao_ai con una get dal server py3, per il risultato ho già il widget di tutto campo, quindi possiamo rpederlo da li senza complicarci la vita, però richiede conessione internet
-    return None # messa per non creare problemi, da tolgiere
+    return None # messa per non creare problemi, da togliere
 
 def control_str(input_string):
     if input_string == 'dove posso sedermi':
