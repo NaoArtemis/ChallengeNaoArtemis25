@@ -102,34 +102,23 @@ def fine_partita():
 #################################
 
 def nao_points():
-    if not task_2:
-        task_2=True
-    else:
-        break
+    task_2 = False
     return None # messa per non creare problemi, da togliere
 
 def nao_seat():
-    if not task_2:
-        task_2=True
-        params = "i posti a sedere riservati sono quelli nella prima fila coi bollini blu"
-        nao_animatedSayText(params)
-    else:
-        break
+    params = "i posti a sedere riservati sono quelli nella prima fila coi bollini blu"
+    nao_animatedSayText(params)
+    task_2 = False
     
 def nao_stats():
-    if not task_2:
-        task_2=True
-    else:
-        break
+    task_2 = False
     return None # messa per non creare problemi, da togliere
 
-def noa_coro():
-    if not task_2:
-        task_2=True
-        params = "dal po in su l'italia è gialloblu"
-        nao_animatedSayText(params)
-    else:
-        break
+def noa_coro():  
+    params = "dal po in su l'italia è gialloblu"
+    nao_animatedSayText(params)
+    task_2 = False 
+
  
 #################################
 # FUNZIONI FLASK SERVER Python2 #
@@ -225,43 +214,55 @@ def webcam_aruco():
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
 
                             #Task1
-                            #gestione inzio partita
-                            global partita_iniziata
+                            #gestione inzio partita                            
                             if 180 in marker_ids.flatten() and not partita_iniziata:
+                                global partita_iniziata
                                 partita_iniziata = True
                                 inizio_partita()
                             
-                            #pausa partita
-                            global partita_pausa
+                            #pausa partita    
                             if 181 in marker_ids.flatten() and not partita_pausa:
+                                global partita_pausa
                                 partita_pausa = True
                                 pausa_partita()
-                            
-                            #inzio secodno tempo
-                            global partita_pausa
+    
+                            #inzio secodno tempo                        
                             if 182 in marker_ids.flatten() and not partita_secondo_tempo and partita_pausa:
+                                global partita_pausa
                                 partita_secondo_tempo = True 
                                 inizio_secodno_tempo()
                             
                             #fine partita
-                            global partita_pausa
                             if 183 in marker_ids.flatten() and not partita_finita:
+                                global partita_pausa
                                 partita_finita = True 
                                 fine_partita()
                             
                             #Task2
 
                             #Punti della partita
-                            if 184 in marker_ids.flatten():
+                            if 184 in marker_ids.flatten() and not task_2 :
+                                global task_2
+                                task_2=True
                                 nao_points()
 
                             #Statistiche della partita
-                            elif 185 in marker_ids.flatten():
+                            elif 185 in marker_ids.flatten() and not task_2 :
+                                global task_2
+                                task_2=True
                                 nao_stats()
 
-                            #Posti a sederes
-                            elif 186 in marker_ids.flatten():
+                            #Posti a sederes 
+                            elif 186 in marker_ids.flatten() and not task_2 :
+                                global task_2
+                                task_2=True
                                 nao_seat()
+
+                            #cori
+                            elif 187 in marker_ids.flatten() and not task_2 :
+                                global task_2
+                                task_2=True
+                                nao_coro()
 
                         # Codifica di nuovo il frame 
                         _, buffer = cv2.imencode('.jpg', frame)
