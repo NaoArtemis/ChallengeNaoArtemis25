@@ -232,12 +232,12 @@ def nao_touch_head_audiorecorder(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
-@app.route('/nao_seat/<params>', methods=['GET'])  
+'''@app.route('/nao_seat/<params>', methods=['GET'])  
 def nao_seat(params):
     #params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
-    '''ricordati che params è un dizionario json, per estrarre i dati prima lo trasfromi in eval, json = eval(params)
+    ricordati che params è un dizionario json, per estrarre i dati prima lo trasfromi in eval, json = eval(params)
      poi estrai come se fosse un dict nromale; nao_ip = json["nao_ip]......
-    ''' 
+    
     nao_animatedSayText(params)
 
 @app.route('/nao_cronac', methods=['GET'])  
@@ -257,7 +257,7 @@ def control_str(input_string):
         nao_cronac()
     elif input_string == 'c':
         nao_stats()
-
+'''
 @app.route('/nao_face_tracker/<params>', methods=['GET'])  
 def nao_face_tracker(params):
     if (params != None and params != ''):

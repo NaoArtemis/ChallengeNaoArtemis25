@@ -79,8 +79,15 @@ def make_sha256(s):
 def inizio_partita():
     nao_animatedSayText("Inizio Partita")
 
+def nao_points():
+    return None # messa per non creare problemi, da togliere
 
-
+def nao_seat():
+    params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli nella prima fila coi bollini blu"}
+    nao_animatedSayText(params)
+    
+def nao_stats():
+    return None # messa per non creare problemi, da togliere
 
 def detect_faces(frame):
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')     # Carica il classificatore Haar per il rilevamento dei volti
@@ -172,12 +179,12 @@ def webcam_aruco():
 
                             if 181 in marker_ids.flatten():
                                 inizio_partita()
-                            if 182 in marker_ids.flatten():
-                            
-                            elif 183 in marker_ids.flatten():
-
-                            elif 184 in marker_ids.flatten():
-                        
+                            if 184 in marker_ids.flatten():
+                                nao_points()
+                            elif 185 in marker_ids.flatten():
+                                nao_stats()
+                            elif 186 in marker_ids.flatten():
+                                nao_seat()
                         # Codifica di nuovo il frame 
                         _, buffer = cv2.imencode('.jpg', frame)
                         yield (b'--frame\r\n'
@@ -356,13 +363,6 @@ def webcam_aruco_pose_estimate():
     return Response(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
 
-
-
-
-
-
-
-
 def nao_audiorecorder(sec_sleep):
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password, "sec_sleep":sec_sleep}
     url      = "http://127.0.0.1:5011/nao_audiorecorder/" + str(data) 
@@ -386,7 +386,7 @@ def nao_audiorecorder(sec_sleep):
     logger.info("nao_audiorecorder: " + str(speech_recognition.result))
     return str(speech_recognition.result)
 
-@app.route('/nao_touch_head_audiorecorder', methods=['GET' f])
+@app.route('/nao_touch_head_audiorecorder', methods=['GET'])
 def nao_touch_head_audiorecorder():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password}
     url      = "http://127.0.0.1:5011/nao_touch_head_audiorecorder/" + str(data) 
