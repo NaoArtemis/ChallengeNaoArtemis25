@@ -102,16 +102,35 @@ def fine_partita():
 #################################
 
 def nao_points():
+    if not task_2:
+        task_2=True
+    else:
+        break
     return None # messa per non creare problemi, da togliere
 
 def nao_seat():
-    params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli nella prima fila coi bollini blu"}
-    nao_animatedSayText(params)
+    if not task_2:
+        task_2=True
+        params = "i posti a sedere riservati sono quelli nella prima fila coi bollini blu"
+        nao_animatedSayText(params)
+    else:
+        break
     
 def nao_stats():
+    if not task_2:
+        task_2=True
+    else:
+        break
     return None # messa per non creare problemi, da togliere
 
-
+def noa_coro():
+    if not task_2:
+        task_2=True
+        params = "dal po in su l'italia è gialloblu"
+        nao_animatedSayText(params)
+    else:
+        break
+ 
 #################################
 # FUNZIONI FLASK SERVER Python2 #
 #################################
