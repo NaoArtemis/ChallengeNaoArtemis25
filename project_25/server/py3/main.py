@@ -79,11 +79,27 @@ partita_secondo_tempo = False
 partita_finita = False
 task_2 = False
 
+
 #################################
-# FUNZIONI FLASK SERVER Python2 #
+#      computer vision          #
 #################################
+
 def inizio_partita():
     nao_animatedSayText("Inizio Partita")
+
+def pausa_partita():
+    nao_animatedSayText("Fine primo tempo")
+
+def inizio_secodno_tempo():
+    nao_animatedSayText("Inizio secondo tempo")
+
+def fine_partita():
+    nao_animatedSayText("Fine Partita")
+
+
+#################################
+#            TASK 2             #
+#################################
 
 def nao_points():
     return None # messa per non creare problemi, da togliere
@@ -94,6 +110,12 @@ def nao_seat():
     
 def nao_stats():
     return None # messa per non creare problemi, da togliere
+
+
+#################################
+# FUNZIONI FLASK SERVER Python2 #
+#################################
+
 
 def detect_faces(frame):
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')     # Carica il classificatore Haar per il rilevamento dei volti
@@ -194,19 +216,19 @@ def webcam_aruco():
                             global partita_pausa
                             if 181 in marker_ids.flatten() and not partita_pausa:
                                 partita_pausa = True
-                                inizio_partita()
+                                pausa_partita()
                             
                             #inzio secodno tempo
                             global partita_pausa
                             if 182 in marker_ids.flatten() and not partita_secondo_tempo and partita_pausa:
                                 partita_secondo_tempo = True 
-                                inizio_partita()
+                                inizio_secodno_tempo()
                             
                             #fine partita
                             global partita_pausa
                             if 183 in marker_ids.flatten() and not partita_finita:
                                 partita_finita = True 
-                                inizio_partita()
+                                fine_partita()
                             
                             #Task2
 
