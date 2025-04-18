@@ -223,51 +223,6 @@ function stopCam() {
     document.getElementById("webcam-feed").src = noCamUrl;
 }
 
-window.onload = function() {
-    stopCam();
-};
-
-
-
-
         /* script fatto prima
-        #webcam
-                document.addEventListener('DOMContentLoaded', function() {
-    const naoBtn = document.getElementById('nao-cam-btn');
-    const arucoBtn = document.getElementById('aruco-cam-btn');
-    const naoCam = document.getElementById('nao-cam');
-    const arucoCam = document.getElementById('aruco-cam');
-
-    function toggleCam(selectedCam) {
-        if((selectedCam === 'nao' && naoCam.classList.contains('active')) || 
-        (selectedCam === 'aruco' && arucoCam.classList.contains('active'))) {
-            naoCam.classList.remove('active');
-            arucoCam.classList.remove('active');
-            naoBtn.classList.remove('active');
-            arucoBtn.classList.remove('active');
-            return;
-        }
-        
-                naoCam.classList.remove('active');
-                arucoCam.classList.remove('active');
-                naoBtn.classList.remove('active');
-                arucoBtn.classList.remove('active');
-                
-                if(selectedCam === 'nao') {
-                    naoCam.classList.add('active');
-                    naoBtn.classList.add('active');
-                } else {
-                    arucoCam.classList.add('active');
-                    arucoBtn.classList.add('active');
-                }
-            }
-
-            naoBtn.addEventListener('click', () => toggleCam('nao'));
-            arucoBtn.addEventListener('click', () => toggleCam('aruco'));
-        });
-
-
-        
-        
         
         */
