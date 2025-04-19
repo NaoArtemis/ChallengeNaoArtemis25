@@ -121,18 +121,12 @@ def nao_stats():
     time.sleep(30)
     task_2 = False
 
-<<<<<<< HEAD
-def noa_coro():  
-    params = ""
-    nao_animatedSayText(params)
-=======
 
 def nao_coro():  
     global task_2
     text = "Capitano sotto il mare, e San Siro è nerazzurro"
     nao_animatedSayText(text)
     time.sleep(30)
->>>>>>> a14b694a180eb4bda1ff9ba33778b35ee6e0a288
     task_2 = False 
 
  
