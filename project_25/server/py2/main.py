@@ -379,6 +379,28 @@ def nao_eye_white(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
                                                        
+@app.route('/nao_SayText/<params>', methods=['GET'])  
+def nao_SayText(params):
+    if (params != None and params != ''):
+        if request.method == 'GET':
+            try:
+                #{"nao_ip":value, "nao_port":value, "text_to_say":value}
+                json        = eval(params)
+                nao_ip      = json['nao_ip']
+                nao_port    = json['nao_port']
+                text_to_say = json['text_to_say']
+
+                tts_2 =  ALProxy("ALTextToSpeech", nao_ip, nao_port)
+                tts_2.say(text_to_say)      
+                tts_2 = None
+                return jsonify({'code': 200, 'function': 'nao_animatedSayText(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            return jsonify({'code': 500, 'message': 'methods error'}), 500   
+    else:
+        return jsonify({'code': 500, 'message': 'params error'}), 500   
 
 
 @app.route('/nao_animatedSayText/<params>', methods=['GET'])  
