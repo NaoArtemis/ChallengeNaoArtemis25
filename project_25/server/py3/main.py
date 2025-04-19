@@ -103,6 +103,12 @@ def fine_partita():
 #            Tribuna            #
 #################################
 
+def nao_ballo():
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_ballo/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
 def nao_points():
     global task_2
     time.sleep(30)
@@ -125,34 +131,8 @@ def nao_stats():
 def nao_coro():  
     global task_2
     text = "Forza Audace, forza Audace, tutti su le mani per Audace"
+    nao_ballo()
     nao_SayText(text)
-
-    joints = ["LShoulderPitch", "RShoulderPitch", "LShoulderRoll", "RShoulderRoll"]#    - ShoulderPitch: piega il braccio avanti/indietro - ShoulderRoll: ruota il braccio verso l’esterno (per aprire un po’ le spalle)
-    angles_up = [ -1.4,           -1.4,           0.4,            -0.4 ]
-    fraction_max_speed = 0.2  # velocità del movimento (0.0–1.0)
-
-    # Solleva le braccia in alto
-    motion.setAngles(joints, angles_up, fraction_max_speed)
-    time.sleep(1.0)  # lascia 1 secondo per stabilizzare
-
-    # Ciclo di alzata e abbassata
-    for i in range (0,3):
-        motion.setAngles(
-            ["LShoulderPitch","RShoulderPitch"],
-            [-0.6, -0.6],    # braccia più avanti ma non completamente alte
-            fraction_max_speed
-        )
-        time.sleep(1.0)
-        motion.setAngles(
-            ["LShoulderPitch","RShoulderPitch"],
-            [-1.3, -1.3],    
-            fraction_max_speed
-        )
-        time.sleep(1.0)
-
-    # 5) Riporta le braccia in posizione neutra e molla i motori
-    posture.goToPosture("StandInit", 0.5)
-    motion.rest()
     time.sleep(30)
     task_2 = False 
 

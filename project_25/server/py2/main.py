@@ -427,6 +427,51 @@ def nao_animatedSayText(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500  
 
+@app.route('/nao_ballo/<params>', methods=['GET'])  
+def nao_ballo(params):
+    if (params != None and params != ''):
+        if request.method == 'GET':
+            try:
+                #{"nao_ip":value, "nao_port":value}
+                json     = eval(params)
+                nao_ip   = json['nao_ip']
+                nao_port = json['nao_port']
+
+                joints = ["LShoulderPitch", "RShoulderPitch", "LShoulderRoll", "RShoulderRoll"]#    - ShoulderPitch: piega il braccio avanti/indietro - ShoulderRoll: ruota il braccio verso l’esterno (per aprire un po’ le spalle)
+                angles_up = [ -1.4,           -1.4,           0.4,            -0.4 ]
+                fraction_max_speed = 0.2  # velocità del movimento (0.0–1.0)
+
+                # Solleva le braccia in alto
+                motion.setAngles(joints, angles_up, fraction_max_speed)
+                time.sleep(1.0)  # lascia 1 secondo per stabilizzare
+
+                # Ciclo di alzata e abbassata
+                for i in range (0,3):
+                    motion.setAngles(
+                        ["LShoulderPitch","RShoulderPitch"],
+                        [-0.6, -0.6],    # braccia più avanti ma non completamente alte
+                        fraction_max_speed
+                    )
+                    time.sleep(1.0)
+                    motion.setAngles(
+                        ["LShoulderPitch","RShoulderPitch"],
+                        [-1.3, -1.3],    
+                        fraction_max_speed
+                    )
+                    time.sleep(1.0)
+
+                    # 5) Riporta le braccia in posizione neutra e molla i motori
+                    posture.goToPosture("StandInit", 0.5)
+                    motion.rest()
+                    return jsonify({'code': 200, 'function': 'nao_standInit(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            return jsonify({'code': 500, 'message': 'methods error'}), 500
+    else:
+        return jsonify({'code': 500, 'message': 'params error'}), 500                                                 
+
 
 @app.route('/nao_standInit/<params>', methods=['GET'])  
 def nao_standInit(params):
