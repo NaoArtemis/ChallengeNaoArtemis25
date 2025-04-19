@@ -393,7 +393,7 @@ def nao_SayText(params):
                 tts_2 =  ALProxy("ALTextToSpeech", nao_ip, nao_port)
                 tts_2.say(text_to_say)      
                 tts_2 = None
-                return jsonify({'code': 200, 'function': 'nao_animatedSayText(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+                return jsonify({'code': 200, 'function': 'nao_SayText(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': str(e)}), 500
