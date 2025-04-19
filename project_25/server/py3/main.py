@@ -252,21 +252,22 @@ def webcam_aruco():
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
 
                             #Task1
-                            #gestione inzio partita                            
+                            #gestione inzio partita
+                            global partita_iniziata                           
                             if 180 in marker_ids.flatten() and not partita_iniziata:
-                                global partita_iniziata
                                 partita_iniziata = True
                                 inizio_partita()
                             
-                            #pausa partita    
+                            #pausa partita
+                            global partita_pausa    
                             if 181 in marker_ids.flatten() and not partita_pausa and partita_iniziata:
-                                global partita_pausa
                                 partita_pausa = True
                                 pausa_partita()
     
-                            #inzio secodno tempo                        
+                            #inzio secodno tempo
+                            global  partita_secondo_tempo                     
                             if 182 in marker_ids.flatten() and not partita_secondo_tempo and partita_pausa:
-                                global partita_pausa
+                                
                                 partita_secondo_tempo = True 
                                 inizio_secodno_tempo()
                             
