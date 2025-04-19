@@ -115,7 +115,7 @@ def nao_stats():
     return None # messa per non creare problemi, da togliere
 
 def noa_coro():  
-    params = "dal po in su l'italia è gialloblu"
+    params = ""
     nao_animatedSayText(params)
     task_2 = False 
 
@@ -829,10 +829,9 @@ def nao_start():
     else:
         nao_stop_face_tracker()
 
-
 if __name__ == "__main__":
     startTime  = time.time()
-        
+   
     #nao_start()
     #nao_autonomous_life()
     #nao_eye_white()
