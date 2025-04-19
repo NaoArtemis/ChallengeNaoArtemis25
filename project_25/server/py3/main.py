@@ -95,28 +95,44 @@ def inizio_secodno_tempo():
 
 def fine_partita():
     nao_animatedSayText("Fine Partita")
+    time.sleep(40)
+    partita_finita = False
 
 
 #################################
-#            TASK 2             #
+#            Tribuna            #
 #################################
 
 def nao_points():
+    global task_2
+    time.sleep(30)
     task_2 = False
-    return None # messa per non creare problemi, da togliere
+
 
 def nao_seat():
-    params = "i posti a sedere riservati sono quelli nella prima fila coi bollini blu"
-    nao_animatedSayText(params)
+    global task_2
+    text = "i posti a sedere riservati sono quelli nella prima fila coi bollini blu"
+    nao_animatedSayText(text)
+    time.sleep(30)
     task_2 = False
     
 def nao_stats():
+    global task_2
+    time.sleep(30)
     task_2 = False
-    return None # messa per non creare problemi, da togliere
 
+<<<<<<< HEAD
 def noa_coro():  
     params = ""
     nao_animatedSayText(params)
+=======
+
+def nao_coro():  
+    global task_2
+    text = "Capitano sotto il mare, e San Siro è nerazzurro"
+    nao_animatedSayText(text)
+    time.sleep(30)
+>>>>>>> a14b694a180eb4bda1ff9ba33778b35ee6e0a288
     task_2 = False 
 
  
@@ -221,7 +237,7 @@ def webcam_aruco():
                                 inizio_partita()
                             
                             #pausa partita    
-                            if 181 in marker_ids.flatten() and not partita_pausa:
+                            if 181 in marker_ids.flatten() and not partita_pausa and partita_iniziata:
                                 global partita_pausa
                                 partita_pausa = True
                                 pausa_partita()
@@ -234,33 +250,31 @@ def webcam_aruco():
                             
                             #fine partita
                             if 183 in marker_ids.flatten() and not partita_finita:
-                                global partita_pausa
+                                partita_iniziata = False
+                                partita_pausa = False
+                                partita_secondo_tempo = False 
                                 partita_finita = True 
                                 fine_partita()
                             
                             #Task2
-
+                            global task_2
                             #Punti della partita
                             if 184 in marker_ids.flatten() and not task_2 :
-                                global task_2
                                 task_2=True
                                 nao_points()
 
                             #Statistiche della partita
                             elif 185 in marker_ids.flatten() and not task_2 :
-                                global task_2
                                 task_2=True
                                 nao_stats()
 
                             #Posti a sederes 
                             elif 186 in marker_ids.flatten() and not task_2 :
-                                global task_2
                                 task_2=True
                                 nao_seat()
 
                             #cori
                             elif 187 in marker_ids.flatten() and not task_2 :
-                                global task_2
                                 task_2=True
                                 nao_coro()
 
