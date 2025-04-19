@@ -146,8 +146,6 @@ def create_annotators(): # annotatori che sostiuiscono quelli della ultrlytics #
 
     return ellipse_annotator, label_annotator, triangle_annotator
 
-
-
 def inizializzazione():
     global PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker
     global processor, model
@@ -162,6 +160,54 @@ def inizio_partita():
     nao_animatedSayText("Inizio Partita")
     homography_matrix = HOMO_FIRST_HALF # imposto l'omografia alla prima parte del campo
 
+def classify_with_siglip(detections, frame):
+    #determino a quale squadra apparteien in base al colore della maglia.
+
+    teams = []
+    
+    for bbox in detections.xyxy:
+        x1, y1, x2, y2 = map(int, bbox)
+        # Estrai il ritaglio del giocatore
+        player_crop = frame[y1:y2, x1:x2]
+        
+        if player_crop.size == 0:  # Salta se il ritaglio è vuoto
+            teams.append("unknown")
+            continue
+        
+        # Ridimensiona per l'input del modello
+        player_crop = cv2.resize(player_crop, (224, 224)) #adeguo 
+        
+        # Elabora l'immagine
+        inputs_img = processor(images=player_crop, return_tensors="pt")
+        
+        # Elabora i prompt di testo per entrambe le squadre
+        inputs_text_a = processor(text=[f"a soccer player with {TEAM_A_COLOR} jersey"], return_tensors="pt")
+        inputs_text_b = processor(text=[f"a soccer player with {TEAM_B_COLOR} jersey"], return_tensors="pt")
+        
+        # Ottieni gli embedding
+        with torch.no_grad():
+            image_emb = model.get_image_features(**inputs_img)
+            text_emb_a = model.get_text_features(**inputs_text_a)
+            text_emb_b = model.get_text_features(**inputs_text_b)
+        
+        # Normalizza gli embedding
+        image_emb = image_emb / image_emb.norm(dim=-1, keepdim=True)
+        text_emb_a = text_emb_a / text_emb_a.norm(dim=-1, keepdim=True)
+        text_emb_b = text_emb_b / text_emb_b.norm(dim=-1, keepdim=True)
+        
+        # Calcola le similitudini
+        similarity_a = (image_emb @ text_emb_a.T).item()
+        similarity_b = (image_emb @ text_emb_b.T).item()
+        
+        # Assegna la squadra in base alla similitudine più alta
+        if similarity_a > similarity_b:
+            teams.append(TEAM_A_COLOR)
+        else:
+            teams.append(TEAM_B_COLOR)
+    
+    # Aggiungi le informazioni sulla squadra alle rilevazioni
+    detections.data["team"] = teams
+    return detections
 
 def pausa_partita():
     nao_animatedSayText("Fine primo tempo")

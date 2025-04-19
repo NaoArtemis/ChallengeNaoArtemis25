@@ -51,7 +51,7 @@ class DB:
                     '''
                     INSERT INTO player_positions 
                     (player_id, time_sec, x_pos, y_pos, team) 
-                    VALUES (%s, %s, %s, %s, %s)
+                    VALUES (?, ?, ?, ?, ?)
                     ''',
                     (player_id, time_sec, x_pos, y_pos, team)
                 )
