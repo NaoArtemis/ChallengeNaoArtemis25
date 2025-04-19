@@ -34,6 +34,12 @@ from openai import OpenAI
 from pathlib import Path
 from flask_cors import CORS
 import whisper
+import threading
+import sqlite3
+import supervision as sv
+from ultralytics import YOLO
+import torch
+from transformers import AutoProcessor, AutoModel
 
 
 
@@ -62,7 +68,6 @@ login_manager.init_app(app)
 login_manager.login_view = '/'
 login_manager.session_protection = 'strong'
 
-
 def make_md5(s):
     encoding = 'utf-8'
     return md5(s.encode(encoding)).hexdigest()
@@ -72,20 +77,91 @@ def make_sha256(s):
     encoding = 'utf-8'
     return sha256(s.encode(encoding)).hexdigest()
 
-# variabili blobali per gestire gli aruco 
-partita_iniziata = False
-partita_pausa = False
-partita_secondo_tempo = False
-partita_finita = False
-task_2 = False
 
 
 #################################
 #      computer vision          #
 #################################
+# variabili blobali task 1 #
+
+#variabili gestione stato partita
+partita_iniziata = False
+partita_pausa = False
+partita_secondo_tempo = False
+partita_finita = False
+start_time = 0 # la partita viene misurata in secondi partendo dal secondo 0
+
+# variabili gestione costanti
+BALL_ID = 0  # ID  classe pallone nel modello  YOLO, nel nostro modello, id palla 0; id giocatori = 1; id arbitro = 2;
+TEAM_A_COLOR = "red"  # Colore squadra A
+TEAM_B_COLOR = "blue" # Colore squadra B
+
+def modelli_computer_vision():
+    # Caricamento modelli YOLO
+    PLAYER_DETECTION_MODEL = YOLO("models/yolov8n.pt")
+    BALL_DETECTION_MODEL = YOLO("models/yolov8n.pt")
+
+    # Inizializzazione tracker
+    tracker = sv.ByteTrack()
+
+    # Inizializzazione SigLIP per classificazione delle maglie
+    processor = AutoProcessor.from_pretrained("google/siglip-base-patch16-224")
+    model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
+
+    return PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model
+
+def matrici_omografiche():
+    # grazie all'omografia possiamo trasformare coordinate pixel in coordinate reali rispettive al campo
+    #con due matrici gestisco il cambio campo
+    HOMO_FIRST_HALF = np.array([ 
+        [0.01, 0, -3],
+        [0, 0.01, -2],
+        [0, 0, 1]
+    ])
+
+    HOMO_SECOND_HALF = np.array([ 
+        [-0.01, 0, 3],
+        [0, -0.01, 2],
+        [0, 0, 1]
+    ])
+
+    return HOMO_FIRST_HALF, HOMO_SECOND_HALF
+
+def create_annotators(): # annotatori che sostiuiscono quelli della ultrlytics #graficamente più belli da vedere
+    ellipse_annotator = sv.EllipseAnnotator(
+        color_lookup=sv.ColorLookup.INDEX,
+        thickness=2
+    )
+
+    label_annotator = sv.LabelAnnotator(
+        color_lookup=sv.ColorLookup.INDEX,
+        text_position=sv.Position.BOTTOM_CENTER,
+        text_scale=0.5
+    )
+
+    triangle_annotator = sv.TriangleAnnotator(
+        color=sv.Color.RED,
+        thickness=2
+    )
+
+    return ellipse_annotator, label_annotator, triangle_annotator
+
+
+
+def inizializzazione():
+    global PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker
+    global processor, model
+    global HOMO_FIRST_HALF, HOMO_SECOND_HALF
+    global ellipse_annotator, label_annotator, triangle_annotator
+
+    PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model = modelli_computer_vision()
+    HOMO_FIRST_HALF, HOMO_SECOND_HALF = matrici_omografiche()
+    ellipse_annotator, label_annotator, triangle_annotator = create_annotators()
 
 def inizio_partita():
     nao_animatedSayText("Inizio Partita")
+    homography_matrix = HOMO_FIRST_HALF # imposto l'omografia alla prima parte del campo
+
 
 def pausa_partita():
     nao_animatedSayText("Fine primo tempo")
@@ -102,6 +178,8 @@ def fine_partita():
 #################################
 #            Tribuna            #
 #################################
+# variabili blobali task 2
+task_2 = False
 
 def nao_ballo():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
@@ -869,6 +947,9 @@ if __name__ == "__main__":
     #logger.info("Result query: %s , id=%s", oggetto, id)
 
     #utenti = db_helper.select_utenti()
+
+    prova = db_helper.create_tables()
+    prova1 = db_helper.insert_player(12,49,0.27,0.30,"red")
 
     
 
