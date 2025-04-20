@@ -460,7 +460,7 @@ def nao_ballo(params):
                     )
                     time.sleep(1.0)
 
-                    # 5) Riporta le braccia in posizione neutra e molla i motori
+                    # Riporta le braccia in posizione neutra e molla i motori
                     posture.goToPosture("StandInit", 0.5)
                     motion.rest()
                     return jsonify({'code': 200, 'function': 'nao_standInit(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
@@ -471,6 +471,33 @@ def nao_ballo(params):
             return jsonify({'code': 500, 'message': 'methods error'}), 500
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500                                                 
+
+@app.route('/nao_entusiasta/<params>', methods=['GET'])  
+def nao_entusiasta(params):
+    if (params != None and params != ''):
+        if request.method == 'GET':
+            try:
+                #{"nao_ip":value, "nao_port":value}
+                json     = eval(params)
+                nao_ip   = json['nao_ip']
+                nao_port = json['nao_port']
+
+                #prova dell'enimazione
+                animation_prova = session.service("ALAnimationPlayer")
+                animation_prova.run("animations/Stand/Gestures/Enthusiastic_4")
+
+                # Riporta le braccia in posizione neutra e molla i motori
+                posture.goToPosture("StandInit", 0.5)
+                motion.rest()
+                
+                return jsonify({'code': 200, 'function': 'nao_standInit(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            return jsonify({'code': 500, 'message': 'methods error'}), 500
+    else:
+        return jsonify({'code': 500, 'message': 'params error'}), 500
 
 
 @app.route('/nao_standInit/<params>', methods=['GET'])  

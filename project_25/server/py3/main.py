@@ -384,6 +384,12 @@ def nao_ballo():
     response = requests.get(url, json=data)
     logger.info(str(response.text))
 
+def nao_entusiasta():
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_entusiasta/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+
 def nao_points():
     global task_2
     time.sleep(30)
