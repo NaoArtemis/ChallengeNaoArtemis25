@@ -21,33 +21,17 @@
     
     <!--main-->
     <div class = "main-content">
-        <div class = "joystick-panel">
-
+        <div id ="webcam_feed" class = "joystick-panel">
+        </div>
+        <script> const computer_visionUrl = "{{url_for('computer_vision')}}"</script>
+        <div>
+            <button id="nao-cam-btn" class="btn btn-joystick" onclick="computer_vision()">Partita</button>
         </div>
     </div>
+
+
     <!--javascript-->
-    <script>
-        document.querySelector("#home").addEventListener("click", function() {
-            fetch("/home", { method: "GET" })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    window.location.href = "/home";
-                }
-            })
-            .catch(error => console.error("Errore:", error));
-        });
-        
-        document.querySelector("#logout").addEventListener("click", function() {
-            fetch("/logout", { method: "GET" })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                }
-            })
-            .catch(error => console.error("Errore:", error));
-        });
+    <script src = "{{ url_for('static', filename='script/script.js') }}">
     </script>
 </body>
 </html>

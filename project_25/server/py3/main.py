@@ -90,6 +90,7 @@ partita_pausa = False
 partita_secondo_tempo = False
 partita_finita = False
 start_time = 0 # la partita viene misurata in secondi partendo dal secondo 0
+homography_matrix = []
 
 # variabili gestione costanti
 BALL_ID = 0  # ID  classe pallone nel modello  YOLO, nel nostro modello, id palla 0; id giocatori = 1; id arbitro = 2;
@@ -109,7 +110,6 @@ def modelli_computer_vision():
     model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
 
     return PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model
-
 
 def create_annotators(): # annotatori che sostiuiscono quelli della ultrlytics #graficamente più belli da vedere
     ellipse_annotator = sv.EllipseAnnotator(
@@ -230,7 +230,6 @@ def analyze_frame(frame):
     
     #inizializzo 
     global start_time
-    inizializzazione()
 
     # Calcola il tempo di gioco in secondi
     if partita_iniziata and not partita_finita:
@@ -355,22 +354,16 @@ def inizio_partita():
 def pausa_partita():
     nao_animatedSayText("Fine primo tempo")
 
-def inizio_secodno_tempo():
+def inizio_secondo_tempo():
     nao_animatedSayText("Inizio secondo tempo")
     global homography_matrix
     homography_matrix = HOMO_SECOND_HALF  # imposto l'omografia alla seconda parte del campo
 
 def fine_partita():
+    global partita_finita
     nao_animatedSayText("Fine Partita")
     time.sleep(40)
-    global partita_finita
     partita_finita = False
-
-
-
-
-
-
 
 #################################
 #            Tribuna            #
@@ -517,6 +510,7 @@ def webcam_aruco():
                             global partita_iniziata                           
                             if 180 in marker_ids.flatten() and not partita_iniziata:
                                 partita_iniziata = True
+                                inizializzazione()
                                 inizio_partita()
                             
                             #pausa partita
@@ -530,7 +524,7 @@ def webcam_aruco():
                             if 182 in marker_ids.flatten() and not partita_secondo_tempo and partita_pausa:
                                 
                                 partita_secondo_tempo = True 
-                                inizio_secodno_tempo()
+                                inizio_secondo_tempo()
                             
                             #fine partita
                             if 183 in marker_ids.flatten() and not partita_finita:
@@ -577,8 +571,6 @@ def nao_move_back(angle):
     url      = "http://127.0.0.1:5011/nao_move_back/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))  
-
-
 
 
 def nao_move_fast(angle):
@@ -892,7 +884,6 @@ def logout():
     logout_user()
     return redirect('/')
 
-
 @app.route('/home', methods=['GET'])
 @login_required
 def home():
@@ -1151,18 +1142,11 @@ if __name__ == "__main__":
 
     #utenti = db_helper.select_utenti()
 
-    prova = db_helper.create_tables()
-    prova1 = db_helper.insert_player(12,49,0.27,0.30,"red")
+    #prova = db_helper.create_tables()
+    #prova1 = db_helper.insert_player(12,49,0.27,0.30,"red")
 
     
 
     app.secret_key = os.urandom(12)
     app.run(host=config_helper.srv_host, port=config_helper.srv_port, debug=config_helper.srv_debug)
-
-
-
-
-
-
-
-    
+ 
