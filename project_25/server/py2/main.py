@@ -446,7 +446,7 @@ def nao_ballo(params):
                 time.sleep(1.0)  # lascia 1 secondo per stabilizzare
 
                 # Ciclo di alzata e abbassata
-                for i in range (0,3):
+                for i in range (0,5):
                     motion.setAngles(
                         ["LShoulderPitch","RShoulderPitch"],
                         [-0.6, -0.6],    # braccia più avanti ma non completamente alte
@@ -489,7 +489,7 @@ def nao_entusiasta(params):
                 # Riporta le braccia in posizione neutra e molla i motori
                 posture.goToPosture("StandInit", 0.5)
                 motion.rest()
-                
+
                 return jsonify({'code': 200, 'function': 'nao_standInit(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
