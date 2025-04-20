@@ -207,6 +207,7 @@ def classify_with_siglip(detections, frame):
     return detections
 
 def apply_homography(boxes):
+    global homography_matrix
 # Applica la trasformazione di omografia per convertire le coordinate dai pixel alle coordinate reali del campo.
     real_coords = []
     for box in boxes:
@@ -348,6 +349,7 @@ def computer_vision():
 
 def inizio_partita():
     nao_animatedSayText("Inizio Partita")
+    global homography_matrix
     homography_matrix = HOMO_FIRST_HALF # imposto l'omografia alla prima parte del campo
 
 def pausa_partita():
@@ -355,6 +357,7 @@ def pausa_partita():
 
 def inizio_secodno_tempo():
     nao_animatedSayText("Inizio secondo tempo")
+    global homography_matrix
     homography_matrix = HOMO_SECOND_HALF  # imposto l'omografia alla seconda parte del campo
 
 def fine_partita():
