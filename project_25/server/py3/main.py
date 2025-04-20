@@ -110,22 +110,6 @@ def modelli_computer_vision():
 
     return PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model
 
-def matrici_omografiche():
-    # grazie all'omografia possiamo trasformare coordinate pixel in coordinate reali rispettive al campo
-    #con due matrici gestisco il cambio campo
-    HOMO_FIRST_HALF = np.array([ 
-        [0.01, 0, -3],
-        [0, 0.01, -2],
-        [0, 0, 1]
-    ])
-
-    HOMO_SECOND_HALF = np.array([ 
-        [-0.01, 0, 3],
-        [0, -0.01, 2],
-        [0, 0, 1]
-    ])
-
-    return HOMO_FIRST_HALF, HOMO_SECOND_HALF
 
 def create_annotators(): # annotatori che sostiuiscono quelli della ultrlytics #graficamente più belli da vedere
     ellipse_annotator = sv.EllipseAnnotator(
@@ -146,6 +130,23 @@ def create_annotators(): # annotatori che sostiuiscono quelli della ultrlytics #
 
     return ellipse_annotator, label_annotator, triangle_annotator
 
+def matrici_omografiche():
+    # grazie all'omografia possiamo trasformare coordinate pixel in coordinate reali rispettive al campo
+    #con due matrici gestisco il cambio campo
+    HOMO_FIRST_HALF = np.array([ 
+        [0.01, 0, -3],
+        [0, 0.01, -2],
+        [0, 0, 1]
+    ])
+
+    HOMO_SECOND_HALF = np.array([ 
+        [-0.01, 0, 3],
+        [0, -0.01, 2],
+        [0, 0, 1]
+    ])
+
+    return HOMO_FIRST_HALF, HOMO_SECOND_HALF
+
 def inizializzazione():
     global PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker
     global processor, model
@@ -155,10 +156,6 @@ def inizializzazione():
     PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model = modelli_computer_vision()
     HOMO_FIRST_HALF, HOMO_SECOND_HALF = matrici_omografiche()
     ellipse_annotator, label_annotator, triangle_annotator = create_annotators()
-
-def inizio_partita():
-    nao_animatedSayText("Inizio Partita")
-    homography_matrix = HOMO_FIRST_HALF # imposto l'omografia alla prima parte del campo
 
 def classify_with_siglip(detections, frame):
     #determino a quale squadra apparteien in base al colore della maglia.
@@ -209,16 +206,167 @@ def classify_with_siglip(detections, frame):
     detections.data["team"] = teams
     return detections
 
+def apply_homography(boxes):
+# Applica la trasformazione di omografia per convertire le coordinate dai pixel alle coordinate reali del campo.
+    real_coords = []
+    for box in boxes:
+        # Prendi il centro inferiore della box come posizione del giocatore
+        x_center = (box[0] + box[2]) / 2
+        y_bottom = box[3]
+        
+        # Applica l'omografia
+        point = np.array([x_center, y_bottom, 1])
+        transformed_point = homography_matrix @ point
+        
+        # Normalizza
+        transformed_point = transformed_point / transformed_point[2]
+        real_coords.append((transformed_point[0], transformed_point[1]))
+    
+    return real_coords
+
+def analyze_frame(frame):
+    #Elabora un frame con i modelli Yolo, traccia giocaotori e stima posizione 
+    
+    #inizializzo 
+    global start_time
+    inizializzazione()
+
+    # Calcola il tempo di gioco in secondi
+    if partita_iniziata and not partita_finita:
+        current_time = time.time()
+        game_time = current_time - start_time
+        if partita_pausa:
+            game_time_text = "PAUSA"
+        else:
+            minutes = int(game_time // 60)
+            seconds = int(game_time % 60)
+            game_time_text = f"{minutes:02d}:{seconds:02d}"
+    else:
+        game_time = 0
+        game_time_text = "00:00"
+        
+    # Rilevamento giocatori con YOLO
+    results_players = PLAYER_DETECTION_MODEL(frame, conf=0.3)
+    detections = sv.Detections.from_ultralytics(results_players[0])
+    
+    # Separa la palla dai giocatori
+    ball_detections = detections[detections.class_id == BALL_ID]
+    if len(ball_detections) > 0:
+        ball_detections.xyxy = sv.pad_boxes(xyxy=ball_detections.xyxy, px=10)
+    
+    # Filtra le rilevazioni dei giocatori
+    player_detections = detections[detections.class_id != BALL_ID]
+    player_detections = player_detections.with_nms(threshold=0.5, class_agnostic=True)
+    
+    # Aggiorna gli ID per essere basati su 0 per il tracker
+    for i in range(len(player_detections.class_id)):
+        if player_detections.class_id[i] > 0:
+            player_detections.class_id[i] -= 1
+    
+    # Traccia i giocatori
+    if len(player_detections) > 0:
+        tracked = tracker.update_with_detections(player_detections)
+        
+        # Classifica la squadra (colore maglia)
+        if len(tracked) > 0:
+            tracked = classify_with_siglip(tracked, frame)
+            
+            # Applica l'omografia per ottenere le coordinate reali del campo
+            real_coords = apply_homography(tracked.xyxy)
+            
+            # Salva le posizioni dei giocatori nel database
+            for idx, coord in enumerate(real_coords):
+                team = tracked.data["team"][idx] if "team" in tracked.data else None
+                db_helper.insert_player(
+                    f"player_{tracked.tracker_id[idx]}",
+                    game_time,
+                    coord[0],
+                    coord[1],
+                    team
+                )
+    else:
+        tracked = player_detections
+    
+    # Annota il frame
+    annotated = frame.copy()
+
+    
+    # Disegna i tracker dei giocatori
+    if len(tracked) > 0:
+        # Crea etichette con i colori delle squadre
+        if "team" in tracked.data:
+            labels = [f"#{id} ({team})" for id, team in zip(tracked.tracker_id, tracked.data["team"])]
+        else:
+            labels = [f"#{id}" for id in tracked.tracker_id]
+        
+        annotated = ellipse_annotator.annotate(scene=annotated, detections=tracked)
+        annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
+    
+    # Disegna il rilevamento della palla
+    if len(ball_detections) > 0:
+        annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
+    
+    # Aggiungi il tempo di gioco al frame
+    cv2.putText(
+        annotated,
+        f"Game Time: {game_time_text}",
+        (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (0, 255, 255),
+        2
+    )
+    
+    return annotated
+
+@app.route('/computer_vision', methods = ["GET"])
+def computer_vision():
+    #Elabora e trasmetti i risultati della computer vision
+    response = webcam_aruco()
+
+    def generate():
+        frame_data = b''
+        for chunk in response.iter_content(1024):
+            frame_data += chunk
+            if b'--frame\r\n' in frame_data:
+                parts = frame_data.split(b'--frame\r\n')
+                for part in parts[:-1]:
+                    if b'Content-Type: image/jpeg\r\n\r\n' in part:
+                        img_bytes = part.split(b'\r\n\r\n')[-1]
+                        try:
+                            frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+                            if frame is not None:
+                                analyzed = analyze_frame(frame)
+                                _, buffer = cv2.imencode('.jpg', analyzed)
+                                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+                        except Exception as e:
+                            print(f"Errore nell'elaborazione del frame: {e}")
+                            continue
+                frame_data = parts[-1]
+    
+    return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+def inizio_partita():
+    nao_animatedSayText("Inizio Partita")
+    homography_matrix = HOMO_FIRST_HALF # imposto l'omografia alla prima parte del campo
+
 def pausa_partita():
     nao_animatedSayText("Fine primo tempo")
 
 def inizio_secodno_tempo():
     nao_animatedSayText("Inizio secondo tempo")
+    homography_matrix = HOMO_SECOND_HALF  # imposto l'omografia alla seconda parte del campo
 
 def fine_partita():
     nao_animatedSayText("Fine Partita")
     time.sleep(40)
+    global partita_finita
     partita_finita = False
+
+
+
+
+
 
 
 #################################
