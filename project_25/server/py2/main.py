@@ -437,6 +437,9 @@ def nao_ballo(params):
                 nao_ip   = json['nao_ip']
                 nao_port = json['nao_port']
 
+                motion  = ALProxy("ALMotion",nao_ip,nao_port)
+                posture = ALProxy("ALRobotPosture", nao_ip, nao_port)
+
                 joints = ["LShoulderPitch", "RShoulderPitch", "LShoulderRoll", "RShoulderRoll"]#    - ShoulderPitch: piega il braccio avanti/indietro - ShoulderRoll: ruota il braccio verso l’esterno (per aprire un po’ le spalle)
                 angles_up = [ -1.4,           -1.4,           0.4,            -0.4 ]
                 fraction_max_speed = 0.2  # velocità del movimento (0.0–1.0)
@@ -482,6 +485,8 @@ def nao_entusiasta(params):
                 nao_ip   = json['nao_ip']
                 nao_port = json['nao_port']
 
+                motion  = ALProxy("ALMotion",nao_ip,nao_port)
+                posture = ALProxy("ALRobotPosture", nao_ip, nao_port)
                 #prova dell'enimazione
                 animation_prova = session.service("ALAnimationPlayer")
                 animation_prova.run("animations/Stand/Gestures/Enthusiastic_4")
