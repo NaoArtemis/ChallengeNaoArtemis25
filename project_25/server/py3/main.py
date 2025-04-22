@@ -89,281 +89,159 @@ partita_iniziata = False
 partita_pausa = False
 partita_secondo_tempo = False
 partita_finita = False
-start_time = 0 # la partita viene misurata in secondi partendo dal secondo 0
-homography_matrix = []
+start_time = 0
+
+# Variabili globali
+MODEL_PLAYERS = None
+MODEL_BALL = None
+tracker = None
+processor = None
+model = None
+homography_matrix = None
+
+
+'''
+molto importante posizionare bene gli aruco, una non lettura o poszione sbagliata può causare errore 
+nell'applicazione della omografia cio può alterare im modo negativo la determinazione delle posizioni 
+dei giocatori.
+'''
+id_to_coord = {
+    1: (0, 0),     # Angolo in alto a sinistra
+    2: (10, 0),    # Angolo in alto a destra
+    3: (0, 6),     # Angolo in basso a sinistra
+    4: (10, 6)     # Angolo in basso a destra
+}
 
 # variabili gestione costanti
-BALL_ID = 0  # ID  classe pallone nel modello  YOLO, nel nostro modello, id palla 0; id giocatori = 1; id arbitro = 2;
 TEAM_A_COLOR = "red"  # Colore squadra A
 TEAM_B_COLOR = "blue" # Colore squadra B
 
-def modelli_computer_vision():
-    # Caricamento modelli YOLO
-    PLAYER_DETECTION_MODEL = YOLO("models/yolov8n.pt")
-    BALL_DETECTION_MODEL = YOLO("models/yolov8n.pt")
-
-    # Inizializzazione tracker
+def inizializzazione():
+    global MODEL_PLAYERS, MODEL_BALL, tracker, processor, model
+    # Carica il modello YOLO per il rilevamento dei giocatori.
+    # Assicurati che le classi nel modello dei giocatori non si sovrappongano a quelle del modello per la palla.
+    MODEL_PLAYERS = YOLO("models/yolo_players.pt")
+    MODEL_BALL = YOLO("models/yolo_ball.pt")
     tracker = sv.ByteTrack()
-
-    # Inizializzazione SigLIP per classificazione delle maglie
     processor = AutoProcessor.from_pretrained("google/siglip-base-patch16-224")
     model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
 
-    return PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model
-
-def create_annotators(): # annotatori che sostiuiscono quelli della ultrlytics #graficamente più belli da vedere
-    ellipse_annotator = sv.EllipseAnnotator(
-        color_lookup=sv.ColorLookup.INDEX,
-        thickness=2
-    )
-
-    label_annotator = sv.LabelAnnotator(
-        color_lookup=sv.ColorLookup.INDEX,
-        text_position=sv.Position.BOTTOM_CENTER,
-        text_scale=0.5
-    )
-
-    triangle_annotator = sv.TriangleAnnotator(
-        color=sv.Color.RED,
-        thickness=2
-    )
-
-    return ellipse_annotator, label_annotator, triangle_annotator
-
-def matrici_omografiche():
-    # grazie all'omografia possiamo trasformare coordinate pixel in coordinate reali rispettive al campo
-    #con due matrici gestisco il cambio campo
-    HOMO_FIRST_HALF = np.array([ 
-        [0.01, 0, -3],
-        [0, 0.01, -2],
-        [0, 0, 1]
-    ])
-
-    HOMO_SECOND_HALF = np.array([ 
-        [-0.01, 0, 3],
-        [0, -0.01, 2],
-        [0, 0, 1]
-    ])
-
-    return HOMO_FIRST_HALF, HOMO_SECOND_HALF
-
-def inizializzazione():
-    global PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker
-    global processor, model
-    global HOMO_FIRST_HALF, HOMO_SECOND_HALF
-    global ellipse_annotator, label_annotator, triangle_annotator
-
-    PLAYER_DETECTION_MODEL, BALL_DETECTION_MODEL, tracker, processor, model = modelli_computer_vision()
-    HOMO_FIRST_HALF, HOMO_SECOND_HALF = matrici_omografiche()
-    ellipse_annotator, label_annotator, triangle_annotator = create_annotators()
 
 def classify_with_siglip(detections, frame):
-    #determino a quale squadra apparteien in base al colore della maglia.
-
     teams = []
-    
     for bbox in detections.xyxy:
         x1, y1, x2, y2 = map(int, bbox)
-        # Estrai il ritaglio del giocatore
-        player_crop = frame[y1:y2, x1:x2]
-        
-        if player_crop.size == 0:  # Salta se il ritaglio è vuoto
+        crop = frame[y1:y2, x1:x2]
+        if crop.size == 0:
             teams.append("unknown")
             continue
-        
-        # Ridimensiona per l'input del modello
-        player_crop = cv2.resize(player_crop, (224, 224)) #adeguo 
-        
-        # Elabora l'immagine
-        inputs_img = processor(images=player_crop, return_tensors="pt")
-        
-        # Elabora i prompt di testo per entrambe le squadre
-        inputs_text_a = processor(text=[f"a soccer player with {TEAM_A_COLOR} jersey"], return_tensors="pt")
-        inputs_text_b = processor(text=[f"a soccer player with {TEAM_B_COLOR} jersey"], return_tensors="pt")
-        
-        # Ottieni gli embedding
+        crop = cv2.resize(crop, (224, 224))
+        inputs_img = processor(images=crop, return_tensors="pt")
+        inputs_text = processor(
+            text=[f"a soccer player with {TEAM_A_COLOR} jersey", f"a soccer player with {TEAM_B_COLOR} jersey"],
+            return_tensors="pt",
+            padding=True
+        )
         with torch.no_grad():
-            image_emb = model.get_image_features(**inputs_img)
-            text_emb_a = model.get_text_features(**inputs_text_a)
-            text_emb_b = model.get_text_features(**inputs_text_b)
-        
-        # Normalizza gli embedding
-        image_emb = image_emb / image_emb.norm(dim=-1, keepdim=True)
-        text_emb_a = text_emb_a / text_emb_a.norm(dim=-1, keepdim=True)
-        text_emb_b = text_emb_b / text_emb_b.norm(dim=-1, keepdim=True)
-        
-        # Calcola le similitudini
-        similarity_a = (image_emb @ text_emb_a.T).item()
-        similarity_b = (image_emb @ text_emb_b.T).item()
-        
-        # Assegna la squadra in base alla similitudine più alta
-        if similarity_a > similarity_b:
-            teams.append(TEAM_A_COLOR)
-        else:
-            teams.append(TEAM_B_COLOR)
-    
-    # Aggiungi le informazioni sulla squadra alle rilevazioni
+            img_emb = model.get_image_features(**inputs_img)
+            text_emb = model.get_text_features(**inputs_text)
+        img_emb = img_emb / img_emb.norm(dim=-1, keepdim=True)
+        text_emb = text_emb / text_emb.norm(dim=-1, keepdim=True)
+        sim = (img_emb @ text_emb.T)[0]
+        teams.append("red" if sim[0] > sim[1] else "blue")
     detections.data["team"] = teams
     return detections
 
 def apply_homography(boxes):
     global homography_matrix
-# Applica la trasformazione di omografia per convertire le coordinate dai pixel alle coordinate reali del campo.
-    real_coords = []
+    coords = []
     for box in boxes:
-        # Prendi il centro inferiore della box come posizione del giocatore
-        x_center = (box[0] + box[2]) / 2
-        y_bottom = box[3]
-        
-        # Applica l'omografiaxx
-        point = np.array([x_center, y_bottom, 1])
-        transformed_point = homography_matrix @ point
-        
-        # Normalizza
-        transformed_point = transformed_point / transformed_point[2]
-        real_coords.append((transformed_point[0], transformed_point[1]))
-    
-    return real_coords
+        x = (box[0] + box[2]) / 2
+        y = box[3]
+        pt = np.array([x, y, 1])
+        transformed = homography_matrix @ pt
+        transformed /= transformed[2]
+        coords.append((transformed[0], transformed[1]))
+    return coords
 
 def analyze_frame(frame):
-    #Elabora un frame con i modelli Yolo, traccia giocaotori e stima posizione 
-    
-    #inizializzo 
     global start_time
-
-    # Calcola il tempo di gioco in secondi
     if partita_iniziata and not partita_finita:
-        current_time = time.time()
-        game_time = current_time - start_time
-        if partita_pausa:
-            game_time_text = "PAUSA"
-        else:
-            minutes = int(game_time // 60)
-            seconds = int(game_time % 60)
-            game_time_text = f"{minutes:02d}:{seconds:02d}"
+        game_time = time.time() - start_time
+        game_time_text = "PAUSA" if partita_pausa else f"{int(game_time // 60):02d}:{int(game_time % 60):02d}"
     else:
-        game_time = 0
         game_time_text = "00:00"
-        
-    # Rilevamento giocatori con YOLO
-    results_players = PLAYER_DETECTION_MODEL(frame, conf=0.3)
+
+    results_players = MODEL_PLAYERS(frame, conf=0.3)
     detections = sv.Detections.from_ultralytics(results_players[0])
-    
-    # Separa la palla dai giocatori
-    ball_detections = detections[detections.class_id == BALL_ID]
-    if len(ball_detections) > 0:
-        ball_detections.xyxy = sv.pad_boxes(xyxy=ball_detections.xyxy, px=10)
-    
-    # Filtra le rilevazioni dei giocatori
-    player_detections = detections[detections.class_id != BALL_ID]
-    player_detections = player_detections.with_nms(threshold=0.5, class_agnostic=True)
-    
-    # Aggiorna gli ID per essere basati su 0 per il tracker
-    for i in range(len(player_detections.class_id)):
-        if player_detections.class_id[i] > 0:
-            player_detections.class_id[i] -= 1
-    
-    # Traccia i giocatori
+    ball_detections = detections[detections.class_id == 0]
+    player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
+
     if len(player_detections) > 0:
+        if tracker is None:
+            inizializzazione()
         tracked = tracker.update_with_detections(player_detections)
-        
-        # Classifica la squadra (colore maglia)
-        if len(tracked) > 0:
-            tracked = classify_with_siglip(tracked, frame)
-            
-            # Applica l'omografia per ottenere le coordinate reali del campo
-            real_coords = apply_homography(tracked.xyxy)
-            
-            # Salva le posizioni dei giocatori nel database
-            for idx, coord in enumerate(real_coords):
-                team = tracked.data["team"][idx] if "team" in tracked.data else None
-                db_helper.insert_player(
-                    f"player_{tracked.tracker_id[idx]}",
-                    game_time,
-                    coord[0],
-                    coord[1],
-                    team
-                )
+        tracked = classify_with_siglip(tracked, frame)
+        coords = apply_homography(tracked.xyxy)
+        for i, c in enumerate(coords):
+            print(f"Player {tracked.tracker_id[i]}: {c} ({tracked.data['team'][i]})")
     else:
         tracked = player_detections
-    
-    # Annota il frame
-    annotated = frame.copy()
 
-    
-    # Disegna i tracker dei giocatori
+    annotated = frame.copy()
     if len(tracked) > 0:
-        # Crea etichette con i colori delle squadre
-        if "team" in tracked.data:
-            labels = [f"#{id} ({team})" for id, team in zip(tracked.tracker_id, tracked.data["team"])]
-        else:
-            labels = [f"#{id}" for id in tracked.tracker_id]
-        
+        labels = [f"#{id} ({team})" for id, team in zip(tracked.tracker_id, tracked.data["team"])]
+        ellipse_annotator = sv.EllipseAnnotator(color_lookup=sv.ColorLookup.INDEX, thickness=2)
+        label_annotator = sv.LabelAnnotator(color_lookup=sv.ColorLookup.INDEX, text_position=sv.Position.BOTTOM_CENTER, text_scale=0.5)
         annotated = ellipse_annotator.annotate(scene=annotated, detections=tracked)
         annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
-    
-    # Disegna il rilevamento della palla
     if len(ball_detections) > 0:
+        triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
         annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
-    
-    # Aggiungi il tempo di gioco al frame
-    cv2.putText(
-        annotated,
-        f"Game Time: {game_time_text}",
-        (10, 30),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (0, 255, 255),
-        2
-    )
-    
+
+    cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
     return annotated
 
-@app.route('/computer_vision', methods = ["GET"])
-def computer_vision():
-    #Elabora e trasmetti i risultati della computer vision
-    flask_response = webcam_aruco()
+class WebcamUSBResponseSimulator:
+    def __init__(self, cam_index=2): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
+        self.cap = cv2.VideoCapture(cam_index)
 
-    def generate():
-        frame_data = b''
-        for chunk in flask_response.response:
-            frame_data += chunk
-            if b'--frame\r\n' in frame_data:
-                parts = frame_data.split(b'--frame\r\n')
-                for part in parts[:-1]:
-                    if b'Content-Type: image/jpeg\r\n\r\n' in part:
-                        img_bytes = part.split(b'\r\n\r\n')[-1]
-                        try:
-                            frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-                            if frame is not None:
-                                analyzed = analyze_frame(frame)
-                                _, buffer = cv2.imencode('.jpg', analyzed)
-                                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-                        except Exception as e:
-                            print(f"Errore nell'elaborazione del frame: {e}")
-                            continue
-                frame_data = parts[-1]
-    
-    return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
+    def iter_content(self, chunk_size=1024):
+        if not self.cap.isOpened():
+            print("Errore: webcam non disponibile.")
+            return
 
-def inizio_partita():
-    nao_animatedSayText("Inizio Partita")
-    global homography_matrix
-    homography_matrix = HOMO_FIRST_HALF # imposto l'omografia alla prima parte del campo
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                break
 
-def pausa_partita():
-    nao_animatedSayText("Fine primo tempo")
+            # Ridimensiona il frame
+            frame_resized = cv2.resize(frame, (640, 480))
 
-def inizio_secondo_tempo():
-    nao_animatedSayText("Inizio secondo tempo")
-    global homography_matrix
-    homography_matrix = HOMO_SECOND_HALF  # imposto l'omografia alla seconda parte del campo
+            # Codifica JPEG
+            ret, buffer = cv2.imencode('.jpg', frame_resized)
+            if not ret:
+                continue
 
-def fine_partita():
-    global partita_finita
-    nao_animatedSayText("Fine Partita")
-    time.sleep(40)
-    partita_finita = False
+            frame_bytes = buffer.tobytes()
+
+            # Costruisci il chunk MJPEG
+            chunk = (b'--frame\r\n'
+                     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+            # Simula suddivisione in pacchetti
+            for i in range(0, len(chunk), chunk_size):
+                yield chunk[i:i+chunk_size]
+
+        self.cap.release()
+
+
+def webcam_usb():
+    return WebcamUSBResponseSimulator()
+
+
+# tutte queste funzioni vengono richiamate nella funzione computer_vision, flask endpoint:/computer_vision
 
 #################################
 #            Tribuna            #
@@ -400,7 +278,7 @@ def nao_stats():
 def nao_coro():  
     global task_2
     text = "Forza Audace, forza Audace, tutti su le mani per Audace"
-    nao_entusiastas()
+    nao_entusiasta()
     nao_SayText(text)
     time.sleep(30)
     task_2 = False 
@@ -460,10 +338,15 @@ def webcam():
 
 @app.route('/webcam_aruco', methods=['GET'])
 def webcam_aruco():
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
-    response = requests.get(url, json=data, stream=True)
+    ### per recuperare frame dal nao tramite py2 ###
+    #data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    #url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
+    #response = requests.get(url, json=data, stream=True)
 
+    ### per recuperare frame tramite webcam collegata al pc ###
+    response = webcam_usb()
+    
+    #recupero variabili
     # Inizializza il dizionario ArUco
     aruco_dict   = aruco.getPredefinedDictionary(aruco.DICT_4X4_1000)
     aruco_params = aruco.DetectorParameters()
@@ -472,7 +355,12 @@ def webcam_aruco():
     detector = aruco.ArucoDetector(aruco_dict, aruco_params)
 
     # aruco detection
+
+    
     def generate_frames():
+        #recupero variabili globali
+        global homography_matrix, partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time
+
         boundary     = b'--frame\r\n'
         content_type = b'Content-Type: image/jpeg\r\n\r\n'
         frame_data   = b''
@@ -482,7 +370,8 @@ def webcam_aruco():
             if boundary in frame_data:
                 # Estrai il frame   
                 parts = frame_data.split(boundary)
-                for part in parts[:-1]:                    
+
+                for part in parts[:-1]:
                     if content_type in part:
                         frame_data = part.split(content_type)[-1]
                         # Decodifica il frame
@@ -491,8 +380,6 @@ def webcam_aruco():
 
                         # Conversione del frame in scala di grigi per migliorare il rilevamento dei marker
                         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-                        # Rileva i marker ArUco nel frame usando ArucoDetector
                         marker_corners, marker_ids, rejected_candidates = detector.detectMarkers(gray)
 
                         # Se vengono rilevati marker, disegnali sul frame
@@ -500,66 +387,102 @@ def webcam_aruco():
                             # Disegna i marker rilevati sul frame
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
 
-                            #Task1
-                            #gestione inzio partita
-                            global partita_iniziata                           
-                            if 180 in marker_ids.flatten() and not partita_iniziata:
+                            pixel_points = []
+                            real_points = []
+
+                            for i, marker_id in enumerate(marker_ids.flatten()):
+                                if marker_id in id_to_coord:
+                                    corners = marker_corners[i][0]
+                                    cx = int(np.mean(corners[:, 0]))
+                                    cy = int(np.mean(corners[:, 1]))
+                                    pixel_points.append([cx, cy])
+                                    real_points.append(id_to_coord[marker_id])
+
+                            if len(pixel_points) == 4:
+                                pixel_np = np.array(pixel_points, dtype=np.float32)
+                                real_np = np.array(real_points, dtype=np.float32)
+                                homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
+
+                            # GESTIONE PARTITA
+                            if 180 in marker_ids and not partita_iniziata:
                                 partita_iniziata = True
                                 inizializzazione()
-                                inizio_partita()
-                            
-                            #pausa partita
-                            global partita_pausa    
-                            if 181 in marker_ids.flatten() and not partita_pausa and partita_iniziata:
+                                start_time = time.time()
+
+                            # PAUSA PARTITA
+                            if 181 in marker_ids and not partita_pausa:
                                 partita_pausa = True
-                                pausa_partita()
-    
-                            #inzio secodno tempo
-                            global  partita_secondo_tempo                     
-                            if 182 in marker_ids.flatten() and not partita_secondo_tempo and partita_pausa:
-                                
-                                partita_secondo_tempo = True 
-                                inizio_secondo_tempo()
-                            
-                            #fine partita
-                            if 183 in marker_ids.flatten() and not partita_finita:
-                                partita_iniziata = False
-                                partita_pausa = False
-                                partita_secondo_tempo = False 
-                                partita_finita = True 
-                                fine_partita()
-                            
-                            #Task2
+
+                            #INIZIO SECONDO TEMPO
+                            if 182 in marker_ids and not partita_secondo_tempo:
+                                partita_secondo_tempo = True
+                                if homography_matrix is not None:
+                                    homography_matrix = np.linalg.inv(homography_matrix)
+
+                            #FINE PARTITA
+                            if 183 in marker_ids and not partita_finita:
+                                partita_finita = True
+
+                            # TASK 2
+
+                            #SCORE PARTITA
                             global task_2
-                            #Punti della partita
-                            if 184 in marker_ids.flatten() and not task_2 :
-                                task_2=True
+                            if 184 in marker_ids.flatten() and not task_2:
+                                task_2 = True
                                 nao_points()
 
                             #Statistiche della partita
-                            elif 185 in marker_ids.flatten() and not task_2 :
-                                task_2=True
+                            elif 185 in marker_ids.flatten() and not task_2:
+                                task_2 = True
                                 nao_stats()
 
-                            #Posti a sederes 
-                            elif 186 in marker_ids.flatten() and not task_2 :
-                                task_2=True
+                            #Posti a sedere
+                            elif 186 in marker_ids.flatten() and not task_2:
+                                task_2 = True
                                 nao_seat()
 
                             #cori
-                            elif 187 in marker_ids.flatten() and not task_2 :
-                                task_2=True
+                            elif 187 in marker_ids.flatten() and not task_2:
+                                task_2 = True
                                 nao_coro()
 
-                        # Codifica di nuovo il frame 
+                        #ricodifica e invia il frame
                         _, buffer = cv2.imencode('.jpg', frame)
                         yield (b'--frame\r\n'
-                               b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+                            b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+
                 frame_data = parts[-1]
 
     return Response(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
 
+
+@app.route('/computer_vision', methods=['GET'])
+def computer_vision():
+    if MODEL_PLAYERS is None or MODEL_BALL is None or tracker is None or processor is None or model is None:
+        inizializzazione()
+    flask_response = webcam_aruco()
+
+    def generate():
+        frame_data = b''
+        for chunk in flask_response.response:
+            frame_data += chunk
+            if b'--frame\r\n' in frame_data:
+                parts = frame_data.split(b'--frame\r\n')
+                for part in parts[:-1]:
+                    if b'Content-Type: image/jpeg\r\n\r\n' in part:
+                        img_bytes = part.split(b'\r\n\r\n')[-1]
+                        try:
+                            frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+                            if frame is not None:
+                                analyzed = analyze_frame(frame)
+                                _, buffer = cv2.imencode('.jpg', analyzed)
+                                yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n'
+                        except Exception as e:
+                            print("Errore nell'elaborazione del frame:", e)
+                frame_data = parts[-1]
+
+    return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
 
 def nao_move_back(angle):
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "angle":angle}
