@@ -371,11 +371,6 @@ def fine_partita():
 # variabili blobali task 2
 task_2 = False
 
-def nao_ballo():
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    url      = "http://127.0.0.1:5011/nao_ballo/" + str(data) 
-    response = requests.get(url, json=data)
-    logger.info(str(response.text))
 
 def nao_entusiasta():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
@@ -405,7 +400,7 @@ def nao_stats():
 def nao_coro():  
     global task_2
     text = "Forza Audace, forza Audace, tutti su le mani per Audace"
-    nao_ballo()
+    nao_entusiastas()
     nao_SayText(text)
     time.sleep(30)
     task_2 = False 
