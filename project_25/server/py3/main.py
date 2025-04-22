@@ -215,7 +215,7 @@ def apply_homography(boxes):
         x_center = (box[0] + box[2]) / 2
         y_bottom = box[3]
         
-        # Applica l'omografia
+        # Applica l'omografiaxx
         point = np.array([x_center, y_bottom, 1])
         transformed_point = homography_matrix @ point
         
@@ -322,11 +322,11 @@ def analyze_frame(frame):
 @app.route('/computer_vision', methods = ["GET"])
 def computer_vision():
     #Elabora e trasmetti i risultati della computer vision
-    response = webcam_aruco()
+    flask_response = webcam_aruco()
 
     def generate():
         frame_data = b''
-        for chunk in response.iter_content(1024):
+        for chunk in flask_response.response:
             frame_data += chunk
             if b'--frame\r\n' in frame_data:
                 parts = frame_data.split(b'--frame\r\n')
@@ -1139,8 +1139,6 @@ if __name__ == "__main__":
 
     #prova = db_helper.create_tables()
     #prova1 = db_helper.insert_player(12,49,0.27,0.30,"red")
-
-    
 
     app.secret_key = os.urandom(12)
     app.run(host=config_helper.srv_host, port=config_helper.srv_port, debug=config_helper.srv_debug)

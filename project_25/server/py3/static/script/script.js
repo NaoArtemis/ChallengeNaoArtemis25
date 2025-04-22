@@ -223,9 +223,6 @@ function stopCam() {
     document.getElementById("webcam-feed").src = noCamUrl;
 }
 
-function computer_vision() {
-    document.getElementById("webcam_feed").src = computer_visionUrl;
-}
 
         /* script fatto prima
         
