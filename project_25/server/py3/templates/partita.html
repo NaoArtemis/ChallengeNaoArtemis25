@@ -20,13 +20,18 @@
     </div>
     
     <!--main-->
-    <div class = "main-content">
-        <div id ="webcam_feed" class = "joystick-panel">
-        </div>
-        <script> const computer_visionUrl = "{{url_for('computer_vision')}}"</script>
-        <div>
-            <button id="nao-cam-btn" class="btn btn-joystick" onclick="computer_vision()">Partita</button>
-        </div>
+    <div class="main-content">
+        <img id="computer_vision" class="webcam-container joystick-panel" />
+    
+        <button id="nao-cam-btn" class="btn btn-joystick" onclick="computer_vision()">Partita</button>
+    
+        <script>
+            const computer_visionUrl = "{{ url_for('computer_vision') }}";
+    
+            function computer_vision() {
+                document.getElementById("computer_vision").src = computer_visionUrl;
+            }
+        </script>
     </div>
 
 
