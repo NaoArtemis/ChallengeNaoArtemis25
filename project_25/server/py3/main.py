@@ -84,28 +84,13 @@ def make_sha256(s):
 #################################
 #      computer vision          #
 #################################
-# variabili blobali task 1 #
-
-#variabili gestione stato partita
-partita_iniziata = False
-partita_pausa = False
-partita_secondo_tempo = False
-partita_finita = False
-start_time = 0
-
-# Variabili globali
-MODEL_PLAYERS = None
-tracker = None
-processor = None
-model = None
-homography_matrix = None
-
-
+#pre impostazione omografia
 '''
 molto importante posizionare bene gli aruco, una non lettura o poszione sbagliata può causare errore 
 nell'applicazione della omografia cio può alterare im modo negativo la determinazione delle posizioni 
 dei giocatori.
 '''
+#grazie a questo dizionario e aruco(id:1,2,3,4) riusciamo ad definire la matriche homography
 id_to_coord = {
     1: (0, 0),     # Angolo in alto a sinistra
     2: (10, 0),    # Angolo in alto a destra
@@ -113,20 +98,59 @@ id_to_coord = {
     4: (10, 6)     # Angolo in basso a destra
 }
 
-# variabili gestione costanti
-TEAM_A_COLOR = "red"  # Colore squadra A
-TEAM_B_COLOR = "blue" # Colore squadra B
 
 def inizializzazione():
-    global MODEL_PLAYERS, MODEL_BALL, tracker, processor, model
-    # Carica il modello YOLO per il rilevamento dei giocatori.
-    MODEL_PLAYERS = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False)
+    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time
+    global MODEL_PLAYERS, tracker, processor, model, homography_matrix
+    global TEAM_A_COLOR, TEAM_B_COLOR
+    global omografia_pronta
+
+    # Stato partita
+    partita_iniziata = False
+    partita_pausa = False
+    partita_secondo_tempo = False
+    partita_finita = False
+    start_time = 0
+
+    ### Oggetti AI e tracking ###
+
+    #inizializzazione modello yolo
+    #se metto verbose true nella console python mi verebbe stampata l'analisi di ogni frame
+    MODEL_PLAYERS = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False) 
     tracker = sv.ByteTrack()
+
+    #inizializzazione modello siglip
     processor = AutoProcessor.from_pretrained("google/siglip-base-patch16-224")
     model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
 
+    #matrice omografica
+    homography_matrix = None
+    #flag omografia
+    omografia_pronta = False
+
+    # Costanti
+    TEAM_A_COLOR = "red"
+    TEAM_B_COLOR = "blue"
+
+
+def global_variabili():
+    # funzion per tenere aggiornate tutte le variabili visto che vengono passate per copia
+    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time
+    global MODEL_PLAYERS, tracker, processor, model, homography_matrix
+    global task_2
+    global game_time, game_time_text, coords
+    global ellipse_annotator, label_annotator, triangle_annotator
+    global frame, np_frame, img_bytes, parts
+    global x_center, y_bottom, ball_box
+    global pixel_np, real_np, cx, cy, marker_ids
+    global speech_file_path, speech_recognition
+    global user_obj, client, username, password
+    global frame_with_faces, x, y, x_speed, y_speed
+    global omografia_pronta
+
 
 def classify_with_siglip(detections, frame):
+    global_variabili()
     teams = []
     for bbox in detections.xyxy:
         x1, y1, x2, y2 = map(int, bbox)
@@ -153,7 +177,7 @@ def classify_with_siglip(detections, frame):
 
 def apply_homography(boxes):
     #omografia tecnica utilizzata per trasfromare coordinate pixel in coordinate reali
-    global homography_matrix
+    global_variabili() #include homography_matrix
     coords = []
     for box in boxes:
         x = (box[0] + box[2]) / 2
@@ -165,7 +189,7 @@ def apply_homography(boxes):
     return coords
 
 def analyze_frame(frame):
-    global start_time
+    global_variabili()
     #se partita già iniziata calcolo il tempo, else imposto il tempo a 00:00
     if partita_iniziata and not partita_finita:
         game_time = time.time() - start_time
@@ -180,8 +204,6 @@ def analyze_frame(frame):
     player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
 
     if len(player_detections) > 0:
-        if tracker is None:
-            inizializzazione()
         tracked = tracker.update_with_detections(player_detections)
         tracked = classify_with_siglip(tracked, frame)
         coords = apply_homography(tracked.xyxy)
@@ -201,7 +223,7 @@ def analyze_frame(frame):
         tracked = player_detections
     
     if len(ball_detections) > 0:
-        # Prende solo la prima palla rilevata (puoi modificarlo se vuoi più palloni)
+        # Prende solo la prima palla rilevata, per non andare in conflitto con i palloni a bordo campo
         ball_box = ball_detections.xyxy[0]
         x_center = (ball_box[0] + ball_box[2]) / 2
         y_bottom = ball_box[3]
@@ -234,7 +256,7 @@ def analyze_frame(frame):
     return annotated
 
 class WebcamUSBResponseSimulator:
-    def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
+    def __init__(self, cam_index=1): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
 
     def iter_content(self, chunk_size=1024):
@@ -373,12 +395,12 @@ def webcam():
 @app.route('/webcam_aruco', methods=['GET'])
 def webcam_aruco():
     ### per recuperare frame dal nao tramite py2 ###
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
-    response = requests.get(url, json=data, stream=True)
+    #data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    #url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
+    #response = requests.get(url, json=data, stream=True)
 
     ### per recuperare frame tramite webcam collegata al pc ###
-    #response = webcam_usb()
+    response = webcam_usb()
     
     #recupero variabili
     # Inizializza il dizionario ArUco
@@ -444,7 +466,7 @@ def webcam_aruco():
                             # GESTIONE PARTITA
                             if 180 in marker_ids and not partita_iniziata and omografia_pronta:
                                 partita_iniziata = True
-                                inizializzazione()
+                                szione()
                                 start_time = time.time()
 
                             # PAUSA PARTITA
@@ -497,6 +519,7 @@ def webcam_aruco():
 
 @app.route('/computer_vision', methods=['GET'])
 def computer_vision():
+    global_variabili()
     if MODEL_PLAYERS is None or tracker is None or processor is None or model is None:
         inizializzazione()
     flask_response = webcam_aruco()
