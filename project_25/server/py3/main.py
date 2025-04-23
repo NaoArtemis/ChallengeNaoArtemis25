@@ -93,7 +93,6 @@ start_time = 0
 
 # Variabili globali
 MODEL_PLAYERS = None
-MODEL_BALL = None
 tracker = None
 processor = None
 model = None
@@ -120,7 +119,6 @@ def inizializzazione():
     global MODEL_PLAYERS, MODEL_BALL, tracker, processor, model
     # Carica il modello YOLO per il rilevamento dei giocatori.
     MODEL_PLAYERS = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False)
-    MODEL_BALL = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False)
     tracker = sv.ByteTrack()
     processor = AutoProcessor.from_pretrained("google/siglip-base-patch16-224")
     model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
@@ -166,12 +164,14 @@ def apply_homography(boxes):
 
 def analyze_frame(frame):
     global start_time
+    #se partita già iniziata calcolo il tempo, else imposto il tempo a 00:00
     if partita_iniziata and not partita_finita:
         game_time = time.time() - start_time
         game_time_text = "PAUSA" if partita_pausa else f"{int(game_time // 60):02d}:{int(game_time % 60):02d}"
     else:
         game_time_text = "00:00"
 
+    #applico il modello per la detection di persone
     results_players = MODEL_PLAYERS(frame, conf=0.3)
     detections = sv.Detections.from_ultralytics(results_players[0])
     ball_detections = detections[detections.class_id == 0]
@@ -197,6 +197,25 @@ def analyze_frame(frame):
 
     else:
         tracked = player_detections
+    
+    if len(ball_detections) > 0:
+        # Prende solo la prima palla rilevata (puoi modificarlo se vuoi più palloni)
+        ball_box = ball_detections.xyxy[0]
+        x_center = (ball_box[0] + ball_box[2]) / 2
+        y_bottom = ball_box[3]
+
+        pt = np.array([x_center, y_bottom, 1])
+        transformed = homography_matrix @ pt
+        transformed /= transformed[2]
+
+        db_helper.insert_player(
+            "ball",
+            game_time,
+            transformed[0],
+            transformed[1],
+            "none"
+        )
+        logger.info("Result query: %s , id=%s", "ball", "ball")
 
     annotated = frame.copy()
     if len(tracked) > 0:
@@ -213,7 +232,7 @@ def analyze_frame(frame):
     return annotated
 
 class WebcamUSBResponseSimulator:
-    def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
+    def __init__(self, cam_index=1): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
 
     def iter_content(self, chunk_size=1024):
@@ -227,7 +246,7 @@ class WebcamUSBResponseSimulator:
                 break
 
             # Ridimensiona il frame
-            frame_resized = cv2.resize(frame, (640, 480))
+            frame_resized = cv2.resize(frame, (320, 240))
 
             # Codifica JPEG
             ret, buffer = cv2.imencode('.jpg', frame_resized)
@@ -287,7 +306,7 @@ def nao_stats():
 
 def nao_coro():  
     global task_2
-    text = "Forza Audace, forza Audace, tutti su le mani per Audace"
+    text = "Eeeee…quella gente che…ama soltanto te,per tutti quei chilometri che ho fatto per te,internazionale devi vincere!"
     nao_entusiasta()
     nao_SayText(text)
     time.sleep(30)
@@ -473,7 +492,7 @@ def webcam_aruco():
 
 @app.route('/computer_vision', methods=['GET'])
 def computer_vision():
-    if MODEL_PLAYERS is None or MODEL_BALL is None or tracker is None or processor is None or model is None:
+    if MODEL_PLAYERS is None or tracker is None or processor is None or model is None:
         inizializzazione()
     flask_response = webcam_aruco()
 
