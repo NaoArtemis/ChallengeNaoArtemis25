@@ -35,7 +35,7 @@ def nao_get_image(nao_ip, nao_port):
 
     # Set the camera parameters
     name_id          = "video_image_" + str(random.randint(0,100))      # The same Name could be used only six time
-    camera_id        = 0                                                # Use the top camera (1 for bottom camera)
+    camera_id        = 0                                              # Use the top camera (1 for bottom camera)
     resolution       = 1                                                # Image of 320*240px
     color_space      = 13                                               # RGB
     camera_fps       = 10                                               # fps
