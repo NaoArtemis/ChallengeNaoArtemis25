@@ -119,9 +119,8 @@ TEAM_B_COLOR = "blue" # Colore squadra B
 def inizializzazione():
     global MODEL_PLAYERS, MODEL_BALL, tracker, processor, model
     # Carica il modello YOLO per il rilevamento dei giocatori.
-    # Assicurati che le classi nel modello dei giocatori non si sovrappongano a quelle del modello per la palla.
-    MODEL_PLAYERS = YOLO("models/yolo_players.pt")
-    MODEL_BALL = YOLO("models/yolo_ball.pt")
+    MODEL_PLAYERS = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False)
+    MODEL_BALL = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False)
     tracker = sv.ByteTrack()
     processor = AutoProcessor.from_pretrained("google/siglip-base-patch16-224")
     model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
@@ -153,6 +152,7 @@ def classify_with_siglip(detections, frame):
     return detections
 
 def apply_homography(boxes):
+    #omografia tecnica utilizzata per trasfromare coordinate pixel in coordinate reali
     global homography_matrix
     coords = []
     for box in boxes:
@@ -183,8 +183,18 @@ def analyze_frame(frame):
         tracked = tracker.update_with_detections(player_detections)
         tracked = classify_with_siglip(tracked, frame)
         coords = apply_homography(tracked.xyxy)
+
+        #salvo le coordinate nel database
         for i, c in enumerate(coords):
-            print(f"Player {tracked.tracker_id[i]}: {c} ({tracked.data['team'][i]})")
+            db_helper.insert_player(
+                f"player_{tracked.tracker_id[i]}",
+                game_time,
+                c[0],
+                c[1],
+                tracked.data['team'][i]
+            )
+            logger.info("Result query: %s , id=%s", "player", tracked.tracker_id[i]) # funzione richimata dal db_helper
+
     else:
         tracked = player_detections
 
@@ -199,11 +209,11 @@ def analyze_frame(frame):
         triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
         annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
 
-    cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 255), 2)              
     return annotated
 
 class WebcamUSBResponseSimulator:
-    def __init__(self, cam_index=2): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
+    def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
 
     def iter_content(self, chunk_size=1024):
@@ -398,13 +408,17 @@ def webcam_aruco():
                                     pixel_points.append([cx, cy])
                                     real_points.append(id_to_coord[marker_id])
 
-                            if len(pixel_points) == 4:
+                            #riconosce i 4 aruco e assegna le coordinate omografice
+                            if len(pixel_points) == 4 and not omografia_pronta:
                                 pixel_np = np.array(pixel_points, dtype=np.float32)
                                 real_np = np.array(real_points, dtype=np.float32)
                                 homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
+                                omografia_pronta = True  # flag attivo, siamo pronti ad iniziare
+
+
 
                             # GESTIONE PARTITA
-                            if 180 in marker_ids and not partita_iniziata:
+                            if 180 in marker_ids and not partita_iniziata and omografia_pronta:
                                 partita_iniziata = True
                                 inizializzazione()
                                 start_time = time.time()
