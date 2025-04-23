@@ -38,6 +38,8 @@ import threading
 import sqlite3
 import supervision as sv
 from ultralytics import YOLO
+import logging
+logging.getLogger("ultralytics").setLevel(logging.CRITICAL)
 import torch
 from transformers import AutoProcessor, AutoModel
 
@@ -232,7 +234,7 @@ def analyze_frame(frame):
     return annotated
 
 class WebcamUSBResponseSimulator:
-    def __init__(self, cam_index=1): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
+    def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
 
     def iter_content(self, chunk_size=1024):
@@ -306,7 +308,7 @@ def nao_stats():
 
 def nao_coro():  
     global task_2
-    text = "Eeeee…quella gente che…ama soltanto te,per tutti quei chilometri che ho fatto per te,internazionale devi vincere!"
+    text = "Eeee    quella gente che  ama soltanto te  per tutti quei chilometri che ho fatto per te internazionale devi vincere"
     nao_entusiasta()
     nao_SayText(text)
     time.sleep(30)
@@ -368,12 +370,12 @@ def webcam():
 @app.route('/webcam_aruco', methods=['GET'])
 def webcam_aruco():
     ### per recuperare frame dal nao tramite py2 ###
-    #data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    #url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
-    #response = requests.get(url, json=data, stream=True)
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
+    response = requests.get(url, json=data, stream=True)
 
     ### per recuperare frame tramite webcam collegata al pc ###
-    response = webcam_usb()
+    #response = webcam_usb()
     
     #recupero variabili
     # Inizializza il dizionario ArUco

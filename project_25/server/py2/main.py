@@ -38,7 +38,7 @@ def nao_get_image(nao_ip, nao_port):
     camera_id        = 0                                                # Use the top camera (1 for bottom camera)
     resolution       = 1                                                # Image of 320*240px
     color_space      = 13                                               # RGB
-    camera_fps       = 5                                               # fps
+    camera_fps       = 10                                               # fps
     brightness_value = 55                                               # default of 55
     video_proxy.setParameter(camera_id, 0, brightness_value)            # brightness
 
