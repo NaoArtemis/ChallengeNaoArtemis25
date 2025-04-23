@@ -280,6 +280,13 @@ def webcam_usb():
 # variabili blobali task 2
 task_2 = False
 
+def tempo_di_pausa():
+    print("Ora aspetta")
+    timer = threading.Timer(20, ritorno_a_false)
+    timer.start()
+
+def ritorno_a_false():
+    task_2 = False
 
 def nao_entusiasta():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
@@ -289,30 +296,26 @@ def nao_entusiasta():
 
 def nao_points():
     global task_2
-    time.sleep(30)
-    task_2 = False
+    tempo_di_pausa()
 
 
 def nao_seat():
     global task_2
-    text = "i posti a sedere riservati sono quelli nella prima fila coi bollini blu"
+    text = "i posti a sedere riservati sono quelli nella prima fila con gli stiker blu"
     nao_animatedSayText(text)
-    time.sleep(30)
-    task_2 = False
+    tempo_di_pausa()
     
 def nao_stats():
     global task_2
-    time.sleep(30)
-    task_2 = False
+    tempo_di_pausa()
 
 
 def nao_coro():  
     global task_2
-    text = "Eeee    quella gente che  ama soltanto te  per tutti quei chilometri che ho fatto per te internazionale devi vincere"
+    text = "vincere"#haseeb non modificare!!!!
     nao_entusiasta()
     nao_SayText(text)
-    time.sleep(30)
-    task_2 = False 
+    tempo_di_pausa() 
 
 
  
