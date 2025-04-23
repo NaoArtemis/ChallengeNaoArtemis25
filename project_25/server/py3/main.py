@@ -965,6 +965,13 @@ def api_movement_nao_train_move_stop():
     nao_train_move_start = False
     return redirect('/home')
 
+@app.route('/api/movement/nao_sitdown', methods=['GET'])
+def nao_sitdown():
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_sitdown/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))   
+
 @app.route('/api/movement/nao_autonomous_life', methods=['GET'])
 def nao_autonomous_life():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
@@ -972,6 +979,12 @@ def nao_autonomous_life():
     response = requests.get(url, json=data)
     logger.info(str(response.text))                                                     
 
+@app.route('/api/movement/nao_autonomous_life_state', methods=['GET'])
+def nao_autonomous_life_state():
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_autonomous_life_state/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))  
 
 @app.route('/api/movement/nao_wakeup',methods=['GET'])
 def nao_wakeup():

@@ -316,7 +316,7 @@ def nao_autonomous_life(params):
                 state    = "disabled"
 
                 life_proxy = ALProxy("ALAutonomousLife", nao_ip, nao_port)              
-                life_proxy.setState(state)                                              
+                life_proxy.setState("interactive")                                            
                 life_proxy = None                                                       
                 return jsonify({'code': 200, 'function': 'nao_autonomous_life(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
             except Exception as e:
@@ -327,6 +327,28 @@ def nao_autonomous_life(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
             
+@app.route('/nao_autonomous_life_state/<params>', methods=['GET'])  
+def nao_autonomous_life_state(params):
+    if (params != None and params != ''):
+        if request.method == 'GET':
+            try:
+                #{"nao_ip":value, "nao_port":value}
+                json     = eval(params)
+                nao_ip   = json['nao_ip']
+                nao_port = json['nao_port']
+                state    = "disabled"
+
+                life_proxy = ALProxy("ALAutonomousLife", nao_ip, nao_port)              
+                life_proxy.setState("state")                                            
+                life_proxy = None                                                       
+                return jsonify({'code': 200, 'function': 'nao_autonomous_life(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            return jsonify({'code': 500, 'message': 'methods error'}), 500  
+    else:
+        return jsonify({'code': 500, 'message': 'params error'}), 500
 
 @app.route('/nao_wakeup/<params>', methods=['GET'])  
 def nao_wakeup(params):
@@ -338,9 +360,9 @@ def nao_wakeup(params):
                 nao_ip   = json['nao_ip']
                 nao_port = json['nao_port']
 
-                motion_proxy = ALProxy("ALMotion", nao_ip, nao_port)                    
-                motion_proxy.wakeUp()                                                   
-                motion_proxy = None   
+                posture_proxy = ALProxy("ALRobotPosture", nao_ip, nao_port)                     
+                posture_proxy.goToPosture("Stand", 0.8)                                                 
+                posture_proxy = None   
                 return jsonify({'code': 200, 'function': 'nao_wakeup(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
@@ -855,7 +877,7 @@ def nao_sitdown(params):
                 nao_port     = json['nao_port']
 
                 posture_proxy = ALProxy("ALRobotPosture", nao_ip, nao_port)                        
-                posture_proxy.goToPosture("Sit", 0.8)                                 
+                posture_proxy.goToPosture("Crouch", 0.8)                                 
                 posture_proxy = None 
     
                 return jsonify({'code': 200, 'function': 'nao_sitdown(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200

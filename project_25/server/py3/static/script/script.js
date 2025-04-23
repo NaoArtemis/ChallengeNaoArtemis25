@@ -116,8 +116,8 @@ document.querySelector("#wakeup").addEventListener("click", function () {
         .catch(error => console.error("Errore:", error));
 });
 
-document.querySelector("#autonomo").addEventListener("click", function () {
-    fetch("/api/movement/nao_autonomous_life", { method: "GET" })
+document.querySelector("#Sit_Down").addEventListener("click", function () {
+    fetch("/api/movement/nao_sitdown", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
@@ -152,6 +152,13 @@ document.querySelector("#stand").addEventListener("click", function () {
 
 document.querySelector("#autonomus_life").addEventListener("click", function () {
     fetch("/api/movement/nao_autonomous_life", { method: "GET" })
+        .then(response => response.json())
+        .then(data => console.log("Risposta API:", data))
+        .catch(error => console.error("Errore:", error));
+});
+
+document.querySelector("#autonomus_life_state").addEventListener("click", function () {
+    fetch("/api/movement/nao_autonomous_life_state", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
