@@ -150,6 +150,13 @@ document.querySelector("#stand").addEventListener("click", function () {
         .catch(error => console.error("Errore:", error));
 });
 
+document.querySelector("#autonomus_life").addEventListener("click", function () {
+    fetch("/api/movement/nao_autonomous_life", { method: "GET" })
+        .then(response => response.json())
+        .then(data => console.log("Risposta API:", data))
+        .catch(error => console.error("Errore:", error));
+});
+
 // Funzioni per i tasti del joystick
 document.querySelector("#start").addEventListener("click", function () {
     fetch("/api/movement/start", { method: "GET" })
