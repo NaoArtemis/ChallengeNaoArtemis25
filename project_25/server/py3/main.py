@@ -84,6 +84,7 @@ def make_sha256(s):
 #################################
 #      computer vision          #
 #################################
+
 #pre impostazione omografia
 '''
 molto importante posizionare bene gli aruco, una non lettura o poszione sbagliata può causare errore 
@@ -98,19 +99,19 @@ id_to_coord = {
     4: (10, 6)     # Angolo in basso a destra
 }
 
-
 def inizializzazione():
-    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time
+    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time, tempo_fine_primo_tempo
     global MODEL_PLAYERS, tracker, processor, model, homography_matrix
     global TEAM_A_COLOR, TEAM_B_COLOR
-    global omografia_pronta
+    global omografia_pronta, task_2
 
     # Stato partita
     partita_iniziata = False
     partita_pausa = False
     partita_secondo_tempo = False
     partita_finita = False
-    start_time = 0
+    start_time = None
+    tempo_fine_primo_tempo = 0  # per gestire cambio campo
 
     ### Oggetti AI e tracking ###
 
@@ -132,10 +133,12 @@ def inizializzazione():
     TEAM_A_COLOR = "red"
     TEAM_B_COLOR = "blue"
 
+    task_2 = False  # inizializza il task secondario
+
+inizializzazione()
 
 def global_variabili():
-    # funzion per tenere aggiornate tutte le variabili visto che vengono passate per copia
-    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time
+    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time, tempo_fine_primo_tempo
     global MODEL_PLAYERS, tracker, processor, model, homography_matrix
     global task_2
     global game_time, game_time_text, coords
@@ -147,7 +150,27 @@ def global_variabili():
     global user_obj, client, username, password
     global frame_with_faces, x, y, x_speed, y_speed
     global omografia_pronta
+    # inizializzo se non esistono (protezione)
+    if 'coords' not in globals(): coords = []
+    if 'game_time' not in globals(): game_time = 0
+    if 'game_time_text' not in globals(): game_time_text = "00:00"
 
+def apply_homography(boxes):
+    #omografia tecnica utilizzata per trasfromare coordinate pixel in coordinate reali
+    global_variabili()
+    coords = []
+    if homography_matrix is None or homography_matrix.shape != (3, 3):
+        print("Omografia non ancora disponibile o malformata")
+        return coords  # ritorna lista vuota
+
+    for box in boxes:
+        x = (box[0] + box[2]) / 2
+        y = box[3]
+        pt = np.array([x, y, 1])
+        transformed = homography_matrix @ pt
+        transformed /= transformed[2]
+        coords.append((transformed[0], transformed[1]))
+    return coords
 
 def classify_with_siglip(detections, frame):
     global_variabili()
@@ -175,24 +198,13 @@ def classify_with_siglip(detections, frame):
     detections.data["team"] = teams
     return detections
 
-def apply_homography(boxes):
-    #omografia tecnica utilizzata per trasfromare coordinate pixel in coordinate reali
-    global_variabili() #include homography_matrix
-    coords = []
-    for box in boxes:
-        x = (box[0] + box[2]) / 2
-        y = box[3]
-        pt = np.array([x, y, 1])
-        transformed = homography_matrix @ pt
-        transformed /= transformed[2]
-        coords.append((transformed[0], transformed[1]))
-    return coords
-
 def analyze_frame(frame):
     global_variabili()
     #se partita già iniziata calcolo il tempo, else imposto il tempo a 00:00
     if partita_iniziata and not partita_finita:
-        game_time = time.time() - start_time
+        # se siamo nel secondo tempo, aggiungiamo il tempo del primo tempo per mantenere continuità
+        now_time = time.time()
+        game_time = now_time - start_time + tempo_fine_primo_tempo if partita_secondo_tempo else now_time - start_time
         game_time_text = "PAUSA" if partita_pausa else f"{int(game_time // 60):02d}:{int(game_time % 60):02d}"
     else:
         game_time_text = "00:00"
@@ -221,7 +233,7 @@ def analyze_frame(frame):
 
     else:
         tracked = player_detections
-    
+
     if len(ball_detections) > 0:
         # Prende solo la prima palla rilevata, per non andare in conflitto con i palloni a bordo campo
         ball_box = ball_detections.xyxy[0]
@@ -255,8 +267,9 @@ def analyze_frame(frame):
     cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 255), 2)              
     return annotated
 
+
 class WebcamUSBResponseSimulator:
-    def __init__(self, cam_index=1): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
+    def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
 
     def iter_content(self, chunk_size=1024):
@@ -270,7 +283,7 @@ class WebcamUSBResponseSimulator:
                 break
 
             # Ridimensiona il frame
-            frame_resized = cv2.resize(frame, (320, 240))
+            frame_resized = cv2.resize(frame, (640, 480))
 
             # Codifica JPEG
             ret, buffer = cv2.imencode('.jpg', frame_resized)
@@ -415,7 +428,7 @@ def webcam_aruco():
     
     def generate_frames():
         #recupero variabili globali
-        global homography_matrix, partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time
+        global_variabili()
 
         boundary     = b'--frame\r\n'
         content_type = b'Content-Type: image/jpeg\r\n\r\n'
@@ -455,30 +468,35 @@ def webcam_aruco():
                                     real_points.append(id_to_coord[marker_id])
 
                             #riconosce i 4 aruco e assegna le coordinate omografice
+                            global omografia_pronta
                             if len(pixel_points) == 4 and not omografia_pronta:
+                                print("Marker 1-2-3-4 rilevati, provo a calcolare omografia")
                                 pixel_np = np.array(pixel_points, dtype=np.float32)
                                 real_np = np.array(real_points, dtype=np.float32)
                                 homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
+                                print("Omografia calcolata:", homography_matrix)
                                 omografia_pronta = True  # flag attivo, siamo pronti ad iniziare
 
-
-
                             # GESTIONE PARTITA
+                            global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita
                             if 180 in marker_ids and not partita_iniziata and omografia_pronta:
                                 partita_iniziata = True
-                                szione()
                                 start_time = time.time()
 
                             # PAUSA PARTITA
+                            
                             if 181 in marker_ids and not partita_pausa:
                                 partita_pausa = True
 
-                            #INIZIO SECONDO TEMPO
+                            # INIZIO SECONDO TEMPO
                             if 182 in marker_ids and not partita_secondo_tempo:
                                 partita_secondo_tempo = True
-                                if homography_matrix is not None:
-                                    homography_matrix = np.linalg.inv(homography_matrix)
 
+                                # Inversione omografia se esiste (cambio campo)
+                                if homography_matrix is not None:
+                                    print("⚠️ Cambio campo: inverto la matrice omografica per secondo tempo")
+                                    homography_matrix = np.linalg.inv(homography_matrix)
+                            
                             #FINE PARTITA
                             if 183 in marker_ids and not partita_finita:
                                 partita_finita = True
