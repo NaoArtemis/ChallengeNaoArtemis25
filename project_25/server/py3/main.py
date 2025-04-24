@@ -159,9 +159,8 @@ def apply_homography(boxes):
     #omografia tecnica utilizzata per trasfromare coordinate pixel in coordinate reali
     global_variabili()
     coords = []
-    if homography_matrix is None or homography_matrix.shape != (3, 3):
-        print("Omografia non ancora disponibile o malformata")
-        return coords  # ritorna lista vuota
+    if not omografia_pronta or homography_matrix is None or homography_matrix.shape != (3, 3):
+        return coords  # ritorna lista vuota senza errore
 
     for box in boxes:
         x = (box[0] + box[2]) / 2
@@ -204,7 +203,10 @@ def analyze_frame(frame):
     if partita_iniziata and not partita_finita:
         # se siamo nel secondo tempo, aggiungiamo il tempo del primo tempo per mantenere continuità
         now_time = time.time()
-        game_time = now_time - start_time + tempo_fine_primo_tempo if partita_secondo_tempo else now_time - start_time
+        if start_time is not None:
+            game_time = now_time - start_time + tempo_fine_primo_tempo if partita_secondo_tempo else now_time - start_time
+        else:
+            game_time = 0
         game_time_text = "PAUSA" if partita_pausa else f"{int(game_time // 60):02d}:{int(game_time % 60):02d}"
     else:
         game_time_text = "00:00"
