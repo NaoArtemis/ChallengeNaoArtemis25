@@ -93,10 +93,10 @@ dei giocatori.
 '''
 #grazie a questo dizionario e aruco(id:1,2,3,4) riusciamo ad definire la matriche homography
 id_to_coord = {
-    1: (0, 0),     # Angolo in alto a sinistra
-    2: (10, 0),    # Angolo in alto a destra
-    3: (0, 6),     # Angolo in basso a sinistra
-    4: (10, 6)     # Angolo in basso a destra
+    1: (0, 0),       # Angolo in alto a sinistra
+    2: (30, 0),      # Angolo in alto a destra
+    3: (0, 15),      # Angolo in basso a sinistra
+    4: (30, 15)      # Angolo in basso a destra
 }
 
 def inizializzazione():
@@ -212,11 +212,15 @@ def analyze_frame(frame):
         game_time_text = "00:00"
 
     #applico il modello per la detection di persone
-    results_players = MODEL_PLAYERS(frame, conf=0.3)
+    
+    results_players = MODEL_PLAYERS(frame, conf=0.2)
+    '''
     detections = sv.Detections.from_ultralytics(results_players[0])
     ball_detections = detections[detections.class_id == 0]
     player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
+    '''
 
+    '''
     if len(player_detections) > 0:
         tracked = tracker.update_with_detections(player_detections)
         tracked = classify_with_siglip(tracked, frame)
@@ -254,8 +258,9 @@ def analyze_frame(frame):
             "none"
         )
         logger.info("Result query: %s , id=%s", "ball", "ball")
-
-    annotated = frame.copy()
+    '''
+    annotated = frame
+    '''
     if len(tracked) > 0:
         labels = [f"#{id} ({team})" for id, team in zip(tracked.tracker_id, tracked.data["team"])]
         ellipse_annotator = sv.EllipseAnnotator(color_lookup=sv.ColorLookup.INDEX, thickness=2)
@@ -265,7 +270,7 @@ def analyze_frame(frame):
     if len(ball_detections) > 0:
         triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
         annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
-
+    '''
     cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 255), 2)              
     return annotated
 
@@ -285,10 +290,10 @@ class WebcamUSBResponseSimulator:
                 break
 
             # Ridimensiona il frame
-            frame_resized = cv2.resize(frame, (640, 480))
-
+            frame_resized = cv2.resize(frame, (320, 240))
+            frame_resized = cv2.flip(frame_resized, 1)
             # Codifica JPEG
-            ret, buffer = cv2.imencode('.jpg', frame_resized)
+            ret, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 100]) # la qualità va fino a 100
             if not ret:
                 continue
 
@@ -471,7 +476,7 @@ def webcam_aruco():
 
                             #riconosce i 4 aruco e assegna le coordinate omografice
                             global omografia_pronta
-                            if len(pixel_points) == 4 and not omografia_pronta:
+                            if len(pixel_points) == 4 and homography_matrix is None:
                                 print("Marker 1-2-3-4 rilevati, provo a calcolare omografia")
                                 pixel_np = np.array(pixel_points, dtype=np.float32)
                                 real_np = np.array(real_points, dtype=np.float32)
@@ -535,7 +540,12 @@ def webcam_aruco():
 
     return Response(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
-
+@app.route('/reset_omografia', methods=['GET']) #per risettare omografia, in caso di errore nella calibrazione
+def reset_omografia():
+    global homography_matrix, omografia_pronta
+    homography_matrix = None
+    omografia_pronta = False
+    return jsonify({"status": "ok", "message": "Omografia resettata"}), 200
 
 @app.route('/computer_vision', methods=['GET'])
 def computer_vision():
@@ -1060,8 +1070,6 @@ def nao_wakeup():
     response = requests.get(url, json=data)
     logger.info(str(response.text))                                                   
 
-
-
 @app.route('/api/movement/red_eye',methods=['GET'])
 def nao_eye_red():
     data     = {"nao_ip": nao_ip, "nao_port": nao_port, "r": 255, "g": 0, "b": 0}  # Red color
@@ -1100,6 +1108,24 @@ def nao_battery_level():
     battery_level = battery_info["battery_level"]
     return jsonify({'battery_level': battery_level}), 200
 
+
+@app.route('/api/app/utente/<id>', methods=['POST'])
+def api_app_utente(id):
+    if (id != None and id != ''):
+        if request.method == 'POST':
+            try:
+                #{"username":value, "password":value}
+                json = request.json
+                username = json["username"]
+                password = json["password"]
+                data = db_helper.select_account_player(username, password)
+                return jsonify({'code': 200, 'message': 'OK', 'data': data}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+    else:
+        logger.error('No id argument passed')
+        return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 
 #computer vision
 

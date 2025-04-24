@@ -16,7 +16,7 @@ class DB:
         except Exception as e:
             logger.error(str(e))
 
-
+#tables
     def create_tables(self):
         with self.connection:
             with self.connection.cursor() as cur:
@@ -37,12 +37,26 @@ class DB:
                 cur.execute('''
                     CREATE TABLE IF NOT EXISTS utenti (
                         id SERIAL PRIMARY KEY,
-                        username TEXT UNIQUE NOT NULL,
-                        password TEXT NOT NULL,
-                        nome TEXT,
-                        cognome TEXT
+                        username VARCHAR NOT NULL,
+                        password VARCHAR NOT NULL,
+                        nome VARCHAR,
+                        cognome VARCHAR
                     )
                 ''')
+
+                cur.execute('''
+                    CREATE TABLE IF NOT EXISTS dati (
+                        id SERIAL PRIMARY KEY,
+                        id_player VARCHAR,
+                        bpm INTEGER,
+                        passi INTEGER,
+                        velocità INTEGER,
+                        FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL
+                    )
+                ''')
+
+
+#insert
 
     def insert_player(self, player_id, time_sec, x_pos, y_pos, team=None):
         with self.connection:
@@ -56,7 +70,7 @@ class DB:
                     (player_id, time_sec, x_pos, y_pos, team)
                 )
 
-    def insert_cliente(self, username, password, nome, cognome):
+    def insert_utente(self, username, password, nome, cognome):
         with self.connection:
             with self.connection.cursor() as cur:
                 cur.execute(
@@ -69,6 +83,9 @@ class DB:
                 )
                 nuovo_id = cur.fetchone()[0]
                 return nuovo_id
+
+
+#select
 
     def select_utenti(self):
         with self.connection:
@@ -87,3 +104,18 @@ class DB:
                         'cognome': tupla[4]
                     })
                 return lista
+            
+    def select_account_player(self, username, password):
+            with self.connection:
+                with self.connection.cursor() as cur:
+                    cur.execute('''
+                                SELECT * 
+                                FROM utenti 
+                                WHERE username::text = %s AND password::text = %s;
+                                ''', (str(username),str(password)))
+
+                    if (cur.rowcount == 0):
+                        return 0
+                    else:
+                        for tupla in cur:
+                            return  {'id': tupla[0], 'nome': tupla[3], 'cognome': tupla[4]} #in [2]username [3]password    
