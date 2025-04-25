@@ -117,7 +117,7 @@ def inizializzazione():
 
     #inizializzazione modello yolo
     #se metto verbose true nella console python mi verebbe stampata l'analisi di ogni frame
-    MODEL_PLAYERS = YOLO("project_25/server/py3/modelli_AI/yolov8n_persone.pt", verbose=False) 
+    MODEL_PLAYERS = YOLO("project_25/server/py3/models/yolov8n_persone.pt", verbose=False) 
     tracker = sv.ByteTrack()
 
     #inizializzazione modello siglip
