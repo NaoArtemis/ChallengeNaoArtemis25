@@ -104,6 +104,7 @@ def inizializzazione():
     global MODEL_PLAYERS, tracker, processor, model, homography_matrix
     global TEAM_A_COLOR, TEAM_B_COLOR
     global omografia_pronta, task_2
+    global frame_id, last_yolo_detections, last_yolo_frame
 
     # Stato partita
     partita_iniziata = False
@@ -133,7 +134,10 @@ def inizializzazione():
     TEAM_A_COLOR = "red"
     TEAM_B_COLOR = "blue"
 
-    task_2 = False  # inizializza il task secondario
+    #gestione analisi frame
+    frame_id = 0
+    last_yolo_detections = None
+    last_yolo_frame = None
 
 inizializzazione()
 
@@ -149,6 +153,7 @@ def global_variabili():
     global speech_file_path, speech_recognition
     global user_obj, client, username, password
     global frame_with_faces, x, y, x_speed, y_speed
+    global frame_id, last_yolo_detections, last_yolo_frame
     global omografia_pronta
     # inizializzo se non esistono (protezione)
     if 'coords' not in globals(): coords = []
@@ -198,7 +203,13 @@ def classify_with_siglip(detections, frame):
     return detections
 
 def analyze_frame(frame):
+    start_time = time.time() # per contare gli fps
     global_variabili()
+
+    global frame_id, last_yolo_detections, last_yolo_frame
+    frame_id += 1
+    run_yolo = frame_id % 10 == 0
+
     #se partita già iniziata calcolo il tempo, else imposto il tempo a 00:00
     if partita_iniziata and not partita_finita:
         # se siamo nel secondo tempo, aggiungiamo il tempo del primo tempo per mantenere continuità
@@ -213,9 +224,15 @@ def analyze_frame(frame):
 
     #applico il modello per la detection di persone
     
-    results_players = MODEL_PLAYERS(frame, conf=0.2)
+    if run_yolo:
+        results_players = MODEL_PLAYERS(frame, conf=0.3)
+        detections = sv.Detections.from_ultralytics(results_players[0])
+        last_yolo_detections = detections
+        last_yolo_frame = frame
+    else:
+        detections = last_yolo_detections if last_yolo_detections is not None else sv.Detections.empty()
+    
     '''
-    detections = sv.Detections.from_ultralytics(results_players[0])
     ball_detections = detections[detections.class_id == 0]
     player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
     '''
@@ -271,7 +288,13 @@ def analyze_frame(frame):
         triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
         annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
     '''
-    cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 255), 2)              
+    cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_DUPLEX , 1, (0, 255, 255), 2)
+    
+    # Calcola il tempo impiegato
+    elapsed_time = (time.time() - start_time) * 1000  # lo trasformo in millisecondi
+    latency_text = f"Latenza: {elapsed_time:.2f} ms"
+    # Scrive il tempo impiegato sull'immagine
+    cv2.putText(annotated, str(latency_text), (10, 60), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 255, 0), 2)             
     return annotated
 
 
