@@ -122,8 +122,8 @@ def inizializzazione():
     tracker = sv.ByteTrack()
 
     #inizializzazione modello siglip
-    processor = AutoProcessor.from_pretrained("google/siglip-base-patch16-224")
-    model = AutoModel.from_pretrained("google/siglip-base-patch16-224")
+    processor = AutoProcessor.from_pretrained("project_25/server/py3/models/siglip")
+    model = AutoModel.from_pretrained("project_25/server/py3/models/siglip")
 
     #matrice omografica
     homography_matrix = None
@@ -131,7 +131,7 @@ def inizializzazione():
     omografia_pronta = False
 
     # Costanti
-    TEAM_A_COLOR = "red"
+    TEAM_A_COLOR = "gray"
     TEAM_B_COLOR = "blue"
 
     #gestione analisi frame
@@ -185,7 +185,6 @@ def classify_with_siglip(detections, frame):
         if crop.size == 0:
             teams.append("unknown")
             continue
-        crop = cv2.resize(crop, (224, 224))
         inputs_img = processor(images=crop, return_tensors="pt")
         inputs_text = processor(
             text=[f"a soccer player with {TEAM_A_COLOR} jersey", f"a soccer player with {TEAM_B_COLOR} jersey"],
@@ -198,7 +197,7 @@ def classify_with_siglip(detections, frame):
         img_emb = img_emb / img_emb.norm(dim=-1, keepdim=True)
         text_emb = text_emb / text_emb.norm(dim=-1, keepdim=True)
         sim = (img_emb @ text_emb.T)[0]
-        teams.append("red" if sim[0] > sim[1] else "blue")
+        teams.append(TEAM_A_COLOR if sim[0] > sim[1] else TEAM_B_COLOR)
     detections.data["team"] = teams
     return detections
 
@@ -225,19 +224,19 @@ def analyze_frame(frame):
     #applico il modello per la detection di persone
     
     if run_yolo:
-        results_players = MODEL_PLAYERS(frame, conf=0.3)
+        results_players = MODEL_PLAYERS(frame, conf=0.2)
         detections = sv.Detections.from_ultralytics(results_players[0])
         last_yolo_detections = detections
         last_yolo_frame = frame
     else:
         detections = last_yolo_detections if last_yolo_detections is not None else sv.Detections.empty()
     
-    '''
+    
     ball_detections = detections[detections.class_id == 0]
     player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
-    '''
+    
 
-    '''
+    
     if len(player_detections) > 0:
         tracked = tracker.update_with_detections(player_detections)
         tracked = classify_with_siglip(tracked, frame)
@@ -275,9 +274,9 @@ def analyze_frame(frame):
             "none"
         )
         logger.info("Result query: %s , id=%s", "ball", "ball")
-    '''
+    
     annotated = frame
-    '''
+    
     if len(tracked) > 0:
         labels = [f"#{id} ({team})" for id, team in zip(tracked.tracker_id, tracked.data["team"])]
         ellipse_annotator = sv.EllipseAnnotator(color_lookup=sv.ColorLookup.INDEX, thickness=2)
@@ -287,7 +286,7 @@ def analyze_frame(frame):
     if len(ball_detections) > 0:
         triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
         annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
-    '''
+    
     cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_DUPLEX , 1, (0, 255, 255), 2)
     
     # Calcola il tempo impiegato
@@ -314,7 +313,7 @@ class WebcamUSBResponseSimulator:
 
             # Ridimensiona il frame
             frame_resized = cv2.resize(frame, (320, 240))
-            frame_resized = cv2.flip(frame_resized, 1)
+            #frame_resized = cv2.flip(frame_resized, 1)
             # Codifica JPEG
             ret, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 100]) # la qualità va fino a 100
             if not ret:
@@ -505,7 +504,7 @@ def webcam_aruco():
                                 real_np = np.array(real_points, dtype=np.float32)
                                 homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
                                 print("Omografia calcolata:", homography_matrix)
-                                omografia_pronta = True  # flag attivo, siamo pronti ad iniziare
+                                omografia_pronta = True  # flag attivo, si può iniziare partita
 
                             # GESTIONE PARTITA
                             global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita
