@@ -17,45 +17,9 @@ class DB:
             logger.error(str(e))
 
 #tables
-    def create_tables(self):
-        with self.connection:
-            with self.connection.cursor() as cur:
-                # Tabella player_positions
-                cur.execute('''
-                    CREATE TABLE IF NOT EXISTS player_positions (
-                        id SERIAL PRIMARY KEY,
-                        player_id TEXT,
-                        time_sec REAL,
-                        x_pos REAL,
-                        y_pos REAL,
-                        team TEXT,
-                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                ''')
+ 
+    #si torvano nel db_ddl.sql (data definition language)
                 
-                # Tabella utenti
-                cur.execute('''
-                    CREATE TABLE IF NOT EXISTS utenti (
-                        id SERIAL PRIMARY KEY,
-                        username VARCHAR NOT NULL,
-                        password VARCHAR NOT NULL,
-                        nome VARCHAR,
-                        cognome VARCHAR
-                    )
-                ''')
-
-                cur.execute('''
-                    CREATE TABLE IF NOT EXISTS dati (
-                        id SERIAL PRIMARY KEY,
-                        id_player VARCHAR,
-                        bpm INTEGER,
-                        passi INTEGER,
-                        velocità INTEGER,
-                        FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL
-                    )
-                ''')
-
-
 #insert
 
     def insert_player(self, player_id, time_sec, x_pos, y_pos, team=None):
