@@ -541,7 +541,7 @@ def webcam_aruco():
                             #Statistiche della partita
                             elif 185 in marker_ids.flatten() and not task_2:
                                 task_2 = True
-                                nao_stats()
+                                nao_stats() #time
 
                             #Posti a sedere
                             elif 186 in marker_ids.flatten() and not task_2:
@@ -551,7 +551,7 @@ def webcam_aruco():
                             #cori
                             elif 187 in marker_ids.flatten() and not task_2:
                                 task_2 = True
-                                nao_coro()
+                                nao_coro() #festeggiamo
 
                         #ricodifica e invia il frame
                         _, buffer = cv2.imencode('.jpg', frame)
@@ -1131,6 +1131,8 @@ def nao_battery_level():
     return jsonify({'battery_level': battery_level}), 200
 
 
+
+###  database  ###
 @app.route('/api/app/utente/<id>', methods=['POST'])
 def api_app_utente(id):
     if (id != None and id != ''):
@@ -1149,15 +1151,18 @@ def api_app_utente(id):
         logger.error('No id argument passed')
         return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 
-#computer vision
+@app.route('/api/app/dati/<id>', methods=['POST'])
+def api_app_dati(id):
+    if (id != None and id != ''):
+        if request.method == 'POST':
+            return None
+
+
 
 # SERVICES
 @app.route('/services', methods=['GET'])
 def services():
     return render_template('services.html')
-
-
-
 
 
 
@@ -1197,7 +1202,7 @@ if __name__ == "__main__":
     #nao_audiorecorder(5)
     #nao_train_move()
 
-    #oggetto, id = db_helper.insert_cliente("nabihaseeb","1","nabi","haseeb")
+    #id = db_helper.insert_utente("nabihaseeb","ciao","nabi","haseeb")
     #logger.info("Result query: %s , id=%s", oggetto, id)
 
     #utenti = db_helper.select_utenti()

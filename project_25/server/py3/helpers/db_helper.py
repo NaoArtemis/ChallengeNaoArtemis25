@@ -16,11 +16,12 @@ class DB:
         except Exception as e:
             logger.error(str(e))
 
-#tables
- 
-    #si torvano nel db_ddl.sql (data definition language)
-                
-#insert
+    #tables
+    
+        #si torvano nel db_ddl.sql (data definition language)
+                    
+    #insert
+
 
     def insert_player(self, player_id, time_sec, x_pos, y_pos, team=None):
         with self.connection:
@@ -29,7 +30,7 @@ class DB:
                     '''
                     INSERT INTO player_positions 
                     (player_id, time_sec, x_pos, y_pos, team) 
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                     ''',
                     (player_id, time_sec, x_pos, y_pos, team)
                 )
@@ -45,11 +46,22 @@ class DB:
                     ''',
                     (username, password, nome, cognome)
                 )
-                nuovo_id = cur.fetchone()[0]
-                return nuovo_id
+                return cur.fetchone()[0]  # ritorna l'id inserito
 
+    def insert_dati(self, id_player, bpm, passi, velocità):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''
+                    INSERT INTO dati(id_player, bpm, passi, velocità)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id;
+                    ''',
+                    (id_player, bpm, passi, velocità)
+                )
+                return cur.fetchone()[0]  # ritorna l'id inserito
 
-#select
+    # select
 
     def select_utenti(self):
         with self.connection:
@@ -59,7 +71,7 @@ class DB:
                     return []
                 
                 lista = []
-                for tupla in cur:
+                for tupla in cur.fetchall():
                     lista.append({
                         'id': tupla[0], 
                         'username': tupla[1], 
@@ -68,18 +80,24 @@ class DB:
                         'cognome': tupla[4]
                     })
                 return lista
-            
-    def select_account_player(self, username, password):
-            with self.connection:
-                with self.connection.cursor() as cur:
-                    cur.execute('''
-                                SELECT * 
-                                FROM utenti 
-                                WHERE username::text = %s AND password::text = %s;
-                                ''', (str(username),str(password)))
 
-                    if (cur.rowcount == 0):
-                        return 0
-                    else:
-                        for tupla in cur:
-                            return  {'id': tupla[0], 'nome': tupla[3], 'cognome': tupla[4]} #in [2]username [3]password    
+    def select_account_player(self, username, password):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''
+                    SELECT * 
+                    FROM utenti 
+                    WHERE username = %s AND password = %s;
+                    ''',
+                    (username, password)
+                )
+                tupla = cur.fetchone()
+                if tupla is None:
+                    return 0
+                else:
+                    return {
+                        'id': tupla[0],
+                        'nome': tupla[3],
+                        'cognome': tupla[4]
+                    }
