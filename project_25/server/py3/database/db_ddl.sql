@@ -17,10 +17,17 @@ CREATE TABLE utenti(
 )
 
 CREATE TABLE dati(
-    id SERIAL PRIMARY KEY,
-    id_player VARCHAR,
+    id_player VARCHAR PRIMARY KEY,
     bpm INTEGER,
     passi INTEGER,
     velocità INTEGER,
     FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL
+)
+
+CREATE TABLE convocazioni(
+    id_player VARCHAR PRIMARY KEY,
+    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL,
+    convoazione BOOLEAN,
+    infortunio BOOLEAN,
+    ammonizione BOOLEAN,
 )

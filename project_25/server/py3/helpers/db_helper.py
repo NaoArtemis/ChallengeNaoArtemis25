@@ -40,13 +40,11 @@ class DB:
             with self.connection.cursor() as cur:
                 cur.execute(
                     '''
-                    INSERT INTO utenti(username, password, nome, cognome)
-                    VALUES (%s, %s, %s, %s)
-                    RETURNING id;
+                    INSERT INTO utenti(username, password, nome, cognome, posizione)
+                    VALUES (%s, %s, %s, %s, %s)
                     ''',
                     (username, password, nome, cognome)
                 )
-                return cur.fetchone()[0]  # ritorna l'id inserito
 
     def insert_dati(self, id_player, bpm, passi, velocità):
         with self.connection:
@@ -55,11 +53,31 @@ class DB:
                     '''
                     INSERT INTO dati(id_player, bpm, passi, velocità)
                     VALUES (%s, %s, %s, %s)
-                    RETURNING id;
                     ''',
                     (id_player, bpm, passi, velocità)
                 )
-                return cur.fetchone()[0]  # ritorna l'id inserito
+
+    def insert_convocazioni(self, id_player ,convocazione):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''
+                    INSERT INTO convocazioni(convocazione)
+                    VALUES (%s,%s)
+                    ''',
+                    (id_player, convocazione)  
+                )
+
+    def insert_disponibilità(self, id_player ,infortunio,ammonizioni):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''
+                    INSERT INTO convocazioni(convocazione)
+                    VALUES (%s,%s,%s)
+                    ''',
+                    (id_player, infortunio, ammonizioni)  
+                )
 
     # select
 
@@ -101,3 +119,22 @@ class DB:
                         'nome': tupla[3],
                         'cognome': tupla[4]
                     }
+                
+    def select_convocazioni(self, id_player):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''SELECT * FROM convocazioni
+                        id_player = %s   
+                    ''',
+                    (id_player)
+                )
+                tupla = cur.fetchone()
+                if tupla is None:
+                    return 0
+                else: 
+                    return{
+                        'infortunio' : tupla[3]
+                        'ammonizione': tupla[4]
+                    }
+

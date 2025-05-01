@@ -1155,19 +1155,40 @@ def api_app_utente(id):
 def api_app_dati(id):
     if (id != None and id != ''):
         if request.method == 'POST':
-            return None
+            try:
+                #{"id_player:n, bpm:98, passi:72, velocità:4m/s"}
+                json = request.json
+                id_player = json["id_player"]
+                bpm = json["password"]
+                passi = json["passi"]
+                velocità = json["velocita"]
+                db_helper.insert_dati(id_player, bpm, passi, velocità)
+                return jsonify({'code': 200, 'message': 'OK',}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            logger.error('No id argument passed')
+            return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 
-
-
-# SERVICES
-@app.route('/services', methods=['GET'])
-def services():
-    return render_template('services.html')
-
-
-
-
-
+@app.route('/api/app/infortuni/<id>', methods=['POST'])
+def api_app_dati(id):
+    if (id != None and id != ''):
+        if request.method == 'POST':
+            try:
+                #{"id_player:n, ammonizone:False, infortunio:True"}
+                json = request.json
+                id_player = json["id_player"]
+                ammonizione = json["ammonizione"]
+                infortunio = json["infortunio"]
+                db_helper.insert_disponibilità(id_player, ammonizione, infortunio)
+                return jsonify({'code': 200, 'message': 'OK',}), 200
+            except Exception as e:
+                logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+        else:
+            logger.error('No id argument passed')
+            return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 '''
 CODICI JSON
 200 messaggio inviato
@@ -1202,7 +1223,7 @@ if __name__ == "__main__":
     #nao_audiorecorder(5)
     #nao_train_move()
 
-    #id = db_helper.insert_utente("nabihaseeb","ciao","nabi","haseeb")
+    #db_helper.insert_utente("nabihaseeb","ciao","nabi","haseeb")
     #logger.info("Result query: %s , id=%s", oggetto, id)
 
     #utenti = db_helper.select_utenti()
