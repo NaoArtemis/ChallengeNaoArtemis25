@@ -35,7 +35,7 @@ class DB:
                     (player_id, time_sec, x_pos, y_pos, team)
                 )
 
-    def insert_utente(self, username, password, nome, cognome):
+    def insert_utente(self, username, password, nome, cognome, posizione):
         with self.connection:
             with self.connection.cursor() as cur:
                 cur.execute(
@@ -43,7 +43,7 @@ class DB:
                     INSERT INTO utenti(username, password, nome, cognome, posizione)
                     VALUES (%s, %s, %s, %s, %s)
                     ''',
-                    (username, password, nome, cognome)
+                    (username, password, nome, cognome, posizione)
                 )
 
     def insert_dati(self, id_player, bpm, passi, velocità):
@@ -133,8 +133,8 @@ class DB:
                 if tupla is None:
                     return 0
                 else: 
-                    return{
-                        'infortunio' : tupla[3]
+                    return {
+                        'infortunio' : tupla[3],
                         'ammonizione': tupla[4]
                     }
 

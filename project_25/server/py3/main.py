@@ -42,6 +42,11 @@ import logging
 logging.getLogger("ultralytics").setLevel(logging.CRITICAL)
 import torch
 from transformers import AutoProcessor, AutoModel
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+from scipy.spatial import Voronoi, voronoi_plot_2d
+import io
 
 
 
@@ -203,6 +208,7 @@ def classify_with_siglip(detections, frame):
 
 def analyze_frame(frame):
     start_time = time.time() # per contare gli fps
+    global tracked, coords # le rendo globali oper vornoi_diagram
     global_variabili()
 
     global frame_id, last_yolo_detections, last_yolo_frame
@@ -596,6 +602,70 @@ def computer_vision():
                 frame_data = parts[-1]
 
     return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+matplotlib.use('Agg')  # Usa un backend non interattivo
+
+@app.route('/voronoi_diagram', methods=['GET'])
+def voronoi_diagram():
+    global_variabili()
+    if MODEL_PLAYERS is None or tracker is None or processor is None or model is None:
+        inizializzazione()
+    flask_response = webcam_aruco()
+
+    def generate():
+        frame_data = b''
+        for chunk in flask_response.response:
+            frame_data += chunk
+            if b'--frame\r\n' in frame_data:
+                parts = frame_data.split(b'--frame\r\n')
+                for part in parts[:-1]:
+                    if b'Content-Type: image/jpeg\r\n\r\n' in part:
+                        img_bytes = part.split(b'\r\n\r\n')[-1]
+                        try:
+                            frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+                            if frame is not None:
+                                analyze_frame(frame)  # aggiorna tracked, team, coords
+
+                                if 'tracked' not in globals() or 'coords' not in globals():
+                                    continue
+                                if len(coords) < 4:
+                                    continue
+
+                                teams = tracked.data["team"] if hasattr(tracked, 'data') and "team" in tracked.data else []
+
+                                # Disegna campo e Voronoi
+                                fig, ax = plt.subplots(figsize=(6, 3))
+                                ax.set_xlim(0, 30)
+                                ax.set_ylim(15, 0)
+                                ax.set_facecolor("#a5bc94")  # colore campo
+
+                                points = np.array(coords)
+                                vor = Voronoi(points)
+                                voronoi_plot_2d(vor, ax=ax, show_vertices=False, show_points=False, line_colors='white')
+
+                                for (x, y), team, pid in zip(coords, teams, tracked.tracker_id):
+                                    color = TEAM_A_COLOR if team == TEAM_A_COLOR else TEAM_B_COLOR
+                                    circle = Circle((x, y), 0.5, edgecolor='black', facecolor=color, linewidth=1.5)
+                                    ax.add_patch(circle)
+                                    ax.text(x, y, str(pid), color='white', ha='center', va='center', fontsize=8)
+
+                                ax.axis('off')
+                                buf = io.BytesIO()
+                                plt.savefig(buf, format='jpg', bbox_inches='tight')
+                                buf.seek(0)
+                                frame_bytes = buf.read()
+                                buf.close()
+                                plt.close(fig)
+
+                                yield (b'--frame\r\n'
+                                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+                        except Exception as e:
+                            print("Errore nel generare il Voronoi:", e)
+                frame_data = parts[-1]
+
+    return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
+
 
 def nao_move_back(angle):
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "angle":angle}
@@ -1172,7 +1242,7 @@ def api_app_dati(id):
             return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 
 @app.route('/api/app/infortuni/<id>', methods=['POST'])
-def api_app_dati(id):
+def api_app_infortuni(id):
     if (id != None and id != ''):
         if request.method == 'POST':
             try:
@@ -1192,7 +1262,7 @@ def api_app_dati(id):
 
 
 @app.route('/api/app/utenti/<id>', methods=['POST'])
-def api_app_dati(id):
+def api_app_utenti(id):
     if (id != None and id != ''):
         if request.method == 'POST':
             try:

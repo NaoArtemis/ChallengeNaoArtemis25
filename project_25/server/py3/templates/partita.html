@@ -21,18 +21,29 @@
     
     <!--main-->
     <div class="main-content">
-        <img id="computer_vision" class="webcam-container joystick-panel" />
+        <img id="computer_vision" class="webcam-container joystick-panel">
     
         <button id="nao-cam-btn" class="btn btn-joystick" onclick="computer_vision()">Partita</button>
-    
-        <script>
-            const computer_visionUrl = "{{ url_for('computer_vision') }}";
-    
-            function computer_vision() {
-                document.getElementById("computer_vision").src = computer_visionUrl;
-            }
-        </script>
     </div>
+    <div class="main-content">
+        <img id="vornoi_diagram" class="webcam-container joystick-panel">
+
+        <button id="nao-cam-btn" class="btn btn-joystick" onclick="vornoi_diagram()">vornoi_diagram</button>
+    </div>
+    
+    <script>
+        const computer_visionUrl = "{{ url_for('computer_vision') }}";
+
+        function computer_vision() {
+            document.getElementById("computer_vision").src = computer_visionUrl;
+        }
+
+        const vornoi_diagramUrl = "{{ url_for('voronoi_diagram') }}";
+
+        function vornoi_diagram(){
+            document.getElementById("vornoi_diagram").src = vornoi_diagramUrl;
+        }
+    </script>
 
 
     <!--javascript-->
