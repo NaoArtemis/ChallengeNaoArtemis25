@@ -936,9 +936,6 @@ def nao_tts_audiofile(filename): # FILE AUDIO NELLA CARTELLA tts_audio DI PY2
     logger.info(str(response.text))
 
 
-
-
-
 # PAGINE WEB
 # Per impedire all'utente di tornare indietro dopo aver fatto il logout
 @app.after_request
@@ -1010,6 +1007,12 @@ def competition():
 @login_required
 def partita():
     return render_template('partita.html')
+
+@app.route('/registra', methods = ['GET']) 
+# tramite questa pagina creai nuovi utenti e salvi nel database tramite funzione api_app_utenti(id):
+@login_required
+def database():
+    return render_template('registra.html')
 
 # API
 @app.route('/api', methods=['GET'])

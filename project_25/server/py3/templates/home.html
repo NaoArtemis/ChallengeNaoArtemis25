@@ -15,6 +15,7 @@
             <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" alt="BetterNao Logo">
         </div>
         <div class="top-bar-buttons">
+            <button id="registra" class="btn btn-volume">Registra</button>
             <button id="logout" class="btn btn-logout">Logout</button>
         </div>
     </div>
@@ -29,7 +30,6 @@
             <button id="competition" class="large-homebutton"><span>Competition</span></button>
             <button id="joystick" class="large-homebutton"><span>Joystick</span></button>
             <button id="" class="large-homebutton"><span>Squad</span></button>
-            <button id="" class="large-homebutton"><span>Database</span></button>
         </div>
     </div>
 
@@ -76,6 +76,18 @@
                     window.location.href = response.url;
                 } else {
                     window.location.href = "/competition";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#registra").addEventListener("click", function() {
+            fetch("/registra", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = "/registra";
                 }
             })
             .catch(error => console.error("Errore:", error));
