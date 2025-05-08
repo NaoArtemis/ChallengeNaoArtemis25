@@ -1,7 +1,7 @@
 body {
   font-family: "Poppins", sans-serif;
   color: #040000;
-  background-color: #63f74f;
+  background-color: #223069;
 }
 
 .layout_padding {
@@ -277,7 +277,7 @@ a:focus {
 }
 
 .slider_section .slider_heading h2 span {
-  color: #63f74f;
+  color: #223069;
 }
 
 .slider_section .detail-box h1 {
@@ -374,7 +374,7 @@ a:focus {
   background-repeat: no-repeat;
   background-size: 8px;
   background-position: center;
-  background-color: #63f74f;
+  background-color: #223069;
   border-radius: 100%;
 }
 
@@ -418,7 +418,7 @@ a:focus {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  color: #63f74f;
+  color: #223069;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
 }
@@ -427,7 +427,7 @@ a:focus {
   border: none;
   width: 1px;
   height: 200px;
-  background-color: #63f74f;
+  background-color: #223069;
   margin: 2rem 0;
 }
 
@@ -682,7 +682,7 @@ a:focus {
   height: 75px;
   border-radius: 100%;
   text-align: center;
-  background-color: #63f74f;
+  background-color: #223069;
   color: #ffffff;
   display: -webkit-box;
   display: -ms-flexbox;
