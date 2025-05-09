@@ -90,219 +90,6 @@ def make_sha256(s):
 #      computer vision          #
 #################################
 
-#pre impostazione omografia
-'''
-molto importante posizionare bene gli aruco, una non lettura o poszione sbagliata può causare errore 
-nell'applicazione della omografia cio può alterare im modo negativo la determinazione delle posizioni 
-dei giocatori.
-'''
-#grazie a questo dizionario e aruco(id:1,2,3,4) riusciamo ad definire la matriche homography
-id_to_coord = {
-    1: (0, 0),       # Angolo in alto a sinistra
-    2: (30, 0),      # Angolo in alto a destra
-    3: (0, 15),      # Angolo in basso a sinistra
-    4: (30, 15)      # Angolo in basso a destra
-}
-
-def inizializzazione():
-    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time, tempo_fine_primo_tempo
-    global MODEL_PLAYERS, tracker, processor, model, homography_matrix
-    global TEAM_A_COLOR, TEAM_B_COLOR
-    global omografia_pronta, task_2
-    global frame_id, last_yolo_detections, last_yolo_frame
-
-    # Stato partita
-    partita_iniziata = False
-    partita_pausa = False
-    partita_secondo_tempo = False
-    partita_finita = False
-    start_time = None
-    tempo_fine_primo_tempo = 0  # per gestire cambio campo
-
-    ### Oggetti AI e tracking ###
-
-    #inizializzazione modello yolo
-    #se metto verbose true nella console python mi verebbe stampata l'analisi di ogni frame
-    MODEL_PLAYERS = YOLO("project_25/server/py3/models/yolov8n_persone.pt", verbose=False) 
-    tracker = sv.ByteTrack()
-
-    #inizializzazione modello siglip
-    processor = AutoProcessor.from_pretrained("project_25/server/py3/models/siglip")
-    model = AutoModel.from_pretrained("project_25/server/py3/models/siglip")
-
-    #matrice omografica
-    homography_matrix = None
-    #flag omografia
-    omografia_pronta = False
-
-    # Costanti
-    TEAM_A_COLOR = "gray"
-    TEAM_B_COLOR = "blue"
-
-    #gestione analisi frame
-    frame_id = 0
-    last_yolo_detections = None
-    last_yolo_frame = None
-
-inizializzazione()
-
-def global_variabili():
-    global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita, start_time, tempo_fine_primo_tempo
-    global MODEL_PLAYERS, tracker, processor, model, homography_matrix
-    global task_2
-    global game_time, game_time_text, coords
-    global ellipse_annotator, label_annotator, triangle_annotator
-    global frame, np_frame, img_bytes, parts
-    global x_center, y_bottom, ball_box
-    global pixel_np, real_np, cx, cy, marker_ids
-    global speech_file_path, speech_recognition
-    global user_obj, client, username, password
-    global frame_with_faces, x, y, x_speed, y_speed
-    global frame_id, last_yolo_detections, last_yolo_frame
-    global omografia_pronta
-    # inizializzo se non esistono (protezione)
-    if 'coords' not in globals(): coords = []
-    if 'game_time' not in globals(): game_time = 0
-    if 'game_time_text' not in globals(): game_time_text = "00:00"
-
-def apply_homography(boxes):
-    #omografia tecnica utilizzata per trasfromare coordinate pixel in coordinate reali
-    global_variabili()
-    coords = []
-    if not omografia_pronta or homography_matrix is None or homography_matrix.shape != (3, 3):
-        return coords  # ritorna lista vuota senza errore
-
-    for box in boxes:
-        x = (box[0] + box[2]) / 2
-        y = box[3]
-        pt = np.array([x, y, 1])
-        transformed = homography_matrix @ pt
-        transformed /= transformed[2]
-        coords.append((transformed[0], transformed[1]))
-    return coords
-
-def classify_with_siglip(detections, frame):
-    global_variabili()
-    teams = []
-    for bbox in detections.xyxy:
-        x1, y1, x2, y2 = map(int, bbox)
-        crop = frame[y1:y2, x1:x2]
-        if crop.size == 0:
-            teams.append("unknown")
-            continue
-        inputs_img = processor(images=crop, return_tensors="pt")
-        inputs_text = processor(
-            text=[f"a soccer player with {TEAM_A_COLOR} jersey", f"a soccer player with {TEAM_B_COLOR} jersey"],
-            return_tensors="pt",
-            padding=True
-        )
-        with torch.no_grad():
-            img_emb = model.get_image_features(**inputs_img)
-            text_emb = model.get_text_features(**inputs_text)
-        img_emb = img_emb / img_emb.norm(dim=-1, keepdim=True)
-        text_emb = text_emb / text_emb.norm(dim=-1, keepdim=True)
-        sim = (img_emb @ text_emb.T)[0]
-        teams.append(TEAM_A_COLOR if sim[0] > sim[1] else TEAM_B_COLOR)
-    detections.data["team"] = teams
-    return detections
-
-def analyze_frame(frame):
-    start_time = time.time() # per contare gli fps
-    global tracked, coords # le rendo globali oper vornoi_diagram
-    global_variabili()
-
-    global frame_id, last_yolo_detections, last_yolo_frame
-    frame_id += 1
-    run_yolo = frame_id % 10 == 0
-
-    #se partita già iniziata calcolo il tempo, else imposto il tempo a 00:00
-    if partita_iniziata and not partita_finita:
-        # se siamo nel secondo tempo, aggiungiamo il tempo del primo tempo per mantenere continuità
-        now_time = time.time()
-        if start_time is not None:
-            game_time = now_time - start_time + tempo_fine_primo_tempo if partita_secondo_tempo else now_time - start_time
-        else:
-            game_time = 0
-        game_time_text = "PAUSA" if partita_pausa else f"{int(game_time // 60):02d}:{int(game_time % 60):02d}"
-    else:
-        game_time_text = "00:00"
-
-    #applico il modello per la detection di persone
-    
-    if run_yolo:
-        results_players = MODEL_PLAYERS(frame, conf=0.2)
-        detections = sv.Detections.from_ultralytics(results_players[0])
-        last_yolo_detections = detections
-        last_yolo_frame = frame
-    else:
-        detections = last_yolo_detections if last_yolo_detections is not None else sv.Detections.empty()
-    
-    
-    ball_detections = detections[detections.class_id == 0]
-    player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
-    
-
-    
-    if len(player_detections) > 0:
-        tracked = tracker.update_with_detections(player_detections)
-        tracked = classify_with_siglip(tracked, frame)
-        coords = apply_homography(tracked.xyxy)
-
-        #salvo le coordinate nel database
-        for i, c in enumerate(coords):
-            db_helper.insert_player(
-                f"player_{tracked.tracker_id[i]}",
-                game_time,
-                c[0],
-                c[1],
-                tracked.data['team'][i]
-            )
-            logger.info("Result query: %s , id=%s", "player", tracked.tracker_id[i]) # funzione richimata dal db_helper
-
-    else:
-        tracked = player_detections
-
-    if len(ball_detections) > 0:
-        # Prende solo la prima palla rilevata, per non andare in conflitto con i palloni a bordo campo
-        ball_box = ball_detections.xyxy[0]
-        x_center = (ball_box[0] + ball_box[2]) / 2
-        y_bottom = ball_box[3]
-
-        pt = np.array([x_center, y_bottom, 1])
-        transformed = homography_matrix @ pt
-        transformed /= transformed[2]
-
-        db_helper.insert_player(
-            "ball",
-            game_time,
-            transformed[0],
-            transformed[1],
-            "none"
-        )
-        logger.info("Result query: %s , id=%s", "ball", "ball")
-    
-    annotated = frame
-    
-    if len(tracked) > 0:
-        labels = [f"#{id} ({team})" for id, team in zip(tracked.tracker_id, tracked.data["team"])]
-        ellipse_annotator = sv.EllipseAnnotator(color_lookup=sv.ColorLookup.INDEX, thickness=2)
-        label_annotator = sv.LabelAnnotator(color_lookup=sv.ColorLookup.INDEX, text_position=sv.Position.BOTTOM_CENTER, text_scale=0.5)
-        annotated = ellipse_annotator.annotate(scene=annotated, detections=tracked)
-        annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
-    if len(ball_detections) > 0:
-        triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
-        annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
-    
-    cv2.putText(annotated, f"Game Time: {game_time_text}", (10, 30), cv2.FONT_HERSHEY_DUPLEX , 1, (0, 255, 255), 2)
-    
-    # Calcola il tempo impiegato
-    elapsed_time = (time.time() - start_time) * 1000  # lo trasformo in millisecondi
-    latency_text = f"Latenza: {elapsed_time:.2f} ms"
-    # Scrive il tempo impiegato sull'immagine
-    cv2.putText(annotated, str(latency_text), (10, 60), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 255, 0), 2)             
-    return annotated
-
-
 class WebcamUSBResponseSimulator:
     def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
@@ -462,8 +249,6 @@ def webcam_aruco():
 
     
     def generate_frames():
-        #recupero variabili globali
-        global_variabili()
 
         boundary     = b'--frame\r\n'
         content_type = b'Content-Type: image/jpeg\r\n\r\n'
@@ -491,30 +276,9 @@ def webcam_aruco():
                             # Disegna i marker rilevati sul frame
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
 
-                            pixel_points = []
-                            real_points = []
-
-                            for i, marker_id in enumerate(marker_ids.flatten()):
-                                if marker_id in id_to_coord:
-                                    corners = marker_corners[i][0]
-                                    cx = int(np.mean(corners[:, 0]))
-                                    cy = int(np.mean(corners[:, 1]))
-                                    pixel_points.append([cx, cy])
-                                    real_points.append(id_to_coord[marker_id])
-
-                            #riconosce i 4 aruco e assegna le coordinate omografice
-                            global omografia_pronta
-                            if len(pixel_points) == 4 and homography_matrix is None:
-                                print("Marker 1-2-3-4 rilevati, provo a calcolare omografia")
-                                pixel_np = np.array(pixel_points, dtype=np.float32)
-                                real_np = np.array(real_points, dtype=np.float32)
-                                homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
-                                print("Omografia calcolata:", homography_matrix)
-                                omografia_pronta = True  # flag attivo, si può iniziare partita
-
                             # GESTIONE PARTITA
                             global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita
-                            if 180 in marker_ids and not partita_iniziata and omografia_pronta:
+                            if 180 in marker_ids and not partita_iniziata:
                                 partita_iniziata = True
                                 start_time = time.time()
 
@@ -527,10 +291,6 @@ def webcam_aruco():
                             if 182 in marker_ids and not partita_secondo_tempo:
                                 partita_secondo_tempo = True
 
-                                # Inversione omografia se esiste (cambio campo)
-                                if homography_matrix is not None:
-                                    print("⚠️ Cambio campo: inverto la matrice omografica per secondo tempo")
-                                    homography_matrix = np.linalg.inv(homography_matrix)
                             
                             #FINE PARTITA
                             if 183 in marker_ids and not partita_finita:
@@ -568,103 +328,9 @@ def webcam_aruco():
 
     return Response(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/reset_omografia', methods=['GET']) #per risettare omografia, in caso di errore nella calibrazione
-def reset_omografia():
-    global homography_matrix, omografia_pronta
-    homography_matrix = None
-    omografia_pronta = False
-    return jsonify({"status": "ok", "message": "Omografia resettata"}), 200
 
-@app.route('/computer_vision', methods=['GET'])
-def computer_vision():
-    global_variabili()
-    if MODEL_PLAYERS is None or tracker is None or processor is None or model is None:
-        inizializzazione()
-    flask_response = webcam_aruco()
 
-    def generate():
-        frame_data = b''
-        for chunk in flask_response.response:
-            frame_data += chunk
-            if b'--frame\r\n' in frame_data:
-                parts = frame_data.split(b'--frame\r\n')
-                for part in parts[:-1]:
-                    if b'Content-Type: image/jpeg\r\n\r\n' in part:
-                        img_bytes = part.split(b'\r\n\r\n')[-1]
-                        try:
-                            frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-                            if frame is not None:
-                                analyzed = analyze_frame(frame)
-                                _, buffer = cv2.imencode('.jpg', analyzed)
-                                yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n'
-                        except Exception as e:
-                            print("Errore nell'elaborazione del frame:", e)
-                frame_data = parts[-1]
 
-    return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
-
-matplotlib.use('Agg')  # Usa un backend non interattivo
-
-@app.route('/voronoi_diagram', methods=['GET'])
-def voronoi_diagram():
-    global_variabili()
-    if MODEL_PLAYERS is None or tracker is None or processor is None or model is None:
-        inizializzazione()
-    flask_response = webcam_aruco()
-
-    def generate():
-        frame_data = b''
-        for chunk in flask_response.response:
-            frame_data += chunk
-            if b'--frame\r\n' in frame_data:
-                parts = frame_data.split(b'--frame\r\n')
-                for part in parts[:-1]:
-                    if b'Content-Type: image/jpeg\r\n\r\n' in part:
-                        img_bytes = part.split(b'\r\n\r\n')[-1]
-                        try:
-                            frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-                            if frame is not None:
-                                analyze_frame(frame)  # aggiorna tracked, team, coords
-
-                                if 'tracked' not in globals() or 'coords' not in globals():
-                                    continue
-                                if len(coords) < 4:
-                                    continue
-
-                                teams = tracked.data["team"] if hasattr(tracked, 'data') and "team" in tracked.data else []
-
-                                # Disegna campo e Voronoi
-                                fig, ax = plt.subplots(figsize=(6, 3))
-                                ax.set_xlim(0, 30)
-                                ax.set_ylim(15, 0)
-                                ax.set_facecolor("#a5bc94")  # colore campo
-
-                                points = np.array(coords)
-                                vor = Voronoi(points)
-                                voronoi_plot_2d(vor, ax=ax, show_vertices=False, show_points=False, line_colors='white')
-
-                                for (x, y), team, pid in zip(coords, teams, tracked.tracker_id):
-                                    color = TEAM_A_COLOR if team == TEAM_A_COLOR else TEAM_B_COLOR
-                                    circle = Circle((x, y), 0.5, edgecolor='black', facecolor=color, linewidth=1.5)
-                                    ax.add_patch(circle)
-                                    ax.text(x, y, str(pid), color='white', ha='center', va='center', fontsize=8)
-
-                                ax.axis('off')
-                                buf = io.BytesIO()
-                                plt.savefig(buf, format='jpg', bbox_inches='tight')
-                                buf.seek(0)
-                                frame_bytes = buf.read()
-                                buf.close()
-                                plt.close(fig)
-
-                                yield (b'--frame\r\n'
-                                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
-                        except Exception as e:
-                            print("Errore nel generare il Voronoi:", e)
-                frame_data = parts[-1]
-
-    return Response(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
 
 
 def nao_move_back(angle):
