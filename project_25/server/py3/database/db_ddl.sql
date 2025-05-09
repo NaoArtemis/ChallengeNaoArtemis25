@@ -1,12 +1,9 @@
-CREATE TABLE  player_positions (
-    id SERIAL PRIMARY KEY,
-    player_id TEXT,
-    time_sec REAL,
-    x_pos REAL,
-    y_pos REAL,
-    team TEXT,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+CREATE TABLE player_positions (
+    player_id INT,
+    timestamp DATETIME,
+    x_coordinate FLOAT,
+    y_coordinate FLOAT
+);
 
 CREATE TABLE utenti(
     id SERIAL PRIMARY KEY,
