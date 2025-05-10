@@ -37,6 +37,7 @@ import whisper
 import threading
 import sqlite3
 import supervision as sv
+from supervision import EllipseAnnotator, LabelAnnotator, ColorLookup, Position
 from ultralytics import YOLO
 import logging
 logging.getLogger("ultralytics").setLevel(logging.CRITICAL)
@@ -47,6 +48,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import io
+from sklearn.cluster import KMeans
+
 
 
 
@@ -89,7 +92,190 @@ def make_sha256(s):
 #################################
 #      computer vision          #
 #################################
+# variabili globali
+recording = False
+recording_thread = None
+video_writer = None
 
+#inzializzazione modelli
+MODEL_PLAYERS = None
+MODEL_LINES = None
+
+def inizializza_modelli_postpartita():
+    global MODEL_PLAYERS, MODEL_LINES
+    MODEL_PLAYERS = YOLO("project_25/server/py3/models/yolov8n_persone.pt", verbose=False)
+    MODEL_LINES   = YOLO("project_25/server/py3/models/yolov8_linee.pt", verbose=False)
+
+#recupero e salvataggio del video dal nao
+def start_video_recording_from_nao():
+    global recording, video_writer
+
+    data = {"nao_ip": nao_ip, "nao_port": nao_port}
+    url = f"http://127.0.0.1:5011/nao_webcam/{str(data)}"
+    response = requests.get(url, stream=True)
+
+    # MJPEG frame boundaries
+    boundary = b'--frame\r\n'
+    content_type = b'Content-Type: image/jpeg\r\n\r\n'
+    frame_data = b''
+
+    # setup video writer
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # AVI format
+    fps = 20.0
+    frame_size = (640, 480)
+    video_writer = cv2.VideoWriter('recordings/partita.avi', fourcc, fps, frame_size)
+
+    recording = True
+    for chunk in response.iter_content(chunk_size=1024):
+        if not recording:
+            break
+        frame_data += chunk
+        if boundary in frame_data:
+            parts = frame_data.split(boundary)
+            for part in parts[:-1]:
+                if content_type in part:
+                    jpg = part.split(content_type)[-1]
+                    np_frame = np.frombuffer(jpg, dtype=np.uint8)
+                    frame = cv2.imdecode(np_frame, cv2.IMREAD_COLOR)
+                    if frame is not None:
+                        video_writer.write(frame)
+            frame_data = parts[-1]
+
+    video_writer.release()
+
+
+#analisi della partita(video catturato)
+def analizza_partita():
+    global db_helper
+    inizializza_modelli_postpartita()
+
+    video_path = "recordings/partita.avi"
+    output_path = "recordings/annotato.avi"
+
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("Errore: impossibile aprire il video")
+        return
+
+    width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps    = cap.get(cv2.CAP_PROP_FPS)
+
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+    tracker = sv.ByteTrack()
+    ellipse_annotator = EllipseAnnotator(color_lookup=sv.ColorLookup.INDEX, thickness=2)
+    label_annotator   = LabelAnnotator(color_lookup=sv.ColorLookup.INDEX, text_position=sv.Position.BOTTOM_CENTER, text_scale=0.5)
+
+    homography_matrix = None
+    frame_index = 0
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        ##########################
+        # STEP 1: omografia da linee
+        ##########################
+        if homography_matrix is None:
+            line_results = MODEL_LINES(frame, conf=0.3)
+            line_detections = sv.Detections.from_ultralytics(line_results[0])
+
+            line_coords = []
+            for box in line_detections.xyxy[:4]:
+                x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+                cx = (x1 + x2) / 2
+                cy = (y1 + y2) / 2
+                line_coords.append([cx, cy])
+
+            if len(line_coords) == 4:
+                pixel_np = np.array(line_coords, dtype=np.float32)
+                real_np = np.array([[0,0], [30,0], [0,15], [30,15]], dtype=np.float32)  # campo futsal 30x15 m
+                homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
+                print("✅ Omografia calcolata")
+
+        ##########################
+        # STEP 2: YOLO su giocatori/palla
+        ##########################
+        results = MODEL_PLAYERS(frame, conf=0.2)
+        detections = sv.Detections.from_ultralytics(results[0])
+        ball_detections = detections[detections.class_id == 0]
+        player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
+
+        if len(player_detections) == 0:
+            out.write(frame)
+            continue
+
+        ##########################
+        # STEP 3: tracking + KMeans
+        ##########################
+        tracked = tracker.update_with_detections(player_detections)
+        colors = []
+
+        for xyxy in tracked.xyxy:
+            x1, y1, x2, y2 = map(int, xyxy)
+            crop = frame[y1:y2, x1:x2]
+            if crop.size == 0:
+                colors.append([0, 0, 0])
+                continue
+            avg_color = np.mean(crop.reshape(-1, 3), axis=0)
+            colors.append(avg_color)
+
+        kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
+        teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
+        tracked.data["team"] = teams
+
+        ##########################
+        # STEP 4: Annotazione + salvataggio
+        ##########################
+        labels = [f"#{tid} ({team})" for tid, team in zip(tracked.tracker_id, teams)]
+        annotated = ellipse_annotator.annotate(scene=frame, detections=tracked)
+        annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
+
+        # Annotazione e salvataggio palla
+        if len(ball_detections) > 0:
+            ball_box = ball_detections.xyxy[0]
+            x_center = (ball_box[0] + ball_box[2]) / 2
+            y_bottom = ball_box[3]
+
+            triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
+            annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
+
+            if homography_matrix is not None:
+                pt = np.array([x_center, y_bottom, 1])
+                transformed = homography_matrix @ pt
+                transformed /= transformed[2]
+                x_real, y_real = transformed[0], transformed[1]
+            else:
+                x_real, y_real = x_center, y_bottom
+
+            db_helper.insert_player("ball", 0, x_real, y_real, "none")
+
+        # Salvataggio giocatori
+        for i, box in enumerate(tracked.xyxy):
+            x_pixel = (box[0] + box[2]) / 2
+            y_pixel = box[3]
+            pt = np.array([x_pixel, y_pixel, 1])
+            if homography_matrix is not None:
+                transformed = homography_matrix @ pt
+                transformed /= transformed[2]
+                x_real, y_real = transformed[0], transformed[1]
+            else:
+                x_real, y_real = x_pixel, y_pixel
+
+            player_id = f"player_{tracked.tracker_id[i]}"
+            db_helper.insert_player(player_id, 0, x_real, y_real, teams[i])
+
+        out.write(annotated)
+        frame_index += 1
+
+    cap.release()
+    out.release()
+
+
+# per recuperare stream video da webcam
 class WebcamUSBResponseSimulator:
     def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
         self.cap = cv2.VideoCapture(cam_index)
@@ -129,7 +315,36 @@ def webcam_usb():
     return WebcamUSBResponseSimulator()
 
 
-# tutte queste funzioni vengono richiamate nella funzione computer_vision, flask endpoint:/computer_vision
+
+#funzioni flask
+@app.route('/inizia_partita', methods=['GET'])
+def inizia_partita():
+    global recording, recording_thread
+
+    if recording:
+        return jsonify({"status": "error", "message": "Registrazione già in corso"}), 400
+
+    recording_thread = threading.Thread(target=start_video_recording_from_nao)
+    recording_thread.start()
+
+    return jsonify({"status": "ok", "message": "Sto registrando la partita dal NAO..."}), 200
+
+@app.route('/fine_partita', methods=['GET'])
+def fine_partita():
+    global recording, recording_thread
+
+    if not recording:
+        return jsonify({"status": "error", "message": "Nessuna registrazione attiva"}), 400
+
+    recording = False
+    if recording_thread is not None:
+        recording_thread.join()
+
+    # avvia analisi in background
+    threading.Thread(target=analizza_partita).start()
+
+    return jsonify({"status": "ok", "message": "Registrazione terminata. Analisi partita in corso..."}), 200
+
 
 #################################
 #            Tribuna            #
