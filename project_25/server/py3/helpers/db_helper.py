@@ -57,27 +57,33 @@ class DB:
                     (id_player, bpm, passi, velocità)
                 )
 
-    def insert_convocazioni(self, id_player ,convocazione):
+    def insert_convocazioni(self, id_player, convocazione):
         with self.connection:
             with self.connection.cursor() as cur:
                 cur.execute(
                     '''
-                    INSERT INTO convocazioni(convocazione)
-                    VALUES (%s,%s)
+                    INSERT INTO convocazioni(id_player, convocazione)
+                    VALUES (%s, %s)
+                    ON CONFLICT (id_player) DO UPDATE
+                    SET convocazione = EXCLUDED.convocazione
                     ''',
                     (id_player, convocazione)  
                 )
 
-    def insert_disponibilità(self, id_player ,infortunio,ammonizioni):
+    def insert_disponibilita(self, id_player, infortunio, ammonizione):
         with self.connection:
             with self.connection.cursor() as cur:
                 cur.execute(
                     '''
-                    INSERT INTO convocazioni(convocazione)
-                    VALUES (%s,%s,%s)
+                    INSERT INTO disponibilita(id_player, infortunio, ammonizione)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (id_player) DO UPDATE
+                    SET infortunio = EXCLUDED.infortunio,
+                        ammonizione = EXCLUDED.ammonizione
                     ''',
-                    (id_player, infortunio, ammonizioni)  
+                    (id_player, infortunio, ammonizione)  
                 )
+
 
     # select
 
@@ -138,3 +144,15 @@ class DB:
                         'ammonizione': tupla[4]
                     }
 
+    def select_players(self): # per recuperare i giocatori dal db
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''
+                    SELECT DISTINCT player_id 
+                    FROM player_positions 
+                    WHERE player_id != 'ball'
+                    '''
+                )
+                players = cur.fetchall()
+                return [p[0] for p in players]

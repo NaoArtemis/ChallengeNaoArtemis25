@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ongoing Match</title>
     <link rel="website icon" type="png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Collega il file CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+
     <!-- barra superiore-->
     <div class="top-bar">
         <div class="logo">
@@ -19,35 +20,94 @@
         </div>
     </div>
     
-    <!--main-->
-    <div class="main-content">
-        <img id="computer_vision" class="webcam-container joystick-panel">
-    
-        <button id="nao-cam-btn" class="btn btn-joystick" onclick="computer_vision()">Partita</button>
-    </div>
-    <div class="main-content">
-        <img id="vornoi_diagram" class="webcam-container joystick-panel">
 
-        <button id="nao-cam-btn" class="btn btn-joystick" onclick="vornoi_diagram()">vornoi_diagram</button>
+    <!-- main -->
+    <div class="main-content">
+        <h1>Gestione Partita</h1>
+
+        <div id="status-message" style="margin-top: 15px; font-weight: bold; color: #333;"></div>
+
+        <!-- Controlli partita -->
+        <div>
+            <button class="btn btn-joystick" onclick="iniziaPartita()">Inizia Partita</button>
+            <button class="btn btn-joystick" onclick="finePartita()">Fine Partita</button>
+        </div>
+
+        <!-- Video Voronoi -->        
+        <div>
+            <h2>Video Voronoi</h2>
+            <video controls style="max-width: 80%; border: 2px solid #333;">
+                <source src="/stream_voronoi" type="video/avi">
+                Il tuo browser non supporta il video.
+            </video>
+        </div>
+
+        <!-- Heatmap giocatori -->
+        <div>
+            <h2>Heatmap Giocatori</h2>
+            {% for player in players %}
+                <button class="btn btn-joystick" onclick="showHeatmap('{{ player }}')">{{ player }}</button>
+            {% endfor %}
+        </div>
+
+        <script>
+            function iniziaPartita() {
+                fetch('/inizia_partita').then(() => alert("Registrazione partita avviata"));
+            }
+        
+            function finePartita() {
+                fetch('/fine_partita').then(() => {
+                    alert("Registrazione terminata. Analisi avviata");
+                    // attendo 5 secondi e poi aggiorno lista player
+                    setTimeout(aggiornaListaGiocatori, 5000);
+                });
+            }
+        
+            function showHeatmap(player_id) {
+                document.getElementById("heatmap-container").innerHTML = '<img src="/heatmap/' + player_id + '" alt="Heatmap ' + player_id + '" style="max-width: 80%; border: 2px solid #333;">';
+            }
+        
+            function aggiornaListaGiocatori() {
+                fetch('/api/players')
+                    .then(response => response.json())
+                    .then(players => {
+                        let container = document.querySelector(".main-content div:nth-of-type(3)");
+                        container.innerHTML = '<h2>Heatmap Giocatori</h2>';
+                        players.forEach(player => {
+                            let btn = document.createElement("button");
+                            btn.className = "btn btn-joystick";
+                            btn.textContent = player;
+                            btn.onclick = () => showHeatmap(player);
+                            container.appendChild(btn);
+                        });
+                    });
+            }
+        </script>
+        
+        <!-- Container per la heatmap -->
+        <div id="heatmap-container" style="margin-top: 20px;"></div>
     </div>
-    
+
+    <!-- Script -->
     <script>
-        const computer_visionUrl = "{{ url_for('computer_vision') }}";
-
-        function computer_vision() {
-            document.getElementById("computer_vision").src = computer_visionUrl;
+        function finePartita() {
+            fetch('/fine_partita').then(() => {
+                document.getElementById("status-message").innerText = "✅ Registrazione terminata. Analisi partita in corso... Attendere qualche minuto";
+                // attendo 5 secondi e poi aggiorno lista player
+                setTimeout(() => {
+                    aggiornaListaGiocatori();
+                    document.getElementById("status-message").innerText = ""; // ✅ rimuove messaggio dopo aggiornamento
+                }, 5000);
+            });
         }
 
-        const vornoi_diagramUrl = "{{ url_for('voronoi_diagram') }}";
 
-        function vornoi_diagram(){
-            document.getElementById("vornoi_diagram").src = vornoi_diagramUrl;
+        function showHeatmap(player_id) {
+            document.getElementById("heatmap-container").innerHTML = '<img src="/heatmap/' + player_id + '" alt="Heatmap ' + player_id + '" style="max-width: 80%; border: 2px solid #333;">';
         }
     </script>
 
-
-    <!--javascript-->
-    <script src = "{{ url_for('static', filename='script/script.js') }}">
-    </script>
+    <!-- tuo JS -->
+    <script src="{{ url_for('static', filename='script/script.js') }}"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ Questo server si interfaccia con l'utente, il database e AI attraverso python3.
 # Modules
 import time
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
-from flask import Flask, render_template, Response, jsonify, request, redirect, url_for
+from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, send_file
 from hashlib import md5, sha256
 from datetime import datetime
 import requests
@@ -49,6 +49,9 @@ from matplotlib.patches import Circle
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import io
 from sklearn.cluster import KMeans
+import shutil
+import seaborn as sns
+
 
 
 
@@ -110,9 +113,13 @@ def inizializza_modelli_postpartita():
 def start_video_recording_from_nao():
     global recording, video_writer
 
-    data = {"nao_ip": nao_ip, "nao_port": nao_port}
-    url = f"http://127.0.0.1:5011/nao_webcam/{str(data)}"
-    response = requests.get(url, stream=True)
+    #se vuoi usare nao
+    #data = {"nao_ip": nao_ip, "nao_port": nao_port}
+    #url = f"http://127.0.0.1:5011/nao_webcam/{str(data)}"
+    #response = requests.get(url, stream=True)
+
+    #se vuoi usare webcam
+    response = webcam_usb()
 
     # MJPEG frame boundaries
     boundary = b'--frame\r\n'
@@ -142,6 +149,86 @@ def start_video_recording_from_nao():
             frame_data = parts[-1]
 
     video_writer.release()
+
+#formazione vornoi soccer
+def genera_video_voronoi():
+    conn = sqlite3.connect('project_25/database/naoartemis.db')  # o il tuo path reale
+    cursor = conn.cursor()
+
+    output_path = "recordings/voronoi_video.avi"
+    frame_width = 640
+    frame_height = 480
+    fps = 20.0
+
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    video_writer = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
+
+    frame_count = int(cursor.execute("SELECT COUNT(DISTINCT id_frame) FROM player_positions").fetchone()[0])
+
+    for frame_id in range(frame_count):
+        cursor.execute("""
+            SELECT x, y, team FROM player_positions WHERE id_frame = ?
+        """, (frame_id,))
+        rows = cursor.fetchall()
+        if len(rows) < 4:
+            continue  # servono almeno 4 punti per Voronoi
+
+        coords = np.array([[row[0], row[1]] for row in rows])
+        teams = [row[2] for row in rows]
+
+        fig, ax = plt.subplots(figsize=(6.4, 4.8))  # formato 640x480
+        ax.set_xlim(0, 30)
+        ax.set_ylim(15, 0)
+        ax.set_facecolor("#a5bc94")
+
+        vor = Voronoi(coords)
+        voronoi_plot_2d(vor, ax=ax, show_vertices=False, show_points=False, line_colors='white')
+
+        for (x, y), team in zip(coords, teams):
+            color = 'blue' if team == 'blue' else 'red'
+            ax.plot(x, y, 'o', color=color)
+
+        ax.axis('off')
+        fig.canvas.draw()
+        img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+        img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        img = cv2.resize(img, (frame_width, frame_height))
+        video_writer.write(img)
+        plt.close(fig)
+
+    video_writer.release()
+    conn.close()
+
+
+#generazione heatmap
+def genera_heatmap_giocatori():
+    os.makedirs("heatmaps", exist_ok=True)
+    conn = sqlite3.connect('project_25/database/naoartemis.db') 
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT DISTINCT player_id FROM player_positions WHERE player_id != 'ball'")
+    players = cursor.fetchall()
+
+    for (player_id,) in players:
+        cursor.execute("""
+            SELECT x, y FROM player_positions WHERE player_id = ?
+        """, (player_id,))
+        rows = cursor.fetchall()
+        if not rows:
+            continue
+
+        x_coords, y_coords = zip(*rows)
+        plt.figure(figsize=(6.4, 4.8))  # 640x480
+        ax = sns.kdeplot(x=x_coords, y=y_coords, fill=True, cmap="Reds", bw_adjust=0.5, thresh=0.05)
+        ax.set_xlim(0, 30)
+        ax.set_ylim(15, 0)
+        ax.set_facecolor("#a5bc94")
+        plt.axis('off')
+        plt.savefig(f"heatmaps/{player_id}.png", bbox_inches='tight', pad_inches=0)
+        plt.close()
+
+    conn.close()
+
 
 
 #analisi della partita(video catturato)
@@ -274,7 +361,13 @@ def analizza_partita():
     cap.release()
     out.release()
 
+    #generazione vornoi
+    genera_video_voronoi()
+    #generazione heatmap
+    genera_heatmap_giocatori()
 
+    shutil.copy("recordings/voronoi_video.avi", "static/voronoi_video.mp4")
+    
 # per recuperare stream video da webcam
 class WebcamUSBResponseSimulator:
     def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
@@ -344,6 +437,19 @@ def fine_partita():
     threading.Thread(target=analizza_partita).start()
 
     return jsonify({"status": "ok", "message": "Registrazione terminata. Analisi partita in corso..."}), 200
+
+@app.route('/stream_voronoi')
+def stream_voronoi():
+    path = "recordings/voronoi_video.avi"
+    if os.path.exists(path):
+        return send_file(path, mimetype='video/avi')
+    else:
+        return "Video non trovato", 404
+    
+@app.route('/api/players', methods=['GET'])
+def api_players():
+    players = db_helper.select_players()
+    return jsonify(players)
 
 
 #################################
@@ -491,26 +597,6 @@ def webcam_aruco():
                             # Disegna i marker rilevati sul frame
                             aruco.drawDetectedMarkers(frame, marker_corners, marker_ids)
 
-                            # GESTIONE PARTITA
-                            global partita_iniziata, partita_pausa, partita_secondo_tempo, partita_finita
-                            if 180 in marker_ids and not partita_iniziata:
-                                partita_iniziata = True
-                                start_time = time.time()
-
-                            # PAUSA PARTITA
-                            
-                            if 181 in marker_ids and not partita_pausa:
-                                partita_pausa = True
-
-                            # INIZIO SECONDO TEMPO
-                            if 182 in marker_ids and not partita_secondo_tempo:
-                                partita_secondo_tempo = True
-
-                            
-                            #FINE PARTITA
-                            if 183 in marker_ids and not partita_finita:
-                                partita_finita = True
-
                             # TASK 2
 
                             #SCORE PARTITA
@@ -545,9 +631,6 @@ def webcam_aruco():
 
 
 
-
-
-
 def nao_move_back(angle):
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "angle":angle}
     url      = "http://127.0.0.1:5011/nao_move_back/" + str(data) 
@@ -567,9 +650,6 @@ def nao_move_fast_stop():
     url      = "http://127.0.0.1:5011/nao_move_fast_stop/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))  
-
-
-
 
 
 def nao_get_sensor_data():
@@ -602,9 +682,6 @@ def nao_train_move():
         writer = csv.writer(file)
         writer.writerow(['gyro_x', 'gyro_y', 'acc_x', 'acc_y', 'acc_z', 'x_speed', 'y_speed', 'theta_speed'])
         writer.writerows(data)
-
-
-
 
 
 
@@ -887,7 +964,8 @@ def competition():
 @app.route('/partita', methods=['GET'])
 @login_required
 def partita():
-    return render_template('partita.html')
+    players = db_helper.select_players()
+    return render_template('partita.html', players=players)
 
 @app.route('/registra', methods = ['GET']) 
 # tramite questa pagina creai nuovi utenti e salvi nel database tramite funzione api_app_utenti(id):
