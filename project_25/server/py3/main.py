@@ -1197,7 +1197,7 @@ def api_app_dati(id):
                 #{"id_player:n, bpm:98, passi:72, velocità:4m/s"}
                 json = request.json
                 id_player = json["id_player"]
-                bpm = json["password"]
+                bpm = json["bpm"]
                 passi = json["passi"]
                 velocità = json["velocita"]
                 db_helper.insert_dati(id_player, bpm, passi, velocità)

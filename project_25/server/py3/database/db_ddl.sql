@@ -19,18 +19,18 @@ CREATE TABLE dati (
     bpm INTEGER,
     passi INTEGER,
     velocità INTEGER,
-    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE convocazioni (
     id_player INT PRIMARY KEY,
     convocazione BOOLEAN,
-    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE disponibilita (
     id_player INT PRIMARY KEY,
     infortunio BOOLEAN,
     ammonizione BOOLEAN,
-    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY(id_player) REFERENCES utenti(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
