@@ -104,10 +104,15 @@ video_writer = None
 MODEL_PLAYERS = None
 MODEL_LINES = None
 
+# path sicuro globale per il video partita
+script_dir = os.path.dirname(os.path.abspath(__file__))
+video_path_mp4 = os.path.join(script_dir, "recordings", "partita", "partita.mp4")
+
 def inizializza_modelli_postpartita():
     global MODEL_PLAYERS, MODEL_LINES
-    MODEL_PLAYERS = YOLO("project_25/server/py3/models/yolov8n_persone.pt", verbose=False)
-    MODEL_LINES   = YOLO("project_25/server/py3/models/yolov8_linee.pt", verbose=False)
+    model_dir = os.path.join(os.path.dirname(__file__), "models")
+    MODEL_PLAYERS = YOLO(os.path.join(model_dir, "yolov8n_persone.pt"), verbose=False)
+    MODEL_LINES   = YOLO(os.path.join(model_dir, "yolo_lines_8n.pt"), verbose=False)
 
 #recupero e salvataggio del video dal nao
 def start_video_recording_from_nao():
@@ -127,10 +132,11 @@ def start_video_recording_from_nao():
     frame_data = b''
 
     # setup video writer
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # AVI format
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # mp4 format
     fps = 20.0
     frame_size = (640, 480)
-    video_writer = cv2.VideoWriter('recordings/partita.avi', fourcc, fps, frame_size)
+    video_writer = cv2.VideoWriter(video_path_mp4, cv2.VideoWriter_fourcc(*'mp4v'), 20.0, (640, 480))
+
 
     recording = True
     for chunk in response.iter_content(chunk_size=1024):
@@ -155,13 +161,13 @@ def genera_video_voronoi():
     conn = sqlite3.connect('project_25/database/naoartemis.db')  # o il tuo path reale
     cursor = conn.cursor()
 
-    output_path = "recordings/voronoi_video.avi"
+    output_path = os.path.join(script_dir, "recordings", "voronoi_video.mp4")
     frame_width = 640
     frame_height = 480
     fps = 20.0
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    video_writer = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
+    video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
     frame_count = int(cursor.execute("SELECT COUNT(DISTINCT id_frame) FROM player_positions").fetchone()[0])
 
@@ -236,10 +242,17 @@ def analizza_partita():
     global db_helper
     inizializza_modelli_postpartita()
 
-    video_path = "recordings/partita.avi"
-    output_path = "recordings/annotato.avi"
+    output_path = "recordings/annotato.mp4"
+    
+    if not os.path.exists(video_path_mp4):
+        print(f"Errore: il file {video_path_mp4} non esiste")
+        return
 
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path_mp4)
+    if not cap.isOpened():
+        print(f"Errore: impossibile aprire il video {video_path_mp4}")
+        return
+
     if not cap.isOpened():
         print("Errore: impossibile aprire il video")
         return
@@ -310,6 +323,14 @@ def analizza_partita():
             avg_color = np.mean(crop.reshape(-1, 3), axis=0)
             colors.append(avg_color)
 
+        if len(colors) >= 2:
+            kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
+            teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
+        else:
+            # se c'è solo 1 giocatore lo mettiamo in una squadra "unknown"
+            teams = ["unknown"] * len(colors)
+
+
         kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
         teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
         tracked.data["team"] = teams
@@ -324,17 +345,18 @@ def analizza_partita():
         # Annotazione e salvataggio palla
         if len(ball_detections) > 0:
             ball_box = ball_detections.xyxy[0]
-            x_center = (ball_box[0] + ball_box[2]) / 2
-            y_bottom = ball_box[3]
+            x_center = float((float(ball_box[0]) + float(ball_box[2])) / 2)
+            y_bottom = float(ball_box[3])
 
-            triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED, thickness=2)
+            triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED)
             annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
 
             if homography_matrix is not None:
                 pt = np.array([x_center, y_bottom, 1])
                 transformed = homography_matrix @ pt
                 transformed /= transformed[2]
-                x_real, y_real = transformed[0], transformed[1]
+                x_real = float(transformed[0])
+                y_real = float(transformed[1])
             else:
                 x_real, y_real = x_center, y_bottom
 
@@ -342,13 +364,14 @@ def analizza_partita():
 
         # Salvataggio giocatori
         for i, box in enumerate(tracked.xyxy):
-            x_pixel = (box[0] + box[2]) / 2
-            y_pixel = box[3]
+            x_pixel = float((float(box[0]) + float(box[2])) / 2)
+            y_pixel = float(box[3])
             pt = np.array([x_pixel, y_pixel, 1])
             if homography_matrix is not None:
                 transformed = homography_matrix @ pt
                 transformed /= transformed[2]
-                x_real, y_real = transformed[0], transformed[1]
+                x_real = float(transformed[0])
+                y_real = float(transformed[1])
             else:
                 x_real, y_real = x_pixel, y_pixel
 
@@ -366,7 +389,9 @@ def analizza_partita():
     #generazione heatmap
     genera_heatmap_giocatori()
 
-    shutil.copy("recordings/voronoi_video.avi", "static/voronoi_video.mp4")
+    shutil.copy(os.path.join(script_dir, "recordings", "voronoi_video.mp4"),
+            os.path.join(script_dir, "static", "voronoi_video.mp4"))
+
     
 # per recuperare stream video da webcam
 class WebcamUSBResponseSimulator:
@@ -433,16 +458,18 @@ def fine_partita():
     if recording_thread is not None:
         recording_thread.join()
 
-    # avvia analisi in background
-    threading.Thread(target=analizza_partita).start()
+    return jsonify({"status": "ok", "message": "Registrazione terminata. Puoi ora avviare l'analisi manualmente."}), 200
 
-    return jsonify({"status": "ok", "message": "Registrazione terminata. Analisi partita in corso..."}), 200
+@app.route('/analyze', methods=['GET'])
+def analyze():
+    threading.Thread(target=analizza_partita).start()
+    return jsonify({"status": "ok", "message": "Analisi avviata. Attendere qualche minuto..."}), 200
 
 @app.route('/stream_voronoi')
 def stream_voronoi():
-    path = "recordings/voronoi_video.avi"
+    path = os.path.join(script_dir, "recordings", "voronoi_video.mp4")
     if os.path.exists(path):
-        return send_file(path, mimetype='video/avi')
+        return send_file(path, mimetype='video/mp4')
     else:
         return "Video non trovato", 404
     
@@ -450,7 +477,6 @@ def stream_voronoi():
 def api_players():
     players = db_helper.select_players()
     return jsonify(players)
-
 
 #################################
 #            Tribuna            #

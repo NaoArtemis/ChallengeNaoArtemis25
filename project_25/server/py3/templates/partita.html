@@ -19,60 +19,72 @@
             <button id="logout" class="btn btn-logout">Logout</button>
         </div>
     </div>
-    
 
     <!-- main -->
     <div class="main-content">
-        <h1>Gestione Partita</h1>
+        <h1 class = "main-text">Gestione Partita</h1>
 
+        <!-- Messaggio di stato -->
         <div id="status-message" style="margin-top: 15px; font-weight: bold; color: #333;"></div>
 
         <!-- Controlli partita -->
         <div>
             <button class="btn btn-joystick" onclick="iniziaPartita()">Inizia Partita</button>
             <button class="btn btn-joystick" onclick="finePartita()">Fine Partita</button>
+            <button class="btn btn-joystick" onclick="analyze()">Analyze</button>
         </div>
 
-        <!-- Video Voronoi -->        
-        <div>
-            <h2>Video Voronoi</h2>
-            <video controls style="max-width: 80%; border: 2px solid #333;">
-                <source src="/stream_voronoi" type="video/avi">
-                Il tuo browser non supporta il video.
-            </video>
+        <div class = "dashboard">
+            <div class = "joystick-panel">
+
+                <!-- Video Voronoi -->        
+                <div>
+                    <h2 class = "text">Video Voronoi</h2>
+                    <!-- Nuovo container per caricare video solo al click -->
+                    <div id="voronoi-container"></div>
+                    <button class="btn btn-joystick" onclick="caricaVoronoi()">Carica Video Voronoi</button>
+                </div>
+            </div>
+
+            <!-- Heatmap giocatori -->
+            <div class = "joystick-panel">
+                <h2 class = "text">Heatmap Giocatori</h2>
+                <button class="btn btn-joystick" onclick="aggiornaListaGiocatori()">Aggiorna Heatmap</button>
+                <!-- Container per la heatmap -->
+                <div  id="heatmap-container" style="margin-top: 20px;"></div>
         </div>
 
-        <!-- Heatmap giocatori -->
-        <div>
-            <h2>Heatmap Giocatori</h2>
-            {% for player in players %}
-                <button class="btn btn-joystick" onclick="showHeatmap('{{ player }}')">{{ player }}</button>
-            {% endfor %}
-        </div>
+            </div>
 
+        <!-- Script -->
         <script>
             function iniziaPartita() {
-                fetch('/inizia_partita').then(() => alert("Registrazione partita avviata"));
-            }
-        
-            function finePartita() {
-                fetch('/fine_partita').then(() => {
-                    alert("Registrazione terminata. Analisi avviata");
-                    // attendo 5 secondi e poi aggiorno lista player
-                    setTimeout(aggiornaListaGiocatori, 5000);
+                fetch('/inizia_partita').then(() => {
+                    document.getElementById("status-message").innerText = "✅ Registrazione partita avviata";
                 });
             }
-        
-            function showHeatmap(player_id) {
-                document.getElementById("heatmap-container").innerHTML = '<img src="/heatmap/' + player_id + '" alt="Heatmap ' + player_id + '" style="max-width: 80%; border: 2px solid #333;">';
+
+            function finePartita() {
+                fetch('/fine_partita').then(() => {
+                    document.getElementById("status-message").innerText = "✅ Registrazione terminata. Puoi ora avviare l'analisi";
+                });
             }
-        
+
+            function analyze() {
+                fetch('/analyze').then(() => {
+                    document.getElementById("status-message").innerText = "✅ Analisi partita avviata... Attendere qualche minuto";
+                    setTimeout(() => {
+                        document.getElementById("status-message").innerText = "✅ Analisi completata con successo!";
+                    }, 5000);
+                });
+            }
+
             function aggiornaListaGiocatori() {
                 fetch('/api/players')
                     .then(response => response.json())
                     .then(players => {
-                        let container = document.querySelector(".main-content div:nth-of-type(3)");
-                        container.innerHTML = '<h2>Heatmap Giocatori</h2>';
+                        let container = document.getElementById("heatmap-container");
+                        container.innerHTML = '<h2>Seleziona giocatore per visualizzare la Heatmap</h2>';
                         players.forEach(player => {
                             let btn = document.createElement("button");
                             btn.className = "btn btn-joystick";
@@ -82,32 +94,24 @@
                         });
                     });
             }
+
+            function showHeatmap(player_id) {
+                document.getElementById("heatmap-container").innerHTML = '<img src="/heatmap/' + player_id + '" alt="Heatmap ' + player_id + '" style="max-width: 80%; border: 2px solid #333;">';
+            }
+
+            function caricaVoronoi() {
+                document.getElementById("voronoi-container").innerHTML =
+                    '<video controls style="max-width: 80%; border: 2px solid #333;">' +
+                    '<source src="/stream_voronoi" type="video/mp4">' +
+                    'Il tuo browser non supporta il video.' +
+                    '</video>';
+            }
         </script>
-        
-        <!-- Container per la heatmap -->
-        <div id="heatmap-container" style="margin-top: 20px;"></div>
+
     </div>
 
-    <!-- Script -->
-    <script>
-        function finePartita() {
-            fetch('/fine_partita').then(() => {
-                document.getElementById("status-message").innerText = "✅ Registrazione terminata. Analisi partita in corso... Attendere qualche minuto";
-                // attendo 5 secondi e poi aggiorno lista player
-                setTimeout(() => {
-                    aggiornaListaGiocatori();
-                    document.getElementById("status-message").innerText = ""; // ✅ rimuove messaggio dopo aggiornamento
-                }, 5000);
-            });
-        }
-
-
-        function showHeatmap(player_id) {
-            document.getElementById("heatmap-container").innerHTML = '<img src="/heatmap/' + player_id + '" alt="Heatmap ' + player_id + '" style="max-width: 80%; border: 2px solid #333;">';
-        }
-    </script>
-
-    <!-- tuo JS -->
+    <!--  JS -->
     <script src="{{ url_for('static', filename='script/script.js') }}"></script>
+
 </body>
 </html>
