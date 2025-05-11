@@ -156,3 +156,39 @@ class DB:
                 )
                 players = cur.fetchall()
                 return [p[0] for p in players]
+
+    def get_total_frames(self):
+        """
+        Conta il numero di frame univoci in player_positions.
+        """
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute("""
+                    SELECT COUNT(DISTINCT id_frame) FROM player_positions
+                """)
+                result = cur.fetchone()
+                return result[0] if result else 0
+
+    def select_player_positions_by_frame(self, frame_id):
+        """
+        Restituisce tutte le posizioni dei player in un frame (x, y, team).
+        """
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute("""
+                    SELECT x_pos, y_pos, team FROM player_positions
+                    WHERE id_frame = %s
+                """, (frame_id,))
+                return cur.fetchall()
+
+    def select_positions_by_player(self, player_id):
+        """
+        Restituisce tutte le posizioni (x, y) per un singolo player.
+        """
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute("""
+                    SELECT x_pos, y_pos FROM player_positions
+                    WHERE player_id = %s
+                """, (player_id,))
+                return cur.fetchall()

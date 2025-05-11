@@ -95,24 +95,22 @@ def make_sha256(s):
 #################################
 #      computer vision          #
 #################################
-# variabili globali
+#variabili globali
 recording = False
 recording_thread = None
 video_writer = None
-
-#inzializzazione modelli
 MODEL_PLAYERS = None
 MODEL_LINES = None
-
-# path sicuro globale per il video partita
 script_dir = os.path.dirname(os.path.abspath(__file__))
 video_path_mp4 = os.path.join(script_dir, "recordings", "partita", "partita.mp4")
 
+#inzializzazione modelli
 def inizializza_modelli_postpartita():
+    """Inizializza YOLOv8 per giocatori e linee."""
     global MODEL_PLAYERS, MODEL_LINES
-    model_dir = os.path.join(os.path.dirname(__file__), "models")
+    model_dir = os.path.join(script_dir, "models")
     MODEL_PLAYERS = YOLO(os.path.join(model_dir, "yolov8n_persone.pt"), verbose=False)
-    MODEL_LINES   = YOLO(os.path.join(model_dir, "yolo_lines_8n.pt"), verbose=False)
+    MODEL_LINES = YOLO(os.path.join(model_dir, "yolo_lines_8n.pt"), verbose=False)
 
 #recupero e salvataggio del video dal nao
 def start_video_recording_from_nao():
@@ -158,38 +156,26 @@ def start_video_recording_from_nao():
 
 #formazione vornoi soccer
 def genera_video_voronoi():
-    conn = sqlite3.connect('project_25/database/naoartemis.db')  # o il tuo path reale
-    cursor = conn.cursor()
+    """Genera video Voronoi dal database PostgreSQL."""
+    output_path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
+    video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 20.0, (640, 480))
 
-    output_path = os.path.join(script_dir, "recordings", "voronoi_video.mp4")
-    frame_width = 640
-    frame_height = 480
-    fps = 20.0
-
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
-
-    frame_count = int(cursor.execute("SELECT COUNT(DISTINCT id_frame) FROM player_positions").fetchone()[0])
-
+    frame_count = db_helper.get_total_frames()
     for frame_id in range(frame_count):
-        cursor.execute("""
-            SELECT x, y, team FROM player_positions WHERE id_frame = ?
-        """, (frame_id,))
-        rows = cursor.fetchall()
+        rows = db_helper.select_player_positions_by_frame(frame_id)
         if len(rows) < 4:
-            continue  # servono almeno 4 punti per Voronoi
+            continue
 
         coords = np.array([[row[0], row[1]] for row in rows])
         teams = [row[2] for row in rows]
 
-        fig, ax = plt.subplots(figsize=(6.4, 4.8))  # formato 640x480
+        fig, ax = plt.subplots(figsize=(6.4, 4.8))
         ax.set_xlim(0, 30)
         ax.set_ylim(15, 0)
         ax.set_facecolor("#a5bc94")
 
         vor = Voronoi(coords)
         voronoi_plot_2d(vor, ax=ax, show_vertices=False, show_points=False, line_colors='white')
-
         for (x, y), team in zip(coords, teams):
             color = 'blue' if team == 'blue' else 'red'
             ax.plot(x, y, 'o', color=color)
@@ -198,43 +184,33 @@ def genera_video_voronoi():
         fig.canvas.draw()
         img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
         img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-        img = cv2.resize(img, (frame_width, frame_height))
+        img = cv2.resize(img, (640, 480))
         video_writer.write(img)
         plt.close(fig)
 
     video_writer.release()
-    conn.close()
 
 
 #generazione heatmap
 def genera_heatmap_giocatori():
-    os.makedirs("heatmaps", exist_ok=True)
-    conn = sqlite3.connect('project_25/database/naoartemis.db') 
-    cursor = conn.cursor()
+    """Crea heatmap dei giocatori usando db PostgreSQL."""
+    os.makedirs("recordings/heat_map", exist_ok=True)
+    players = db_helper.select_players()
 
-    cursor.execute("SELECT DISTINCT player_id FROM player_positions WHERE player_id != 'ball'")
-    players = cursor.fetchall()
-
-    for (player_id,) in players:
-        cursor.execute("""
-            SELECT x, y FROM player_positions WHERE player_id = ?
-        """, (player_id,))
-        rows = cursor.fetchall()
+    for player_id in players:
+        rows = db_helper.select_positions_by_player(player_id)
         if not rows:
             continue
 
         x_coords, y_coords = zip(*rows)
-        plt.figure(figsize=(6.4, 4.8))  # 640x480
+        plt.figure(figsize=(6.4, 4.8))
         ax = sns.kdeplot(x=x_coords, y=y_coords, fill=True, cmap="Reds", bw_adjust=0.5, thresh=0.05)
         ax.set_xlim(0, 30)
         ax.set_ylim(15, 0)
         ax.set_facecolor("#a5bc94")
         plt.axis('off')
-        plt.savefig(f"heatmaps/{player_id}.png", bbox_inches='tight', pad_inches=0)
+        plt.savefig(f"recordings/heat_map/{player_id}.png", bbox_inches='tight', pad_inches=0)
         plt.close()
-
-    conn.close()
-
 
 
 #analisi della partita(video catturato)
@@ -330,6 +306,9 @@ def analizza_partita():
             # se c'è solo 1 giocatore lo mettiamo in una squadra "unknown"
             teams = ["unknown"] * len(colors)
 
+        tracked.data["team"] = teams
+
+
 
         kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
         teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
@@ -389,7 +368,7 @@ def analizza_partita():
     #generazione heatmap
     genera_heatmap_giocatori()
 
-    shutil.copy(os.path.join(script_dir, "recordings", "voronoi_video.mp4"),
+    shutil.copy(os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4"),
             os.path.join(script_dir, "static", "voronoi_video.mp4"))
 
     
@@ -437,20 +416,19 @@ def webcam_usb():
 #funzioni flask
 @app.route('/inizia_partita', methods=['GET'])
 def inizia_partita():
+    """Endpoint per avviare registrazione video."""
     global recording, recording_thread
-
     if recording:
         return jsonify({"status": "error", "message": "Registrazione già in corso"}), 400
 
     recording_thread = threading.Thread(target=start_video_recording_from_nao)
     recording_thread.start()
-
     return jsonify({"status": "ok", "message": "Sto registrando la partita dal NAO..."}), 200
 
 @app.route('/fine_partita', methods=['GET'])
 def fine_partita():
+    """Endpoint per fermare registrazione."""
     global recording, recording_thread
-
     if not recording:
         return jsonify({"status": "error", "message": "Nessuna registrazione attiva"}), 400
 
@@ -458,7 +436,7 @@ def fine_partita():
     if recording_thread is not None:
         recording_thread.join()
 
-    return jsonify({"status": "ok", "message": "Registrazione terminata. Puoi ora avviare l'analisi manualmente."}), 200
+    return jsonify({"status": "ok", "message": "Registrazione terminata. Puoi ora avviare l'analyze."}), 200
 
 @app.route('/analyze', methods=['GET'])
 def analyze():
@@ -467,14 +445,16 @@ def analyze():
 
 @app.route('/stream_voronoi')
 def stream_voronoi():
-    path = os.path.join(script_dir, "recordings", "voronoi_video.mp4")
+    """Restituisce il video Voronoi appena generato."""
+    path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
     if os.path.exists(path):
         return send_file(path, mimetype='video/mp4')
     else:
         return "Video non trovato", 404
-    
+
 @app.route('/api/players', methods=['GET'])
 def api_players():
+    """Restituisce lista dei player_id rilevati."""
     players = db_helper.select_players()
     return jsonify(players)
 
