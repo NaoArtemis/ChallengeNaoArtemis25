@@ -24,8 +24,23 @@
     <div class="main-content">
         <h1 class="main-text">Creazione account</h1>
         <div class="container_creazione_account">
-            <button id="crea" class="btn btn-crea"><span>crea</span></button>
-        </div>
+        <p id = "d1", class ="text"></p>
+        <form mothod="post" action="/">
+            <input type="text" name="nome" id="nome" placeholder="Nome" required>
+            <input type="text" name="cognome" id="cognome" placeholder="Cognome" required>
+            <input type="text" list="posizioni" name="posizione" id="posizione" placeholder="Posizione" required>
+            <datalist id="posizioni">
+            <option value="1">
+            <option value="2">
+            <option value="3">
+            <option value="4">
+            <option value="5">
+            </datalist>
+            <input type="text" name="username" id="username" placeholder="Username" required>
+            <input type="password" name="password" id="password" placeholder="Password" required>
+            <button id="crea_account" class="btn btn-joystick">crea</button>
+        </form>
+        </div> 
     </div>
 
     <!-- Javascript -->
@@ -47,6 +62,32 @@
                     window.location.href = response.url;
                 } else {
                     window.location.href = "/home";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#crea_account").addEventListener("click", function() {
+            fetch(`/api/app/utenti/${userId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: 
+                password: 
+                nome: 
+                cognome: 
+                posizione: 
+            })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code == 200){
+                    document.getElementById("d1").innerHTML = " account registrato con sucesso"
+                }
+                else{
+                    document.getElementById("d1").innerHTML = "Errore"
                 }
             })
             .catch(error => console.error("Errore:", error));

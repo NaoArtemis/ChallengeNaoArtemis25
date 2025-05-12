@@ -515,3 +515,34 @@ video {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
+/*===========REGISTRA==========*/
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 75px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="nome"],
+input[type="cognome"] 
+input[type="posizione"]{
+    width: 300px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border-color: #4b6cb7;
+    
+}
+.crea_account {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #92140C;
+    color: #fff
+}
