@@ -156,11 +156,19 @@ def start_video_recording_from_nao():
 
 #formazione vornoi soccer
 def genera_video_voronoi():
-    """Genera video Voronoi dal database PostgreSQL."""
+    """Genera un video Voronoi decente dal database."""
     output_path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
-    video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), 20.0, (640, 480))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    frame_width = 1280
+    frame_height = 720
+    fps = 30
+
+    video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
     frame_count = db_helper.get_total_frames()
+    print(f"Generazione Voronoi: {frame_count} frames trovati.")
+
     for frame_id in range(frame_count):
         rows = db_helper.select_player_positions_by_frame(frame_id)
         if len(rows) < 4:
@@ -169,26 +177,34 @@ def genera_video_voronoi():
         coords = np.array([[row[0], row[1]] for row in rows])
         teams = [row[2] for row in rows]
 
-        fig, ax = plt.subplots(figsize=(6.4, 4.8))
+        fig, ax = plt.subplots(figsize=(12.8, 7.2))  # miglior risoluzione
         ax.set_xlim(0, 30)
         ax.set_ylim(15, 0)
         ax.set_facecolor("#a5bc94")
 
+        # Disegna Voronoi
         vor = Voronoi(coords)
         voronoi_plot_2d(vor, ax=ax, show_vertices=False, show_points=False, line_colors='white')
+
+        # Disegna i punti
         for (x, y), team in zip(coords, teams):
             color = 'blue' if team == 'blue' else 'red'
-            ax.plot(x, y, 'o', color=color)
+            ax.add_patch(Circle((x, y), 0.3, color=color, ec='black', lw=1.5))  # cerchi più belli
 
+        ax.set_title(f"Frame {frame_id}", fontsize=18, color='white')
         ax.axis('off')
+        fig.tight_layout()
+
+        # Converti la figura in immagine
         fig.canvas.draw()
         img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
         img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-        img = cv2.resize(img, (640, 480))
+        img = cv2.resize(img, (frame_width, frame_height))
         video_writer.write(img)
         plt.close(fig)
 
     video_writer.release()
+
 
 
 #generazione heatmap
@@ -237,7 +253,7 @@ def analizza_partita():
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps    = cap.get(cv2.CAP_PROP_FPS)
 
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     tracker = sv.ByteTrack()
@@ -304,14 +320,8 @@ def analizza_partita():
             teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
         else:
             # se c'è solo 1 giocatore lo mettiamo in una squadra "unknown"
-            teams = ["unknown"] * len(colors)
+            teams = ["unknown"] * len(tracked.xyxy)
 
-        tracked.data["team"] = teams
-
-
-
-        kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
-        teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
         tracked.data["team"] = teams
 
         ##########################
@@ -339,7 +349,7 @@ def analizza_partita():
             else:
                 x_real, y_real = x_center, y_bottom
 
-            db_helper.insert_player("ball", 0, x_real, y_real, "none")
+            db_helper.insert_player(0, 0, x_real, y_real, "none") # 0 per la palla
 
         # Salvataggio giocatori
         for i, box in enumerate(tracked.xyxy):
@@ -354,7 +364,7 @@ def analizza_partita():
             else:
                 x_real, y_real = x_pixel, y_pixel
 
-            player_id = f"player_{tracked.tracker_id[i]}"
+            player_id = int(tracked.tracker_id[i])
             db_helper.insert_player(player_id, 0, x_real, y_real, teams[i])
 
         out.write(annotated)
@@ -457,6 +467,16 @@ def api_players():
     """Restituisce lista dei player_id rilevati."""
     players = db_helper.select_players()
     return jsonify(players)
+
+@app.route('/heatmap/<int:player_id>', methods=['GET'])
+def get_heatmap(player_id):
+    """Restituisce la heatmap del giocatore."""
+    heatmap_path = os.path.join(script_dir, "recordings", "heat_map", f"{player_id}.png")
+    if os.path.exists(heatmap_path):
+        return send_file(heatmap_path, mimetype='image/png')
+    else:
+        return "Heatmap non trovata", 404
+
 
 #################################
 #            Tribuna            #
