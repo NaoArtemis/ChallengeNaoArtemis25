@@ -118,7 +118,7 @@ class DB:
                 )
                 tupla = cur.fetchone()
                 if tupla is None:
-                    return 0
+                    return "0"
                 else:
                     return {
                         'id': tupla[0],
@@ -151,7 +151,7 @@ class DB:
                     '''
                     SELECT DISTINCT player_id 
                     FROM player_positions 
-                    WHERE player_id != 'ball'
+                    WHERE player_id != 0
                     '''
                 )
                 players = cur.fetchall()
