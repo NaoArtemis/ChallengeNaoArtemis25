@@ -336,12 +336,11 @@ def nao_autonomous_life_state(params):
                 json     = eval(params)
                 nao_ip   = json['nao_ip']
                 nao_port = json['nao_port']
-                state    = "disabled"
 
                 life_proxy = ALProxy("ALAutonomousLife", nao_ip, nao_port)              
-                life_proxy.setState("state")                                            
+                life_proxy.setState("disabled")                                            
                 life_proxy = None                                                       
-                return jsonify({'code': 200, 'function': 'nao_autonomous_life(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+                return jsonify({'code': 200, 'function': 'nao_autonomous_life_state (ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': str(e)}), 500

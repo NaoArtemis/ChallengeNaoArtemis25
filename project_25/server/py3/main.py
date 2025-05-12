@@ -1274,6 +1274,7 @@ def nao_start():
 
 if __name__ == "__main__":
     startTime  = time.time()
+    #nao_autonomous_life_state()
    
     #nao_start()
     #nao_autonomous_life()

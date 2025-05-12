@@ -133,7 +133,8 @@ document.querySelector("#stand_init").addEventListener("click", function () {
 document.querySelector("#head_touch").addEventListener("click", function () {
     fetch("/nao_touch_head_audiorecorder", { method: "GET" })
         .then(response => response.json())
-        .then(data => console.log("Risposta API:", data));
+        .then(data => console.log("Risposta API:", data))
+        .catch(error => console.error("Errore:", error));
 });
 
 document.querySelector("#stop_train").addEventListener("click", function () {
@@ -157,7 +158,7 @@ document.querySelector("#autonomus_life").addEventListener("click", function () 
         .catch(error => console.error("Errore:", error));
 });
 
-document.querySelector("#autonomus_life_state").addEventListener("click", function () {
+document.querySelector("#autonomous_life_state").addEventListener("click", function () {
     fetch("/api/movement/nao_autonomous_life_state", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
