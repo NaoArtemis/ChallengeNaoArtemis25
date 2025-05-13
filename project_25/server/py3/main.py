@@ -51,6 +51,11 @@ import io
 from sklearn.cluster import KMeans
 import shutil
 import seaborn as sns
+import matplotlib
+matplotlib.use("Agg")    # 👈 AGGIUNGI QUESTO!
+import matplotlib.pyplot as plt
+from mplsoccer import Pitch
+
 
 
 
@@ -95,388 +100,196 @@ def make_sha256(s):
 #################################
 #      computer vision          #
 #################################
-#variabili globali
-recording = False
-recording_thread = None
-video_writer = None
-MODEL_PLAYERS = None
-MODEL_LINES = None
+# variabili globali
 script_dir = os.path.dirname(os.path.abspath(__file__))
 video_path_mp4 = os.path.join(script_dir, "recordings", "partita", "partita.mp4")
+all_positions = []  # <-- Memorizziamo le posizioni dei giocatori 
+voronoi_path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
 
-#inzializzazione modelli
-def inizializza_modelli_postpartita():
-    """Inizializza YOLOv8 per giocatori e linee."""
+
+MODEL_PLAYERS = None
+MODEL_LINES = None
+
+def inizializza_modelli():
     global MODEL_PLAYERS, MODEL_LINES
     model_dir = os.path.join(script_dir, "models")
     MODEL_PLAYERS = YOLO(os.path.join(model_dir, "yolov8n_persone.pt"), verbose=False)
     MODEL_LINES = YOLO(os.path.join(model_dir, "yolo_lines_8n.pt"), verbose=False)
 
-#recupero e salvataggio del video dal nao
-def start_video_recording_from_nao():
-    global recording, video_writer
-
-    #se vuoi usare nao
-    #data = {"nao_ip": nao_ip, "nao_port": nao_port}
-    #url = f"http://127.0.0.1:5011/nao_webcam/{str(data)}"
-    #response = requests.get(url, stream=True)
-
-    #se vuoi usare webcam
-    response = webcam_usb()
-
-    # MJPEG frame boundaries
-    boundary = b'--frame\r\n'
-    content_type = b'Content-Type: image/jpeg\r\n\r\n'
-    frame_data = b''
-
-    # setup video writer
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # mp4 format
-    fps = 20.0
-    frame_size = (640, 480)
-    video_writer = cv2.VideoWriter(video_path_mp4, cv2.VideoWriter_fourcc(*'mp4v'), 20.0, (640, 480))
 
 
-    recording = True
-    for chunk in response.iter_content(chunk_size=1024):
-        if not recording:
-            break
-        frame_data += chunk
-        if boundary in frame_data:
-            parts = frame_data.split(boundary)
-            for part in parts[:-1]:
-                if content_type in part:
-                    jpg = part.split(content_type)[-1]
-                    np_frame = np.frombuffer(jpg, dtype=np.uint8)
-                    frame = cv2.imdecode(np_frame, cv2.IMREAD_COLOR)
-                    if frame is not None:
-                        video_writer.write(frame)
-            frame_data = parts[-1]
+import os
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.spatial import Voronoi
+from mplsoccer import Pitch
 
-    video_writer.release()
+import matplotlib.pyplot as plt
+from scipy.spatial import Voronoi, voronoi_plot_2d
+import os
 
-#formazione vornoi soccer
-def genera_video_voronoi():
-    """Genera un video Voronoi decente dal database."""
-    output_path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    frame_width = 1280
-    frame_height = 720
+def genera_video_voronoi(all_positions, output_path):
+    import matplotlib.pyplot as plt
+    from scipy.spatial import Voronoi, voronoi_plot_2d
+
+    campo_larghezza = 30  # metri
+    campo_altezza = 15    # metri
+    frame_width, frame_height = 1280, 720
     fps = 30
 
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
-    frame_count = db_helper.get_total_frames()
-    print(f"Generazione Voronoi: {frame_count} frames trovati.")
+    for frame_data in all_positions:
+        if len(frame_data) < 4:
+            continue  # serve almeno 4 punti per Voronoi
 
-    for frame_id in range(frame_count):
-        rows = db_helper.select_player_positions_by_frame(frame_id)
-        if len(rows) < 4:
-            continue
+        points = np.array([[x, y] for x, y, _ in frame_data])
+        teams = [team for _, _, team in frame_data]
 
-        coords = np.array([[row[0], row[1]] for row in rows])
-        teams = [row[2] for row in rows]
+        fig, ax = plt.subplots(figsize=(12.8, 7.2), dpi=100)
+        ax.set_facecolor('green')  # sfondo campo verde
+        ax.set_xlim(0, campo_larghezza)
+        ax.set_ylim(0, campo_altezza)
+        ax.invert_yaxis()  # per allineare asse Y al tuo sistema
+        ax.set_xticks([])
+        ax.set_yticks([])
 
-        fig, ax = plt.subplots(figsize=(12.8, 7.2))  # miglior risoluzione
-        ax.set_xlim(0, 30)
-        ax.set_ylim(15, 0)
-        ax.set_facecolor("#a5bc94")
+        # --- DISEGNA RIGHE CAMPO ---
+        # Linee laterali
+        ax.plot([0, 30], [0, 0], color='white', linewidth=2)          # linea fondo (bassa)
+        ax.plot([0, 30], [15, 15], color='white', linewidth=2)        # linea fondo (alta)
+        ax.plot([0, 0], [0, 15], color='white', linewidth=2)          # linea laterale sinistra
+        ax.plot([30, 30], [0, 15], color='white', linewidth=2)        # linea laterale destra
 
-        # Disegna Voronoi
-        vor = Voronoi(coords)
-        voronoi_plot_2d(vor, ax=ax, show_vertices=False, show_points=False, line_colors='white')
+        # Centrocampo
+        ax.plot([15, 15], [0, 15], color='white', linewidth=2)        # linea metà campo
+        cerchio_centro = plt.Circle((15, 7.5), 2, color='white', fill=False, linewidth=2)
+        ax.add_artist(cerchio_centro)
 
-        # Disegna i punti
-        for (x, y), team in zip(coords, teams):
-            color = 'blue' if team == 'blue' else 'red'
-            ax.add_patch(Circle((x, y), 0.3, color=color, ec='black', lw=1.5))  # cerchi più belli
+        # Area di rigore (esempio semplificato futsal)
+        ax.plot([2, 2], [4, 11], color='white', linewidth=2)          # area sx verticale
+        ax.plot([28, 28], [4, 11], color='white', linewidth=2)        # area dx verticale
+        ax.plot([2, 10], [4, 4], color='white', linewidth=2)          # area sx orizzontale bassa
+        ax.plot([2, 10], [11, 11], color='white', linewidth=2)        # area sx orizzontale alta
+        ax.plot([20, 28], [4, 4], color='white', linewidth=2)         # area dx orizzontale bassa
+        ax.plot([20, 28], [11, 11], color='white', linewidth=2)       # area dx orizzontale alta
 
-        ax.set_title(f"Frame {frame_id}", fontsize=18, color='white')
-        ax.axis('off')
-        fig.tight_layout()
+        # --- DIAGRAMMA VORONOI ---
+        vor = Voronoi(points)
+        voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='white', line_width=1)
 
-        # Converti la figura in immagine
+        # --- DISEGNA GIOCATORI ---
+        colors = {'blue': 'blue', 'red': 'red', 'unknown': 'gray'}
+        for (x, y), team in zip(points, teams):
+            ax.plot(x, y, 'o', color=colors.get(team, 'gray'), markersize=8)
+
+        plt.tight_layout(pad=0)
         fig.canvas.draw()
         img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
         img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
         img = cv2.resize(img, (frame_width, frame_height))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
         video_writer.write(img)
         plt.close(fig)
 
     video_writer.release()
 
 
-
-#generazione heatmap
-def genera_heatmap_giocatori():
-    """Crea heatmap dei giocatori usando db PostgreSQL."""
-    os.makedirs("recordings/heat_map", exist_ok=True)
-    players = db_helper.select_players()
-
-    for player_id in players:
-        rows = db_helper.select_positions_by_player(player_id)
-        if not rows:
-            continue
-
-        x_coords, y_coords = zip(*rows)
-        plt.figure(figsize=(6.4, 4.8))
-        ax = sns.kdeplot(x=x_coords, y=y_coords, fill=True, cmap="Reds", bw_adjust=0.5, thresh=0.05)
-        ax.set_xlim(0, 30)
-        ax.set_ylim(15, 0)
-        ax.set_facecolor("#a5bc94")
-        plt.axis('off')
-        plt.savefig(f"recordings/heat_map/{player_id}.png", bbox_inches='tight', pad_inches=0)
-        plt.close()
-
-
-#analisi della partita(video catturato)
 def analizza_partita():
-    global db_helper
-    inizializza_modelli_postpartita()
+    global all_positions
+    all_positions = []
+    inizializza_modelli()
 
-    output_path = "recordings/annotato.mp4"
-    
+    output_path = os.path.join(script_dir, "recordings", "annotato.mp4")
     if not os.path.exists(video_path_mp4):
-        print(f"Errore: il file {video_path_mp4} non esiste")
         return
 
     cap = cv2.VideoCapture(video_path_mp4)
     if not cap.isOpened():
-        print(f"Errore: impossibile aprire il video {video_path_mp4}")
         return
 
-    if not cap.isOpened():
-        print("Errore: impossibile aprire il video")
-        return
-
-    width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps    = cap.get(cv2.CAP_PROP_FPS)
-
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    width, height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
 
     tracker = sv.ByteTrack()
     ellipse_annotator = EllipseAnnotator(color_lookup=sv.ColorLookup.INDEX, thickness=2)
-    label_annotator   = LabelAnnotator(color_lookup=sv.ColorLookup.INDEX, text_position=sv.Position.BOTTOM_CENTER, text_scale=0.5)
+    label_annotator = LabelAnnotator(color_lookup=sv.ColorLookup.INDEX, text_position=Position.BOTTOM_CENTER, text_scale=0.5)
 
     homography_matrix = None
-    frame_index = 0
-
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
 
-        ##########################
-        # STEP 1: omografia da linee
-        ##########################
         if homography_matrix is None:
-            line_results = MODEL_LINES(frame, conf=0.3)
-            line_detections = sv.Detections.from_ultralytics(line_results[0])
+            lines = MODEL_LINES(frame, conf=0.3)
+            det = sv.Detections.from_ultralytics(lines[0])
+            points = [[(b[0]+b[2])/2, b[3]] for b in det.xyxy[:4]]
+            if len(points) == 4:
+                homography_matrix, _ = cv2.findHomography(np.array(points, np.float32), np.array([[0,0],[30,0],[0,15],[30,15]], np.float32))
 
-            line_coords = []
-            for box in line_detections.xyxy[:4]:
-                x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
-                cx = (x1 + x2) / 2
-                cy = (y1 + y2) / 2
-                line_coords.append([cx, cy])
-
-            if len(line_coords) == 4:
-                pixel_np = np.array(line_coords, dtype=np.float32)
-                real_np = np.array([[0,0], [30,0], [0,15], [30,15]], dtype=np.float32)  # campo futsal 30x15 m
-                homography_matrix, _ = cv2.findHomography(pixel_np, real_np)
-                print("✅ Omografia calcolata")
-
-        ##########################
-        # STEP 2: YOLO su giocatori/palla
-        ##########################
         results = MODEL_PLAYERS(frame, conf=0.2)
-        detections = sv.Detections.from_ultralytics(results[0])
-        ball_detections = detections[detections.class_id == 0]
-        player_detections = detections[detections.class_id != 0].with_nms(threshold=0.5, class_agnostic=True)
+        det = sv.Detections.from_ultralytics(results[0])
+        players = det[det.class_id != 0].with_nms(threshold=0.5)
 
-        if len(player_detections) == 0:
-            out.write(frame)
-            continue
-
-        ##########################
-        # STEP 3: tracking + KMeans
-        ##########################
-        tracked = tracker.update_with_detections(player_detections)
-        colors = []
-
-        for xyxy in tracked.xyxy:
-            x1, y1, x2, y2 = map(int, xyxy)
-            crop = frame[y1:y2, x1:x2]
-            if crop.size == 0:
-                colors.append([0, 0, 0])
-                continue
-            avg_color = np.mean(crop.reshape(-1, 3), axis=0)
-            colors.append(avg_color)
-
-        if len(colors) >= 2:
-            kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
-            teams = ["blue" if label == 0 else "red" for label in kmeans.labels_]
-        else:
-            # se c'è solo 1 giocatore lo mettiamo in una squadra "unknown"
-            teams = ["unknown"] * len(tracked.xyxy)
-
-        tracked.data["team"] = teams
-
-        ##########################
-        # STEP 4: Annotazione + salvataggio
-        ##########################
-        labels = [f"#{tid} ({team})" for tid, team in zip(tracked.tracker_id, teams)]
-        annotated = ellipse_annotator.annotate(scene=frame, detections=tracked)
-        annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
-
-        # Annotazione e salvataggio palla
-        if len(ball_detections) > 0:
-            ball_box = ball_detections.xyxy[0]
-            x_center = float((float(ball_box[0]) + float(ball_box[2])) / 2)
-            y_bottom = float(ball_box[3])
-
-            triangle_annotator = sv.TriangleAnnotator(color=sv.Color.RED)
-            annotated = triangle_annotator.annotate(scene=annotated, detections=ball_detections)
-
-            if homography_matrix is not None:
-                pt = np.array([x_center, y_bottom, 1])
-                transformed = homography_matrix @ pt
-                transformed /= transformed[2]
-                x_real = float(transformed[0])
-                y_real = float(transformed[1])
+        frame_data = []
+        if len(players) > 0:
+            tracked = tracker.update_with_detections(players)
+            colors = [np.mean(frame[int(b[1]):int(b[3]), int(b[0]):int(b[2])].reshape(-1, 3), axis=0) if frame[int(b[1]):int(b[3]), int(b[0]):int(b[2])].size > 0 else [0, 0, 0] for b in tracked.xyxy]
+            if len(colors) >= 2:
+                kmeans = KMeans(n_clusters=2, n_init=10).fit(colors)
+                teams = ["blue" if l == 0 else "red" for l in kmeans.labels_]
             else:
-                x_real, y_real = x_center, y_bottom
+                teams = ["unknown"] * len(tracked.xyxy)
+            tracked.data["team"] = teams
 
-            db_helper.insert_player(0, 0, x_real, y_real, "none") # 0 per la palla
+            labels = [f"#{tid} ({team})" for tid, team in zip(tracked.tracker_id, teams)]
+            annotated = ellipse_annotator.annotate(scene=frame, detections=tracked)
+            annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
 
-        # Salvataggio giocatori
-        for i, box in enumerate(tracked.xyxy):
-            x_pixel = float((float(box[0]) + float(box[2])) / 2)
-            y_pixel = float(box[3])
-            pt = np.array([x_pixel, y_pixel, 1])
-            if homography_matrix is not None:
-                transformed = homography_matrix @ pt
-                transformed /= transformed[2]
-                x_real = float(transformed[0])
-                y_real = float(transformed[1])
-            else:
-                x_real, y_real = x_pixel, y_pixel
+            for i, box in enumerate(tracked.xyxy):
+                center = np.array([(box[0]+box[2])/2, box[3], 1])
+                if homography_matrix is not None:
+                    pt = homography_matrix @ center
+                    pt /= pt[2]
+                else:
+                    pt = center
+                frame_data.append((float(pt[0]), float(pt[1]), teams[i]))
+            frame = annotated
 
-            player_id = int(tracked.tracker_id[i])
-            db_helper.insert_player(player_id, 0, x_real, y_real, teams[i])
-
-        out.write(annotated)
-        frame_index += 1
+        all_positions.append(frame_data)
+        out.write(frame)
 
     cap.release()
     out.release()
-
-    #generazione vornoi
-    genera_video_voronoi()
-    #generazione heatmap
-    genera_heatmap_giocatori()
-
-    shutil.copy(os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4"),
-            os.path.join(script_dir, "static", "voronoi_video.mp4"))
-
-    
-# per recuperare stream video da webcam
-class WebcamUSBResponseSimulator:
-    def __init__(self, cam_index=0): # cam_index = 0, prima webcam dispobinile, per ecellenza quella integrata
-        self.cap = cv2.VideoCapture(cam_index)
-
-    def iter_content(self, chunk_size=1024):
-        if not self.cap.isOpened():
-            print("Errore: webcam non disponibile.")
-            return
-
-        while True:
-            ret, frame = self.cap.read()
-            if not ret:
-                break
-
-            # Ridimensiona il frame
-            frame_resized = cv2.resize(frame, (320, 240))
-            #frame_resized = cv2.flip(frame_resized, 1)
-            # Codifica JPEG
-            ret, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 100]) # la qualità va fino a 100
-            if not ret:
-                continue
-
-            frame_bytes = buffer.tobytes()
-
-            # Costruisci il chunk MJPEG
-            chunk = (b'--frame\r\n'
-                     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
-            # Simula suddivisione in pacchetti
-            for i in range(0, len(chunk), chunk_size):
-                yield chunk[i:i+chunk_size]
-
-        self.cap.release()
-
-
-def webcam_usb():
-    return WebcamUSBResponseSimulator()
-
-
-
-#funzioni flask
-@app.route('/inizia_partita', methods=['GET'])
-def inizia_partita():
-    """Endpoint per avviare registrazione video."""
-    global recording, recording_thread
-    if recording:
-        return jsonify({"status": "error", "message": "Registrazione già in corso"}), 400
-
-    recording_thread = threading.Thread(target=start_video_recording_from_nao)
-    recording_thread.start()
-    return jsonify({"status": "ok", "message": "Sto registrando la partita dal NAO..."}), 200
-
-@app.route('/fine_partita', methods=['GET'])
-def fine_partita():
-    """Endpoint per fermare registrazione."""
-    global recording, recording_thread
-    if not recording:
-        return jsonify({"status": "error", "message": "Nessuna registrazione attiva"}), 400
-
-    recording = False
-    if recording_thread is not None:
-        recording_thread.join()
-
-    return jsonify({"status": "ok", "message": "Registrazione terminata. Puoi ora avviare l'analyze."}), 200
+    genera_video_voronoi(all_positions, voronoi_path)
+                
+@app.route('/upload_video', methods=['POST'])
+def upload_video():
+    file = request.files.get('file')
+    if file and file.filename.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
+        os.makedirs(os.path.dirname(video_path_mp4), exist_ok=True)
+        file.save(video_path_mp4)
+        return jsonify({"status": "ok", "message": "Video caricato con successo."}), 200
+    return jsonify({"status": "error", "message": "Formato non valido."}), 400
 
 @app.route('/analyze', methods=['GET'])
 def analyze():
-    threading.Thread(target=analizza_partita).start()
-    return jsonify({"status": "ok", "message": "Analisi avviata. Attendere qualche minuto..."}), 200
+    print("inizio analisi")
+    analizza_partita()
+    return jsonify({"status": "ok", "message": "Analisi completata."}), 200
 
-@app.route('/stream_voronoi')
+@app.route('/stream_voronoi', methods=['GET'])
 def stream_voronoi():
-    """Restituisce il video Voronoi appena generato."""
     path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
     if os.path.exists(path):
         return send_file(path, mimetype='video/mp4')
-    else:
-        return "Video non trovato", 404
-
-@app.route('/api/players', methods=['GET'])
-def api_players():
-    """Restituisce lista dei player_id rilevati."""
-    players = db_helper.select_players()
-    return jsonify(players)
-
-@app.route('/heatmap/<int:player_id>', methods=['GET'])
-def get_heatmap(player_id):
-    """Restituisce la heatmap del giocatore."""
-    heatmap_path = os.path.join(script_dir, "recordings", "heat_map", f"{player_id}.png")
-    if os.path.exists(heatmap_path):
-        return send_file(heatmap_path, mimetype='image/png')
-    else:
-        return "Heatmap non trovata", 404
-
+    return "Video non trovato", 404
 
 #################################
 #            Tribuna            #
@@ -580,12 +393,11 @@ def webcam():
 @app.route('/webcam_aruco', methods=['GET'])
 def webcam_aruco():
     ### per recuperare frame dal nao tramite py2 ###
-    #data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    #url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
-    #response = requests.get(url, json=data, stream=True)
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_webcam/" + str(data) 
+    response = requests.get(url, json=data, stream=True)
 
     ### per recuperare frame tramite webcam collegata al pc ###
-    response = webcam_usb()
     
     #recupero variabili
     # Inizializza il dizionario ArUco
@@ -888,12 +700,6 @@ def nao_SayText(text_to_say):
     response = requests.get(url, json=data)
     logger.info(str(response.text))
 
-def nao_animatedSayText(text_to_say):
-    data     = {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":text_to_say}
-    url      = "http://127.0.0.1:5011/nao_animatedSayText/" + str(data) 
-    response = requests.get(url, json=data)
-    logger.info(str(response.text))
-
 
 def nao_standInit():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
@@ -974,10 +780,10 @@ def logout():
 def home():
     return render_template('home.html')
 
-@app.route('/home2', methods=['GET']) # non definito
+@app.route('/salute', methods=['GET'])
 @login_required
-def home2():
-    return render_template('home2.html')
+def salute():
+    return render_template('salute.html')
 
 @app.route('/joystick', methods=['GET'])
 @login_required
@@ -988,7 +794,6 @@ def joystcik():
 @login_required
 def competition():
     return render_template('competition.html')
-
 
 @app.route('/partita', methods=['GET'])
 @login_required
@@ -1191,7 +996,12 @@ def nao_battery_level():
     battery_level = battery_info["battery_level"]
     return jsonify({'battery_level': battery_level}), 200
 
-
+@app.route('/nao_animatedSayText', methods = ['GET'])
+def nao_animatedSayText(text_to_say):
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":text_to_say}
+    url      = "http://127.0.0.1:5011/nao_animatedSayText/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
 
 ###  database  ###
 @app.route('/api/app/utente/<id>', methods=['POST'])
@@ -1273,6 +1083,14 @@ def api_app_utenti(id):
             logger.error('No id argument passed')
             return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 
+@app.route('/api/db/dati', methods=['GET'])
+def get_all_dati():
+    try:
+        results = db_helper.select_all_dati()
+        return jsonify({'code': 200, 'data': results}), 200
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({'code': 500, 'message': str(e)}), 500
 
 '''
 CODICI JSON
