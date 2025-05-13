@@ -449,8 +449,8 @@ def nao_animatedSayText(params):
         return jsonify({'code': 500, 'message': 'params error'}), 500  
 
 
-@app.route('/nao_entusiasta/<params>', methods=['GET'])  
-def nao_entusiasta(params):
+@app.route('/nao_dance_1/<params>', methods=['GET'])  
+def nao_dance_1(params):
     if (params != None and params != ''):
         if request.method == 'GET':
             try:
