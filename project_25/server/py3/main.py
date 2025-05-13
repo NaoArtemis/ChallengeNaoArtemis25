@@ -294,8 +294,64 @@ def stream_voronoi():
 #################################
 #            Tribuna            #
 #################################
-# variabili blobali task 2
-task_2 = False
+# VARIABILI GLOBALI task 2
+global_timer_running = False
+global_timer_start = 0
+global_game_time = 0
+global_score_audace = 0
+global_score_ospite = 0
+
+@app.route('/api/start_timer', methods=['POST'])
+def start_timer():
+    global global_timer_running, global_timer_start
+    if not global_timer_running:
+        global_timer_start = time.time() - global_game_time
+        global_timer_running = True
+    return jsonify({"status": "started"})
+
+@app.route('/api/stop_timer', methods=['POST'])
+def stop_timer():
+    global global_timer_running, global_game_time
+    if global_timer_running:
+        global_game_time = time.time() - global_timer_start
+        global_timer_running = False
+    return jsonify({"status": "stopped"})
+
+@app.route('/api/get_status', methods=['GET'])
+def get_status():
+    global global_timer_running, global_game_time, global_score_audace, global_score_ospite
+    current_time = global_game_time
+    if global_timer_running:
+        current_time = time.time() - global_timer_start
+    minutes = int(current_time // 60)
+    seconds = int(current_time % 60)
+    return jsonify({
+        "time": f"{minutes:02d}:{seconds:02d}",
+        "audace": global_score_audace,
+        "ospite": global_score_ospite
+    })
+
+@app.route('/api/increment_score/<team>', methods=['POST'])
+def increment_score(team):
+    global global_score_audace, global_score_ospite
+    if team == 'audace':
+        global_score_audace += 1
+    elif team == 'ospite':
+        global_score_ospite += 1
+    return jsonify({"status": "score updated"})
+
+@app.route('/api/reset_game', methods=['POST'])
+def reset_game():
+    global global_timer_running, global_timer_start, global_game_time
+    global global_score_audace, global_score_ospite
+    global_timer_running = False
+    global_timer_start = 0
+    global_game_time = 0
+    global_score_audace = 0
+    global_score_ospite = 0
+    return jsonify({"status": "game reset"})
+
+
 
 def tempo_di_pausa():
     print("Ora aspetta")

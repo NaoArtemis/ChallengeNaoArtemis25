@@ -48,9 +48,32 @@
                 <button class="btn btn-joystick" onclick="analyze()">Analyze</button>
                 <div id="upload-status" style="margin-top: 15px; font-weight: bold;"></div>
             </div>
+        </div>
 
+        <div class = "dashboard">
+            <div class = "joystick-panel">
+                <h1 class="text">Gestione Partita</h1>
+                <div style = "color: black;", id="timer">00:00</div>
+                <div class="mb-4">
+                    <button onclick="startTimer()" class="btn btn-volume">Start</button>
+                    <button onclick="stopTimer()" class="btn btn-volume">Pausa</button>
+                    <button onclick="resetGame()" class="btn btn-volume">Fine Partita</button>
+                </div>
+                <div class="flex justify-center items-center space-x-8 text-2xl">
+                    <div>
+                        <div style = "color: black;">audace</div>
+                        <button onclick="incrementScore('audace')" class="bg-red-500 text-white px-4 py-2 rounded">+</button>
+                    </div>
+                    <div id="score" , style = "color: black;">0:0</div>
+                    <div>
+                        <div style = "color: black;">Ospite</div>
+                        <button onclick="incrementScore('ospite')" class="bg-blue-500 text-white px-4 py-2 rounded">+</button>
+                    </div>
+                </div>
             </div>
+        </div>
 
+        <script src="https://cdn.tailwindcss.com"></script> <!-- carico liberria tailwind-->
         <!-- Script -->
         <script>
 
@@ -99,6 +122,37 @@
                     'Il tuo browser non supporta il video.' +
                     '</video>';
             }
+
+
+            // parte score e time
+                
+            async function updateStatus() {
+                const res = await fetch('/api/get_status');
+                const data = await res.json();
+                document.getElementById('timer').innerText = data.time;
+                document.getElementById('score').innerText = `${data.audace}:${data.ospite}`;
+            }
+
+            async function startTimer() {
+                await fetch('/api/start_timer', { method: 'POST' });
+            }
+
+            async function stopTimer() {
+                await fetch('/api/stop_timer', { method: 'POST' });
+            }
+
+            async function resetGame() {
+                await fetch('/api/reset_game', { method: 'POST' });
+            }
+
+            async function incrementScore(team) {
+                await fetch(`/api/increment_score/${team}`, { method: 'POST' });
+            }
+
+            if (window.location.pathname === "/partita"){
+            setInterval(updateStatus, 1000);
+            }
+
         </script>
 
     </div>
