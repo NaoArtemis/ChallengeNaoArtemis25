@@ -272,6 +272,20 @@ def nao_touch_head_counter(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
+@app.route('/nao_get_seat/<params>', methods=['GET'])
+def nao_get_seat(params):
+    if (params != None and params != ''):
+        if request.method == 'GET':
+            try:
+                data       = eval(params)
+                nao_ip     = data['nao_ip']
+                nao_port   = data['nao_port']
+                global touch_counter
+                # Ritorna un JSON 
+                return jsonify({'counter': touch_counter})
+
+
+
 
 '''@app.route('/nao_seat/<params>', methods=['GET'])  
 def nao_seat(params):

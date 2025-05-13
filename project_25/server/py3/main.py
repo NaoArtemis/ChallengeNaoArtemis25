@@ -307,6 +307,8 @@ global global_score_audace
 global_score_audace =0
 global global_score_ospite
 global_score_ospite=0
+global counter
+counter=0
 
 @app.route('/api/start_timer', methods=['POST'])
 def start_timer():
@@ -397,27 +399,45 @@ def nao_points():
         nao_animatedSayText(text)
     tempo_di_pausa()
 
+
+def nao_get_seat():
+    data     = {"nao_ip":nao_ip, "nao_port":nao_port}
+    url      = "http://127.0.0.1:5011/nao_get_seat/" + str(data) 
+    response = requests.get(url, json=data)
+    logger.info(str(response.text))
+    counter= payload.get('counter')
+
+
 @app.route('/nao_seat', methods=['GET'])
 def nao_seat():
     global task_2
     # Numero di righe e colonne
     righe = 6
     colonne = 10
+    riga_t=0
+    posto_t=0
     matrice = [[True for _ in range(colonne)] for _ in range(righe)]
     posti_max = righe*colonne
-    posti_occupati =  
+    posti_occupati =  counter
 
     # Imposta a False i primi 'posti_occupati' posti, riga per riga
     contatore = 0
     for i in range(righe):
         for j in range(colonne):
-            if contatore < posti_occupati:
+            if contatore < posti_occupati and posti_occupati<=posti_max:
                 matrice[i][j] = False
                 contatore += 1
             else:
                 break
-
-    
+    for i in range(righe):
+        for j in range(colonne):
+            if matrice[i][j] == True:
+                riga_t=i
+                posto_t=j
+                break
+        if prima_disponibile:
+            break
+    text="Puoi sederti nel posto "+ riga_t+"della riga "+posto_t
     nao_animatedSayText(text)
     tempo_di_pausa()
     
