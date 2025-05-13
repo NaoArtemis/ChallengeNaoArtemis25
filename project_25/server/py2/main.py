@@ -251,7 +251,7 @@ def nao_touch_head_counter(params):
                     global touch_counter  # per modificare la variabile esterna
                     if value == 1.0:
                         touch_counter += 1
-                    try:
+                try:
                     while True:
                         is_touched = memory_proxy.getData("MiddleTactilTouched")
                         on_middle_tactil_touched_counter(is_touched)
