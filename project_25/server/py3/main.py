@@ -385,8 +385,8 @@ def nao_time_match():
     global task_2
     tempo_di_pausa()
 
-@app.route('/nao_coro', methods=['GET'])
-def nao_coro():  
+@app.route('/nao_cori', methods=['GET'])
+def nao_cori():  
     global task_2
     text = "vincere"#haseeb non modificare!!!!
     nao_dance_1()
@@ -854,8 +854,8 @@ def competition():
 @app.route('/partita', methods=['GET'])
 @login_required
 def partita():
-    players = db_helper.select_players()
-    return render_template('partita.html', players=players)
+    #players = db_helper.select_players()     , players=players
+    return render_template('partita.html')
 
 @app.route('/registra', methods = ['GET']) 
 # tramite questa pagina creai nuovi utenti e salvi nel database tramite funzione api_app_utenti(id):

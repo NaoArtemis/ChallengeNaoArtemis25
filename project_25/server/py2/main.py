@@ -229,6 +229,58 @@ def nao_touch_head_audiorecorder(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
+@app.route('/nao_touch_head_counter/<params>', methods=['GET'])
+def nao_touch_head_counter(params): 
+    global touch_counter
+    touch_counter = 0
+
+    if params:
+        if request.method == 'GET':
+            try:
+                data       = eval(params)
+                nao_ip     = data['nao_ip']
+                nao_port   = data['nao_port']
+
+                memory_proxy = ALProxy("ALMemory", nao_ip, nao_port)
+
+                global service_active
+                service_active = False
+
+                def on_middle_tactil_touched_counter(value):
+                    nonlocal touch_counter  # per modificare la variabile esterna
+                    if value == 1.0:
+                        touch_counter += 1
+                        print(f"Head touched! Counter: {touch_counter}")
+
+                try:
+                    while True:
+                        is_touched = memory_proxy.getData("MiddleTactilTouched")
+                        on_middle_tactil_touched_counter(is_touched)
+                        time.sleep(0.1)
+                except KeyboardInterrupt:
+                    # Se interrompi manualmente col CTRL+C
+                    print("Loop interrotto manualmente.")
+                except Exception as e:
+                    # Qualunque altra eccezione (anche nostro stop) ci fa uscire dal loop
+                    print("Touch loop terminato:", e)
+
+                # Alla fine restituisco il valore del counter
+                return jsonify({
+                    'code':    200,
+                    'message': 'Tocco centrale rilevato.',
+                    'touches': touch_counter
+                }), 200
+
+            except Exception as e:
+                app.logger.error(str(e))
+                return jsonify({'code': 500, 'message': str(e)}), 500
+
+        else:
+            return jsonify({'code': 500, 'message': 'methods error'}), 500
+    else:
+        return jsonify({'code': 500, 'message': 'params error'}), 500
+
+
 '''@app.route('/nao_seat/<params>', methods=['GET'])  
 def nao_seat(params):
     #params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
