@@ -229,7 +229,7 @@ def nao_touch_head_audiorecorder(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 global touch_counter
-    touch_counter = 0
+touch_counter = 0
 @app.route('/nao_touch_head_counter/<params>', methods=['GET'])
 def nao_touch_head_counter(params): 
 
