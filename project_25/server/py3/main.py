@@ -498,12 +498,12 @@ def nao_dance_1(): #baletto richiamato in nao_coro
     response = requests.get(url, json=data)
     logger.info(str(response.text))
 
-@app.route('nao_points' methods='GET')
+@app.route('/nao_points', methods=['GET'])
 def nao_points():
     global task_2
     tempo_di_pausa()
 
-@app.route('nao_seat', methods=['GET'])
+@app.route('/nao_seat', methods=['GET'])
 def nao_seat():
     global task_2
     text = "i posti a sedere riservati sono quelli nella prima fila con gli stiker blu"
@@ -511,12 +511,12 @@ def nao_seat():
     tempo_di_pausa()
     
 
-@app.route('nao_time_match' methods=['GET'])
+@app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
     global task_2
     tempo_di_pausa()
 
-@app.toute('nao_coro' methods=['GET'])
+@app.route('/nao_coro', methods=['GET'])
 def nao_coro():  
     global task_2
     text = "vincere"#haseeb non modificare!!!!
