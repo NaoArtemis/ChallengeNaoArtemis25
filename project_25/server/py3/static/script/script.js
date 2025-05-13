@@ -94,10 +94,10 @@ document.querySelector("#battery-icon").addEventListener("mouseout", function ()
 });
 
 
-document.querySelector("#color_eye_button").addEventListener("click", function () {
+function color_eye() {
     const dropdown = document.querySelector("#eye_color_dropdown");
     dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
-});
+};
 
 document.querySelector("#eye_color_dropdown").addEventListener("change", function () {
     const selectedOption = this.value;
@@ -109,97 +109,96 @@ document.querySelector("#eye_color_dropdown").addEventListener("change", functio
     }
 });
 
-document.querySelector("#wakeup").addEventListener("click", function () {
+function wake_up() {
     fetch("/api/movement/nao_wakeup", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#Sit_Down").addEventListener("click", function () {
+function sit_down() {
     fetch("/api/movement/nao_sitdown", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#stand_init").addEventListener("click", function () {
+function stand_init() {
     fetch("/api/movement/standInit", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#head_touch").addEventListener("click", function () {
+function head_touch() {
     fetch("/nao_touch_head_audiorecorder", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#stop_train").addEventListener("click", function () {
+function stop_train() {
     fetch("/api/movement/nao_train_move", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
-
-document.querySelector("#stand").addEventListener("click", function () {
+};
+function stand() {
     fetch("/api/movement/stand", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#autonomus_life").addEventListener("click", function () {
+function a_life() {
     fetch("/api/movement/nao_autonomous_life", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#autonomous_life_state").addEventListener("click", function () {
+function a_life_stop() {
     fetch("/api/movement/nao_autonomous_life_state", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
 // Funzioni per i tasti del joystick
-document.querySelector("#start").addEventListener("click", function () {
+function start() {
     fetch("/api/movement/start", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#sinistra").addEventListener("click", function () {
+function left() {
     fetch("/api/movement/left", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#stop").addEventListener("click", function () {
+function stop() {
     fetch("/api/movement/stop", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#destra").addEventListener("click", function () {
+function right() {
     fetch("/api/movement/right", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
-document.querySelector("#back").addEventListener("click", function () {
+function back() {
     fetch("/api/movement/back", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
-});
+};
 
 // Funzioni per inviare testo al NAO
 function inviaTestoAlNAO() {
