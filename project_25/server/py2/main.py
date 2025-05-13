@@ -228,34 +228,28 @@ def nao_touch_head_audiorecorder(params):
             return jsonify({'code': 500, 'message': 'methods error'}), 500  
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
+
+
 global touch_counter
 touch_counter = 0
 @app.route('/nao_touch_head_counter/<params>', methods=['GET'])
 def nao_touch_head_counter(params): 
-
-    if params:
+    if (params != None and params != ''):
         if request.method == 'GET':
             try:
                 data       = eval(params)
                 nao_ip     = data['nao_ip']
                 nao_port   = data['nao_port']
-                nao_user     = json['nao_user']
-                nao_password = json['nao_password']
 
                 memory_proxy = ALProxy("ALMemory", nao_ip, nao_port)
-
-                global service_active
-                service_active = False
-
-                def on_middle_tactil_touched_counter(value):
-                    global touch_counter  # per modificare la variabile esterna
-                    if value == 1.0:
-                        touch_counter += 1
                 try:
                     while True:
                         is_touched = memory_proxy.getData("MiddleTactilTouched")
-                        on_middle_tactil_touched_counter(is_touched)
-                        time.sleep(0.1)
+                        if is_touched == 1.0:
+                            print("Middle Tactil Touched - attivato.")
+                            global touch_counter
+                            touch_counter += 1
+                        time.sleep(0.2)
                 except KeyboardInterrupt:
                     # Se interrompi manualmente col CTRL+C
                     app.logger.error(str(e))
@@ -278,33 +272,20 @@ def nao_touch_head_counter(params):
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
 
+@app.route('/get_seat', methods=['GET'])
+def get_seat():
+    try:
+        return jsonify({
+            'code': 200,
+            'function': 'get_seat()',
+            'status': 'OK',
+            'counter': touch_counter
+        }), 200
+    except Exception as e:
+        app.logger.error(str(e))
+        return jsonify({'code': 500, 'message': str(e)}), 500
 
-'''@app.route('/nao_seat/<params>', methods=['GET'])  
-def nao_seat(params):
-    #params= {"nao_ip":nao_ip, "nao_port":nao_port, "text_to_say":"i posti a sedere riservati sono quelli in prima fila"}
-    ricordati che params è un dizionario json, per estrarre i dati prima lo trasfromi in eval, json = eval(params)
-     poi estrai come se fosse un dict nromale; nao_ip = json["nao_ip]......
-    
-    nao_animatedSayText(params)
 
-@app.route('/nao_cronac', methods=['GET'])  
-def nao_cronac():
-    #bisogna chiamare la funzione tts_to_nao_ai con una get dal server py3, dagli la text, dobbiamo ancora trovare un modo per farlo
-    return None # messa per non creare problemi, da togliere
-
-@app.route('/nao_stats', methods=['GET'])  
-def nao_stats():
-    #bisogna chiamare la funzione tts_to_nao_ai con una get dal server py3, per il risultato ho già il widget di tutto campo, quindi possiamo rpederlo da li senza complicarci la vita, però richiede conessione internet
-    return None # messa per non creare problemi, da togliere
-
-def control_str(input_string):
-    if input_string == 'dove posso sedermi':
-        nao_seat()
-    elif input_string == 'b':
-        nao_cronac()
-    elif input_string == 'c':
-        nao_stats()
-'''
 @app.route('/nao_face_tracker/<params>', methods=['GET'])  
 def nao_face_tracker(params):
     if (params != None and params != ''):
@@ -517,11 +498,11 @@ def nao_dance_1(params):
                 animation_prova = ALProxy("ALAnimationPlayer", nao_ip, nao_port)
                 #prova dell'enimazione
                 animation_prova = session.service("ALAnimationPlayer")
-                animation_prova.run("animations/Stand/BodyTalk/BodyTalk_1")
+                animation_prova.run("animations/Stand/Gestures/Enthusiastic_5")
 
-                nao_standInit(params)                
+                nao_stand(params)                
 
-                return jsonify({'code': 200, 'function': 'nao_standInit(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
+                return jsonify({'code': 200, 'function': 'nao_dance_1(ip:' + str(nao_ip) + ' port:' + str(nao_port) + ')', 'status':'OK'}), 200
             except Exception as e:
                 logger.error(str(e))
                 return jsonify({'code': 500, 'message': str(e)}), 500

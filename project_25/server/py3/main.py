@@ -296,12 +296,22 @@ def stream_voronoi():
 #            Tribuna            #
 #################################
 # VARIABILI GLOBALI task 2
+global time 
 task_2 = False
+global global_timer_running 
 global_timer_running = False
-global_timer_start = 0
-global_game_time = 0
-global_score_audace = 0
-global_score_ospite = 0
+global global_timer_start 
+global_timer_start =0
+global global_game_time 
+global_game_time =0
+global global_score_audace 
+global_score_audace =0
+global global_score_ospite
+global_score_ospite=0
+global counter
+counter=0
+global prima_disponibile
+prima_disponibile=False
 
 @app.route('/api/start_timer', methods=['POST'])
 def start_timer():
@@ -321,12 +331,13 @@ def stop_timer():
 
 @app.route('/api/get_status', methods=['GET'])
 def get_status():
-    global global_timer_running, global_game_time, global_score_audace, global_score_ospite
+    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time
     current_time = global_game_time
     if global_timer_running:
         current_time = time.time() - global_timer_start
     minutes = int(current_time // 60)
     seconds = int(current_time % 60)
+    time = f"{minutes:02d}:{seconds:02d}"
     return jsonify({
         "time": f"{minutes:02d}:{seconds:02d}",
         "audace": global_score_audace,
@@ -342,22 +353,24 @@ def increment_score(team):
         global_score_ospite += 1
     return jsonify({"status": "score updated"})
 
-@app.route('/api/reset_game', methods=['POST'])
+@app.route('/api/reset_game', methods=['GET'])
 def reset_game():
     global global_timer_running, global_timer_start, global_game_time
-    global global_score_audace, global_score_ospite
+    global global_score_audace, global_score_ospite,counter,posto_t,riga_t
     global_timer_running = False
     global_timer_start = 0
     global_game_time = 0
     global_score_audace = 0
     global_score_ospite = 0
+    counter=0
+    posto_t=1
+    riga_t=1
     return jsonify({"status": "game reset"})
-
 
 
 def tempo_di_pausa():
     print("Ora aspetta")
-    timer = threading.Timer(20, ritorno_a_false)
+    timer = threading.Timer(5, ritorno_a_false)
     timer.start()
 
 def ritorno_a_false():
@@ -372,12 +385,69 @@ def nao_dance_1(): #baletto richiamato in nao_coro
 @app.route('/nao_points', methods=['GET'])
 def nao_points():
     global task_2
+    global global_score_audace, global_score_ospite
+    if global_score_audace ==global_score_ospite and global_score_audace==0:
+        text = "Siamo ancora 0 pari, forza audace presto segneremo"
+        nao_animatedSayText(text)
+    elif global_score_audace ==global_score_ospite:
+        text = "Siamo "+ str(global_score_audace) +"pari, forza audace presto segneremo"
+        nao_animatedSayText(text)
+    elif global_score_audace<global_score_ospite and (global_score_ospite-global_score_audace)==1:
+        text = "Siamo sotto di un solo gol, possiamo recuperare"
+        nao_animatedSayText(text)
+    elif global_score_audace<global_score_ospite and (global_score_ospite-global_score_audace)>1:
+        text = "Peccato siamo sotto di"+str(global_score_ospite-global_score_audace)+"gol, non perdiamo la speranza audace"
+        nao_animatedSayText(text)
+    elif global_score_audace>global_score_ospite and (global_score_audace-global_score_ospite)==1:
+        text = "Siamo in vantaggio di un gol, evviva"
+        nao_animatedSayText(text)
+    elif global_score_audace>global_score_ospite and (global_score_audace-global_score_ospite)>1:
+        text = "Siamo in vantaggio di " + str(global_score_audace - global_score_ospite) + " gol, nessuno ci può battere, evviva"
+        nao_animatedSayText(text)
     tempo_di_pausa()
+
+
+def get_seat():
+    url      = "http://127.0.0.1:5011/get_seat"
+    response = requests.get(url)
+    logger.info(str(response.text))
+    return response.json()['counter']
+    
 
 @app.route('/nao_seat', methods=['GET'])
 def nao_seat():
+    counter = get_seat()
+
     global task_2
-    text = "i posti a sedere riservati sono quelli nella prima fila con gli stiker blu"
+    global prima_disponibile
+    # Numero di righe e colonne
+    righe = 6
+    colonne = 10
+    riga_t=1
+    posto_t=1
+    matrice = [[True for _ in range(colonne)] for _ in range(righe)]
+    posti_max = righe*colonne
+    posti_occupati =  counter
+
+    # Imposta a False i primi 'posti_occupati' posti, riga per riga
+    contatore = 0
+    for i in range(righe):
+        for j in range(colonne):
+            if (contatore < posti_occupati and posti_occupati<=posti_max) or posti_occupati!=0:
+                matrice[i][j] = False
+                contatore += 1
+            else:
+                break
+    for i in range(righe):
+        for j in range(colonne):
+            if matrice[i][j] == True:
+                riga_t=i+1
+                posto_t=j+1
+                prima_disponibile=True
+                break
+        if prima_disponibile:
+            break
+    text="Puoi sederti nel posto {} della fila {}".format(posto_t, riga_t)
     nao_animatedSayText(text)
     tempo_di_pausa()
     
@@ -385,6 +455,12 @@ def nao_seat():
 @app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
     global task_2
+    time= get_status()
+    if time[0]==0 and time[1]==0:
+        text ="La partita non è ancora iniziata"
+    else:
+        text = "La partita è iniziata da "+str(time[0])+"minuti e "str(time[1])+"secondi"
+    nao_animatedSayText(text)
     tempo_di_pausa()
 
 @app.route('/nao_cori', methods=['GET'])
@@ -397,8 +473,9 @@ def nao_cori():
     "Sempre con te, ovunque andrai, Audace nel cuore, non ti lascerò mai",
     "Curva Sud canta per te, Audace Audace, orgoglio della città",
     "Forza Audace, vinci per noi, la Curva Sud è sempre con te"])
-    nao_dance_1()
     nao_SayText(text)
+    nao_dance_1()
+    
     tempo_di_pausa() 
 
 
@@ -740,6 +817,26 @@ def nao_touch_head_audiorecorder():
     result = model.transcribe(local_path)
     ORDINE = result['text']
     print(ORDINE)
+
+@app.route('/nao_touch_head_counter', methods=['GET'])
+def nao_touch_head_counter():
+    # Prepara i dati da inviare
+    data = {
+        "nao_ip":       nao_ip,
+        "nao_port":     nao_port,
+        "nao_user":     nao_user,
+        "nao_password": nao_password
+    }
+
+    url = "http://127.0.0.1:5011/nao_touch_head_counter/" + str(data) 
+    response = requests.get(url, json=data, stream=True)
+
+    if response.status_code == 200:
+        app.logger.info("Tocco ricevuto da Python 2 (200).")
+        return jsonify({'code': 200, 'message': 'Tocco registrato con successo'}), 200
+    else:
+        app.logger.error(f"Errore dal server Python 2: {response.status_code}")
+        return jsonify({'code': 500, 'message': 'Errore remoto'}), 500
 
 
 def nao_face_tracker():
