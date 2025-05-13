@@ -51,6 +51,9 @@
 
             </div>
             <div class="partita-panel">
+                <div>
+                    <button id ="avvio_task_2"class="btn btn-joystick" onclick="avvio_task_2()">task 2</button>
+                </div>
                 <button id ="cori"class="btn btn-joystick" onclick="cori()">Cori</button>
                 <button id ="posti"class="btn btn-joystick" onclick="seat()">Posti</button>
                 <button id ="tempo_match"class="btn btn-joystick" onclick="time_match()">Tempo match</button>
@@ -104,6 +107,13 @@
                     'Il tuo browser non supporta il video.' +
                     '</video>';
             }
+            function avvio_task_2(){
+                fetch("/webcam_aruco", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+
             function cori(){
                 fetch("/nao_cori", { method: "GET" })
                     .then(response => response.json())
