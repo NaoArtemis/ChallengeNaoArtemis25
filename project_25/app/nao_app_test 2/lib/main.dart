@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:pedometer/pedometer.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
 
@@ -18,7 +15,7 @@ class HealthApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const LoginPage(),
     );
   }
@@ -26,189 +23,26 @@ class HealthApp extends StatelessWidget {
 
 class User {
   final String id;
-  final String firstName;
-  final String lastName;
   final String username;
   final String password;
   int? heartRate;
-  int? stepCount;
+  int? steps;
   double? speed;
-  Position? position;
 
   User({
     required this.id,
-    required this.firstName,
-    required this.lastName,
     required this.username,
     required this.password,
     this.heartRate,
-    this.stepCount,
+    this.steps,
     this.speed,
-    this.position,
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'firstName': firstName,
-        'lastName': lastName,
-        'username': username,
-        'password': password,
         'heartRate': heartRate,
-        'stepCount': stepCount,
+        'steps': steps,
         'speed': speed,
-        'latitude': position?.latitude,
-        'longitude': position?.longitude,
       };
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'],
-        firstName: json['firstName'],
-        lastName: json['lastName'],
-        username: json['username'],
-        password: json['password'],
-        heartRate: json['heartRate'],
-        stepCount: json['stepCount'],
-        speed: json['speed'],
-        position: (json['latitude'] != null && json['longitude'] != null)
-            ? Position(
-                latitude: json['latitude'],
-                longitude: json['longitude'],
-                timestamp: DateTime.now(),
-                accuracy: 0,
-                altitude: 0,
-                heading: 0,
-                speed: json['speed'] ?? 0,
-                speedAccuracy: 0,
-                altitudeAccuracy: 0,
-                headingAccuracy: 0,
-              )
-            : null,
-      );
-}
-
-class ServerConfig {
-  static String serverIP = "192.168.0.103"; // Default IP, will be updated
-  static const int serverPort = 5010;
-
-  static Future<void> updateServerIP(String newIP) async {
-    serverIP = newIP;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('serverIP', newIP);
-  }
-
-  static Future<void> loadServerIP() async {
-    final prefs = await SharedPreferences.getInstance();
-    serverIP = prefs.getString('serverIP') ?? "192.168.1.100";
-  }
-}
-
-class AuthService {
-  static List<User> users = [];
-
-  static Future<void> loadUsers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? userJsonList = prefs.getStringList('users');
-    if (userJsonList != null) {
-      users = userJsonList
-          .map((userJson) => User.fromJson(json.decode(userJson)))
-          .toList();
-    }
-  }
-
-  static Future<void> saveUsers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> userJsonList =
-        users.map((user) => json.encode(user.toJson())).toList();
-    await prefs.setStringList('users', userJsonList);
-  }
-
-  static Future<void> register(User newUser) async {
-    await ServerConfig.loadServerIP();
-    final url = Uri.parse(
-        'http://${ServerConfig.serverIP}:${ServerConfig.serverPort}/register');
-
-    final body = json.encode(newUser.toJson());
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        users.add(newUser);
-        await saveUsers();
-        print('Utente registrato con successo!');
-      } else {
-        print('Errore durante la registrazione: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Errore di connessione: $error');
-    }
-  }
-
-  static bool login(String username, String password) {
-    return users.any((user) =>
-        user.username == username && user.password == password);
-  }
-
-  static Future<void> sendUserDataToServer(User user) async {
-    await ServerConfig.loadServerIP();
-    final url = Uri.parse(
-        'http://${ServerConfig.serverIP}:${ServerConfig.serverPort}/update');
-
-    final body = json.encode(user.toJson());
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        print('Dati utente aggiornati sul server!');
-        
-        // Controlla se la frequenza cardiaca è troppo alta
-        if (user.heartRate != null && user.heartRate! > 120) {
-          await _sendNaoCommand("cambio giocatore");
-        }
-      } else {
-        print('Errore durante l\'invio dei dati: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Errore di connessione: $error');
-    }
-  }
-
-  static Future<void> _sendNaoCommand(String command) async {
-    await ServerConfig.loadServerIP();
-    final url = Uri.parse(
-        'http://${ServerConfig.serverIP}:${ServerConfig.serverPort}/nao');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({'command': command}),
-      );
-
-      if (response.statusCode == 200) {
-        print('Comando inviato al NAO: $command');
-      } else {
-        print('Errore nell\'invio del comando al NAO: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Errore di connessione con il NAO: $error');
-    }
-  }
 }
 
 class LoginPage extends StatefulWidget {
@@ -223,381 +57,63 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   void _login() async {
-    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Inserisci username e password')),
-      );
-      return;
-    }
+    final username = _usernameController.text;
+    final password = _passwordController.text;
 
-    final url = Uri.parse(
-        'http://${ServerConfig.serverIP}:${ServerConfig.serverPort}/api/app/utente/${_usernameController.text}');
+    if (username.isEmpty || password.isEmpty) return;
+
+    final url = Uri.parse('http://192.168.0.103:5010/api/app/utente/$username');
 
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'username': _usernameController.text,
-          'password': _passwordController.text,
-        }),
+        body: json.encode({'username': username, 'password': password}),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
         if (data['code'] == 200) {
-          final userData = data['data'];
-
           final user = User(
-            id: userData['id_player'].toString(),
-            firstName: userData['nome'] ?? '',
-            lastName: userData['cognome'] ?? '',
-            username: _usernameController.text,
-            password: _passwordController.text,
+            id: data['data']['id_player'].toString(),
+            username: username,
+            password: password,
           );
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HealthScreen(user: user)),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Errore sconosciuto')),
+            MaterialPageRoute(
+                builder: (context) => HealthScreen(user: user)),
           );
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore server: ${response.statusCode}')),
-        );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Errore di rete: $e')),
-      );
-    }
-  }
-
-  void _navigateToRegister() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const RegisterPage()),
-    );
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 243, 245, 246),
       body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  offset: const Offset(0, 4),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Benvenuto!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome utente',
-                    labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _login,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
-                    backgroundColor: Colors.blue,
-                  ),
-                  child: const Text('Accedi'),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: _navigateToRegister,
-                  child: const Text(
-                    'Non hai un account? Registrati',
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
-
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-  final _idController = TextEditingController();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _serverIpController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadServerConfig();
-  }
-
-  Future<void> _loadServerConfig() async {
-    await ServerConfig.loadServerIP();
-    setState(() {
-      _serverIpController.text = ServerConfig.serverIP;
-    });
-  }
-
-  void _register() async {
-    if (_idController.text.isEmpty ||
-        _firstNameController.text.isEmpty ||
-        _lastNameController.text.isEmpty ||
-        _usernameController.text.isEmpty ||
-        _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tutti i campi sono obbligatori!')),
-      );
-      return;
-    }
-
-    bool userExists = AuthService.users.any((user) =>
-        user.id == _idController.text || user.username == _usernameController.text);
-
-    if (userExists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID o Nome utente già esistente!')),
-      );
-      return;
-    }
-
-    // Aggiorna l'IP del server se è stato modificato
-    if (_serverIpController.text != ServerConfig.serverIP) {
-      await ServerConfig.updateServerIP(_serverIpController.text);
-    }
-
-    final newUser = User(
-      id: _idController.text,
-      firstName: _firstNameController.text,
-      lastName: _lastNameController.text,
-      username: _usernameController.text,
-      password: _passwordController.text,
-    );
-
-    await AuthService.register(newUser);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registrazione completata!')),
-    );
-
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 243, 245, 246),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  offset: const Offset(0, 4),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Registrati',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _idController,
-                  decoration: const InputDecoration(
-                    labelText: 'ID',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.badge),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _firstNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _lastNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Cognome',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome utente',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _serverIpController,
-                  decoration: const InputDecoration(
-                    labelText: 'Server IP',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.computer),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _register,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
-                    backgroundColor: Colors.blue,
-                  ),
-                  child: const Text('Registrati'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  final User user;
-  const ProfilePage({super.key, required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profilo Utente'),
-      ),
-      backgroundColor: const Color.fromARGB(255, 243, 245, 246),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  offset: const Offset(0, 4),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('ID: ${user.id}', style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text('Nome: ${user.firstName}',
-                    style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text('Cognome: ${user.lastName}',
-                    style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text('Nome Utente: ${user.username}',
-                    style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text('Password: ${user.password}',
-                    style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text('Battito cardiaco: ${user.heartRate ?? "N/A"} bpm',
-                    style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text('Passi: ${user.stepCount ?? "N/A"}',
-                    style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 10),
-                Text(
-                    'Posizione: ${user.position?.latitude.toStringAsFixed(4) ?? "N/A"}, ${user.position?.longitude.toStringAsFixed(4) ?? "N/A"}',
-                    style: const TextStyle(fontSize: 18)),
-              ],
-            ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(labelText: 'Username'),
+              ),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Password'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _login,
+                child: const Text('Login'),
+              ),
+            ],
           ),
         ),
       ),
@@ -614,30 +130,15 @@ class HealthScreen extends StatefulWidget {
 }
 
 class _HealthScreenState extends State<HealthScreen> {
-  late User _currentUser;
-  int _stepCount = 0;
-  double? _speed;
-  double? _latitude;
-  double? _longitude;
-  int? _heartRate;
-  String _heartLog = "Recuperando dati da Google Fit...";
+  late User _user;
   late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    _currentUser = widget.user;
-    _initServices();
-
-    // Aggiorna i dati ogni minuto e li invia al server
-    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      _getHeartRateFromGoogleFit();
-      _updateUserData();
-      _sendDataToServer();
-    });
-
-    // Inizializza i dati immediatamente
-    _getHeartRateFromGoogleFit();
+    _user = widget.user;
+    _fetchGoogleFitData();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) => _sendData());
   }
 
   @override
@@ -646,224 +147,94 @@ class _HealthScreenState extends State<HealthScreen> {
     super.dispose();
   }
 
-  void _initServices() {
-    _getStepCount();
-    _getLocation();
-    _getHeartRateFromGoogleFit();
-  }
-
-  void _getStepCount() {
-    Pedometer.stepCountStream.listen((stepCount) {
-      setState(() {
-        _stepCount = stepCount.steps;
-        _currentUser.stepCount = _stepCount;
-      });
-    });
-  }
-
-  Future<void> _getLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse) return;
-    }
-
-    Geolocator.getPositionStream().listen((Position position) {
-      setState(() {
-        _speed = position.speed;
-        _latitude = position.latitude;
-        _longitude = position.longitude;
-        _currentUser.speed = _speed;
-        _currentUser.position = position;
-      });
-    });
-  }
-
-  Future<void> _getHeartRateFromGoogleFit() async {
-    setState(() {
-      _heartLog = "🔄 Avvio autenticazione con Google Fit...";
-    });
-
+  Future<void> _fetchGoogleFitData() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
+      final googleSignIn = GoogleSignIn(
         scopes: [
           'https://www.googleapis.com/auth/fitness.heart_rate.read',
+          'https://www.googleapis.com/auth/fitness.activity.read',
           'email',
         ],
       );
 
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-      if (account == null) {
-        setState(() {
-          _heartLog = "❌ Autenticazione annullata dall'utente.";
-        });
-        return;
+      final account = await googleSignIn.signIn();
+      if (account == null) return;
+      final auth = await account.authentication;
+
+      final now = DateTime.now();
+      final start = now.subtract(const Duration(hours: 24));
+      final startNs = (start.millisecondsSinceEpoch * 1000000).toString();
+      final endNs = (now.millisecondsSinceEpoch * 1000000).toString();
+
+      // Heart Rate
+      final heartUrl = Uri.parse(
+          'https://www.googleapis.com/fitness/v1/users/me/dataSources/derived:com.google.heart_rate.bpm:com.google.android.gms:merge_heart_rate_bpm/datasets/$startNs-$endNs');
+      final heartResponse = await http.get(heartUrl,
+          headers: {'Authorization': 'Bearer ${auth.accessToken}'});
+      if (heartResponse.statusCode == 200) {
+        final points = json.decode(heartResponse.body)['point'];
+        if (points != null && points.isNotEmpty) {
+          final bpm = points.last['value'][0]['fpVal'];
+          _user.heartRate = (bpm is num) ? bpm.round() : 0;
+        }
       }
 
-      final GoogleSignInAuthentication auth = await account.authentication;
-      final accessToken = auth.accessToken;
-
-      if (accessToken == null) {
-        setState(() {
-          _heartLog = "❌ Access token non disponibile.";
-        });
-        return;
-      }
-
-      await _fetchHeartRateData(accessToken);
-    } catch (e) {
-      setState(() {
-        _heartLog = "❌ Errore durante l'autenticazione: $e";
-      });
-      print("Google Fit Error: $e");
-    }
-  }
-
-  Future<void> _fetchHeartRateData(String accessToken) async {
-    final now = DateTime.now();
-    final start = now.subtract(const Duration(hours: 24));
-    final startNs = (start.millisecondsSinceEpoch * 1000000).toString();
-    final endNs = (now.millisecondsSinceEpoch * 1000000).toString();
-
-    final url = Uri.parse(
-      'https://www.googleapis.com/fitness/v1/users/me/dataSources/derived:com.google.heart_rate.bpm:com.google.android.gms:merge_heart_rate_bpm/datasets/$startNs-$endNs',
-    );
-
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $accessToken',
-    });
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final points = data['point'];
-
-      if (points != null && points.isNotEmpty) {
-        final latest = points.last;
-        final bpm = latest['value'][0]['fpVal'];
-        setState(() {
-          _heartRate = (bpm is num) ? bpm.round() : 0;
-          _currentUser.heartRate = _heartRate;
-          _heartLog = "❤️ Ultimo battito rilevato: $_heartRate bpm";
-          
-          // Mostra un avviso se la frequenza cardiaca è troppo alta
-          if (_heartRate! > 120) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Frequenza cardiaca troppo alta! Cambio giocatore.'),
-                backgroundColor: Colors.red,
-              ),
-            );
+      // Steps
+      final stepsUrl = Uri.parse(
+          'https://www.googleapis.com/fitness/v1/users/me/dataSources/derived:com.google.step_count.delta:com.google.android.gms:estimated_steps/datasets/$startNs-$endNs');
+      final stepsResponse = await http.get(stepsUrl,
+          headers: {'Authorization': 'Bearer ${auth.accessToken}'});
+      if (stepsResponse.statusCode == 200) {
+        final points = json.decode(stepsResponse.body)['point'];
+        int totalSteps = 0;
+        for (var point in points) {
+          final stepValue = point['value']?[0]?['intVal'];
+          if (stepValue != null && stepValue is int) {
+            totalSteps += stepValue;
           }
-        });
-      } else {
-        setState(() {
-          _heartLog = "ℹ️ Nessun battito trovato nelle ultime 24 ore.";
-        });
+        }
+        _user.steps = totalSteps;
       }
-    } else {
-      final errorMsg = response.body.isNotEmpty
-          ? json.decode(response.body)['error']['message']
-          : response.reasonPhrase;
-      setState(() {
-        _heartLog = "❌ Errore ${response.statusCode}: $errorMsg";
-      });
-    }
+
+      // Speed (mocked as not always available from Google Fit)
+      _user.speed = 0.0;
+
+      setState(() {});
+    } catch (_) {}
   }
 
-  void _updateUserData() {
-    setState(() {
-      _currentUser.stepCount = _stepCount;
-      _currentUser.speed = _speed;
-      _currentUser.heartRate = _heartRate;
-      if (_latitude != null && _longitude != null) {
-        _currentUser.position = Position(
-          latitude: _latitude!,
-          longitude: _longitude!,
-          timestamp: DateTime.now(),
-          accuracy: 0,
-          altitude: 0,
-          heading: 0,
-          speed: _speed ?? 0,
-          speedAccuracy: 0,
-          altitudeAccuracy: 0,
-          headingAccuracy: 0,
-        );
-      }
-    });
-  }
+  Future<void> _sendData() async {
+    await _fetchGoogleFitData();
+    final url = Uri.parse('http://192.168.0.103:5010/api/app/dati/${_user.id}');
 
-  Future<void> _sendDataToServer() async {
-    await AuthService.sendUserDataToServer(_currentUser);
+    try {
+      await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(_user.toJson()),
+      );
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: AppBar(
-      title: const Text("Health Tracker"),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: _initServices,
-        ),
-        IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ProfilePage(user: _currentUser)),
-            );
-          },
-        ),
-      ],
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(50),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            "Ciao ${_currentUser.firstName} ${_currentUser.lastName}",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    ),
-
-      body: ListView(
+      appBar: AppBar(title: const Text("Health Monitor")),
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          _buildCard("Passi", "$_stepCount", Icons.directions_walk, Colors.green),
-          _buildCard("Velocità", "${_speed?.toStringAsFixed(2) ?? "N/A"} m/s",
-              Icons.speed, Colors.blue),
-          _buildCard("Battito cardiaco", "${_heartRate ?? "N/A"} bpm",
-              Icons.favorite, Colors.red),
-          Text(_heartLog, style: const TextStyle(fontSize: 14, color: Colors.black87)),
-          _buildCard(
-            "Posizione",
-            "${_latitude?.toStringAsFixed(4) ?? "N/A"}, ${_longitude?.toStringAsFixed(4) ?? "N/A"}",
-            Icons.location_on,
-            Colors.orange,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCard(String title, String value, IconData icon, Color color) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.only(bottom: 16),
-      child: ListTile(
-        leading: Icon(icon, color: color, size: 40),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(value, style: const TextStyle(fontSize: 18)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ElevatedButton(
+              onPressed: _fetchGoogleFitData,
+              child: const Text("Accedi a Google Fit"),
+            ),
+            const SizedBox(height: 20),
+            Text("Heart Rate: ${_user.heartRate ?? 'N/A'} bpm"),
+            Text("Steps: ${_user.steps ?? 'N/A'}"),
+            Text("Speed: ${_user.speed ?? 'N/A'} m/s"),
+          ],
+        ),
       ),
     );
   }
