@@ -55,6 +55,7 @@ import matplotlib
 matplotlib.use("Agg")    # 👈 AGGIUNGI QUESTO!
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
+import random
 
 
 
@@ -295,6 +296,7 @@ def stream_voronoi():
 #            Tribuna            #
 #################################
 # VARIABILI GLOBALI task 2
+task_2 = False
 global_timer_running = False
 global_timer_start = 0
 global_game_time = 0
@@ -388,7 +390,13 @@ def nao_time_match():
 @app.route('/nao_cori', methods=['GET'])
 def nao_cori():  
     global task_2
-    text = "vincere"#haseeb non modificare!!!!
+    text = random.choice([
+    "Alè alè oh oh, alè alè oh oh, Audace siamo noi, Audace siamo noi, Audace siamo noooi",
+    "Questa passione la dedico a te, Audace mia, non ti lascerò mai",
+    "Amarsi ancora, per questi colori, per questa città",
+    "Sempre con te, ovunque andrai, Audace nel cuore, non ti lascerò mai",
+    "Curva Sud canta per te, Audace Audace, orgoglio della città",
+    "Forza Audace, vinci per noi, la Curva Sud è sempre con te"])
     nao_dance_1()
     nao_SayText(text)
     tempo_di_pausa() 
