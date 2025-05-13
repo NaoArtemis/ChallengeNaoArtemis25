@@ -50,7 +50,12 @@
             </div>
 
             </div>
-
+            <div class="partita-panel">
+                <button id ="cori"class="btn btn-joystick" onclick="cori()">Cori</button>
+                <button id ="posti"class="btn btn-joystick" onclick="seat()">Posti</button>
+                <button id ="tempo_match"class="btn btn-joystick" onclick="time_match()">Tempo match</button>
+                <button id ="gol"class="btn btn-joystick" onclick="points()">Points</button>
+            </div>
         <!-- Script -->
         <script>
 
@@ -98,6 +103,30 @@
                     '<source src="/stream_voronoi" type="video/mp4">' +
                     'Il tuo browser non supporta il video.' +
                     '</video>';
+            }
+            function cori(){
+                fetch("/nao_cori", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            function time_match(){
+                fetch("/nao_time_match", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            function seat(){
+                fetch("/nao_seat", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            function points(){
+                fetch("/nao_points", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
             }
         </script>
 
