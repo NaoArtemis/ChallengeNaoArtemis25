@@ -32,15 +32,15 @@
             <div class="joystick-panel">
                 <h1 class="text">Joystick</h1>
                 <div class="joystick-controls">
-                    <button id="start" class="btn btn-joystick">Avanti</button>
+                    <button id="start" class="btn btn-joystick" onclick="start()">Avanti</button>
                     <div class="joystick-middle">
-                        <button id="sinistra" class="btn btn-joystick">Sinistra</button>
-                        <button id="stop" class="btn btn-stop">Stop</button>
-                        <button id="destra" class="btn btn-joystick">Destra</button>
+                        <button id="sinistra" class="btn btn-joystick" onclick="left()">Sinistra</button>
+                        <button id="stop" class="btn btn-stop" onclick="stop()">Stop</button>
+                        <button id="destra" class="btn btn-joystick" onclick="right()">Destra</button>
                     </div>
-                    <button id="back" class="btn btn-joystick">Indietro</button>
+                    <button id="back" class="btn btn-joystick" onclick="back()">Indietro</button>
                     <div class="button-row">
-                        <button id="color_eye_button" class="btn btn-joystick">Color Eye</button>
+                        <button id="color_eye_button" class="btn btn-joystick" onclick="color_eye()">Color Eye</button>
                         <select id="eye_color_dropdown" style="display: none;">
                             <option value="">Seleziona il colore</option>
                             <option value="red_eye">Red Eye</option>
@@ -48,15 +48,15 @@
                             <option value="green_eye">Green Eye</option>
                             <option value="nao_eye">White Eye</option>
                         </select>
-                        <button id="stand" class="btn btn-joystick">Wakeup</button>
-                        <button id="Sit_Down" class="btn btn-joystick">Sit down</button>
-                        <button id="stand_init" class="btn btn-joystick">Stand Init</button>
+                        <button id="stand" class="btn btn-joystick" onclick="wake_up()">Wakeup</button>
+                        <button id="Sit_Down" class="btn btn-joystick" onclick="sit_down()">Sit down</button>
+                        <button id="stand_init" class="btn btn-joystick" onclick="stand_init()">Stand Init</button>
                     </div>
                     <div class="button-row">
-                        <button id="head_touch" class="btn btn-joystick">head touch</button>
-                        <button id="stand" class="btn btn-joystick">Stand</button>
-                        <button id="autonomus_life" class="btn btn-joystick">A_life</button>
-                        <button id="autonomous_life_state" class="btn btn-joystick">A_life_stop</button>
+                        <button id="head_touch" class="btn btn-joystick" onclick="head_touch()">head touch</button>
+                        <button id="stand" class="btn btn-joystick" onclick="stand()">Stand</button>
+                        <button id="autonomus_life" class="btn btn-joystick" onclick="a_life()">A_life</button>
+                        <button id="autonomous_life_state" class="btn btn-joystick" onclick="a_life_stop()">A_life_stop</button>
                     </div>
                     <div class="button-row">
                         <form onsubmit="event.preventDefault(); inviaTestoAlNAOai();">

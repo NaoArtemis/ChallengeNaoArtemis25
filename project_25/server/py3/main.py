@@ -305,32 +305,35 @@ def tempo_di_pausa():
 def ritorno_a_false():
     task_2 = False
 
-def nao_entusiasta():
+def nao_dance_1(): #baletto richiamato in nao_coro
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
-    url      = "http://127.0.0.1:5011/nao_entusiasta/" + str(data) 
+    url      = "http://127.0.0.1:5011/nao_dance_1/" + str(data) 
     response = requests.get(url, json=data)
     logger.info(str(response.text))
 
+@app.route('nao_points' methods='GET')
 def nao_points():
     global task_2
     tempo_di_pausa()
 
-
+@app.route('nao_seat', methods=['GET'])
 def nao_seat():
     global task_2
     text = "i posti a sedere riservati sono quelli nella prima fila con gli stiker blu"
     nao_animatedSayText(text)
     tempo_di_pausa()
     
-def nao_stats():
+
+@app.route('nao_time_match' methods=['GET'])
+def nao_time_match():
     global task_2
     tempo_di_pausa()
 
-
+@app.toute('nao_coro' methods=['GET'])
 def nao_coro():  
     global task_2
     text = "vincere"#haseeb non modificare!!!!
-    nao_entusiasta()
+    nao_dance_1()
     nao_SayText(text)
     tempo_di_pausa() 
 
