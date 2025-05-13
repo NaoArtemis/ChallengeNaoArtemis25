@@ -228,33 +228,27 @@ def nao_touch_head_audiorecorder(params):
             return jsonify({'code': 500, 'message': 'methods error'}), 500  
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
+
+
 global touch_counter
 touch_counter = 0
 @app.route('/nao_touch_head_counter/<params>', methods=['GET'])
 def nao_touch_head_counter(params): 
-
-    if params:
+    if (params != None and params != ''):
         if request.method == 'GET':
             try:
                 data       = eval(params)
                 nao_ip     = data['nao_ip']
                 nao_port   = data['nao_port']
-                nao_user     = json['nao_user']
-                nao_password = json['nao_password']
 
                 memory_proxy = ALProxy("ALMemory", nao_ip, nao_port)
-
-                global service_active
-                service_active = False
-
-                def on_middle_tactil_touched_counter(value):
-                    global touch_counter  # per modificare la variabile esterna
-                    if value == 1.0:
-                        touch_counter += 1
                 try:
                     while True:
                         is_touched = memory_proxy.getData("MiddleTactilTouched")
-                        on_middle_tactil_touched_counter(is_touched)
+                        if is_touched == 1.0:
+                            print("Middle Tactil Touched - attivato.")
+                            global touch_counter
+                            touch_counter += 1
                         time.sleep(0.1)
                 except KeyboardInterrupt:
                     # Se interrompi manualmente col CTRL+C

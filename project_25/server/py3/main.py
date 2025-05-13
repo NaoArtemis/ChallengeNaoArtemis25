@@ -297,11 +297,16 @@ def stream_voronoi():
 #################################
 # VARIABILI GLOBALI task 2
 task_2 = False
+global global_timer_running 
 global_timer_running = False
-global_timer_start = 0
-global_game_time = 0
-global_score_audace = 0
-global_score_ospite = 0
+global global_timer_start 
+global_timer_start =0
+global global_game_time 
+global_game_time =0
+global global_score_audace 
+global_score_audace =0
+global global_score_ospite
+global_score_ospite=0
 
 @app.route('/api/start_timer', methods=['POST'])
 def start_timer():
@@ -342,7 +347,7 @@ def increment_score(team):
         global_score_ospite += 1
     return jsonify({"status": "score updated"})
 
-@app.route('/api/reset_game', methods=['POST'])
+@app.route('/api/reset_game', methods=['GET'])
 def reset_game():
     global global_timer_running, global_timer_start, global_game_time
     global global_score_audace, global_score_ospite
@@ -352,7 +357,6 @@ def reset_game():
     global_score_audace = 0
     global_score_ospite = 0
     return jsonify({"status": "game reset"})
-
 
 
 def tempo_di_pausa():
@@ -372,12 +376,48 @@ def nao_dance_1(): #baletto richiamato in nao_coro
 @app.route('/nao_points', methods=['GET'])
 def nao_points():
     global task_2
+    global global_score_audace, global_score_ospite
+    if global_score_audace ==global_score_ospite and global_score_audace==0:
+        text = "Siamo ancora 0 pari, forza audace presto segneremo"
+        nao_animatedSayText(text)
+    elif global_score_audace ==global_score_ospite:
+        text = "Siamo "+ global_score_audace +"pari, forza audace presto segneremo"
+        nao_animatedSayText(text)
+    elif global_score_audace<global_score_ospite and (global_score_ospite-global_score_audace)==1:
+        text = "Siamo sotto di un solo gol, possiamo recuperare"
+        nao_animatedSayText(text)
+    elif global_score_audace<global_score_ospite and (global_score_ospite-global_score_audace)>1:
+        text = "Peccato siamo sotto di"+(global_score_ospite-global_score_audace)+"gol, non perdiamo la speranza audace"
+        nao_animatedSayText(text)
+    elif global_score_audace>global_score_ospite and (global_score_audace-global_score_ospite)==1:
+        text = "Siamo in vantaggio di un gol, evviva"
+        nao_animatedSayText(text)
+    elif global_score_audace>global_score_ospite and (global_score_audace-global_score_ospite)>1:
+        text = "Siamo in vantaggio di "+(global_score_audace-global_score_ospite)+"gol, nessuno ci può battere, evviva"
+        nao_animatedSayText(text)
     tempo_di_pausa()
 
 @app.route('/nao_seat', methods=['GET'])
 def nao_seat():
     global task_2
-    text = "i posti a sedere riservati sono quelli nella prima fila con gli stiker blu"
+    # Numero di righe e colonne
+    righe = 6
+    colonne = 10
+    matrice = [[True for _ in range(colonne)] for _ in range(righe)]
+    posti_max = righe*colonne
+    posti_occupati =  
+
+    # Imposta a False i primi 'posti_occupati' posti, riga per riga
+    contatore = 0
+    for i in range(righe):
+        for j in range(colonne):
+            if contatore < posti_occupati:
+                matrice[i][j] = False
+                contatore += 1
+            else:
+                break
+
+    
     nao_animatedSayText(text)
     tempo_di_pausa()
     
@@ -740,6 +780,26 @@ def nao_touch_head_audiorecorder():
     result = model.transcribe(local_path)
     ORDINE = result['text']
     print(ORDINE)
+
+@app.route('/nao_touch_head_counter', methods=['GET'])
+def nao_touch_head_counter():
+    # Prepara i dati da inviare
+    data = {
+        "nao_ip":       nao_ip,
+        "nao_port":     nao_port,
+        "nao_user":     nao_user,
+        "nao_password": nao_password
+    }
+
+    url = "http://127.0.0.1:5011/nao_touch_head_counter/" + str(data) 
+    response = requests.get(url, json=data, stream=True)
+
+    if response.status_code == 200:
+        app.logger.info("Tocco ricevuto da Python 2 (200).")
+        return jsonify({'code': 200, 'message': 'Tocco registrato con successo'}), 200
+    else:
+        app.logger.error(f"Errore dal server Python 2: {response.status_code}")
+        return jsonify({'code': 500, 'message': 'Errore remoto'}), 500
 
 
 def nao_face_tracker():
