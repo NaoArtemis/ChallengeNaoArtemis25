@@ -45,6 +45,7 @@ class DB:
                     ''',
                     (username, password, nome, cognome, posizione)
                 )
+                print("salvataggio avvenuto con sucesso")
 
     def insert_dati(self, id_player, bpm, passi, velocità):
         with self.connection:
