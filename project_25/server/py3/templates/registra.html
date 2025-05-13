@@ -38,7 +38,7 @@
             </datalist>
             <input type="text" name="username" id="username" placeholder="Username" required>
             <input type="password" name="password" id="password" placeholder="Password" required>
-            <button id="crea_account" class="btn btn-joystick">crea</button>
+            <button id="crea_account" class="btn btn-joystick" onclick="crea_account()">crea</button>
         </form>
         </div> 
     </div>
@@ -77,20 +77,18 @@
         password = document.getElementById('password').value;
         }
 
-        document.querySelector("#crea_account").addEventListener("click", function() {
+        function crea_account() {
             salvaDatiGlobali();
             fetch(`/api/app/utenti/${userId}`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
                 username: username,
                 password: password,
                 nome: nome,
                 cognome: cognome,
                 posizione: posizione
-            })
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -102,7 +100,7 @@
                 }
             })
             .catch(error => console.error("Errore:", error));
-        });
+        };
     </script>
 </body>
 </html>
