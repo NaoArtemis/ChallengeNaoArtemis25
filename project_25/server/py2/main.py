@@ -247,10 +247,10 @@ def nao_touch_head_counter(params):
                 service_active = False
 
                 def on_middle_tactil_touched_counter(value):
-                    nonlocal touch_counter  # per modificare la variabile esterna
+                    global touch_counter  # per modificare la variabile esterna
                     if value == 1.0:
                         touch_counter += 1
-                        print(f"Head touched! Counter: {touch_counter}")
+                        
 
                 try:
                     while True:
@@ -259,16 +259,15 @@ def nao_touch_head_counter(params):
                         time.sleep(0.1)
                 except KeyboardInterrupt:
                     # Se interrompi manualmente col CTRL+C
-                    print("Loop interrotto manualmente.")
+                    app.logger.error(str(e))
                 except Exception as e:
                     # Qualunque altra eccezione (anche nostro stop) ci fa uscire dal loop
-                    print("Touch loop terminato:", e)
+                    app.logger.error(str(e))
 
                 # Alla fine restituisco il valore del counter
                 return jsonify({
                     'code':    200,
-                    'message': 'Tocco centrale rilevato.',
-                    'touches': touch_counter
+                    'message': 'Tocco centrale rilevato.'
                 }), 200
 
             except Exception as e:
