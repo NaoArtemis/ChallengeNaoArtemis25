@@ -27,12 +27,6 @@
         <!-- Messaggio di stato -->
         <div id="status-message" style="margin-top: 15px; font-weight: bold; color: #333;"></div>
 
-        <!-- Controlli partita -->
-        <div>
-            <button class="btn btn-joystick" onclick="iniziaPartita()">Inizia Partita</button>
-            <button class="btn btn-joystick" onclick="finePartita()">Fine Partita</button>
-            <button class="btn btn-joystick" onclick="analyze()">Analyze</button>
-        </div>
 
         <div class = "dashboard">
             <div class = "joystick-panel">
@@ -47,56 +41,55 @@
             </div>
 
             <!-- Heatmap giocatori -->
-            <div class = "joystick-panel">
-                <h2 class = "text">Heatmap Giocatori</h2>
-                <button class="btn btn-joystick" onclick="aggiornaListaGiocatori()">Aggiorna Heatmap</button>
-                <!-- Container per la heatmap -->
-                <div  id="heatmap-container" style="margin-top: 20px;"></div>
-        </div>
+            <div class="joystick-panel">
+                <h2 class="text">Carica Video da Analizzare</h2>
+                <input type="file" id="videoFile" accept="video/*" style="margin-top: 10px;" />
+                <button class="btn btn-joystick" onclick="uploadVideo()">Carica Video</button>
+                <button class="btn btn-joystick" onclick="analyze()">Analyze</button>
+                <div id="upload-status" style="margin-top: 15px; font-weight: bold;"></div>
+            </div>
 
             </div>
 
         <!-- Script -->
         <script>
-            function iniziaPartita() {
-                fetch('/inizia_partita').then(() => {
-                    document.getElementById("status-message").innerText = "✅ Registrazione partita avviata";
-                });
-            }
-
-            function finePartita() {
-                fetch('/fine_partita').then(() => {
-                    document.getElementById("status-message").innerText = "✅ Registrazione terminata. Puoi ora avviare l'analisi";
-                });
-            }
 
             function analyze() {
-                fetch('/analyze').then(() => {
-                    document.getElementById("status-message").innerText = "✅ Analisi partita avviata... Attendere qualche minuto";
-                    setTimeout(() => {
-                        document.getElementById("status-message").innerText = "✅ Analisi completata con successo!";
-                    }, 5000);
+                document.getElementById("status-message").innerText = "Analisi in corso...";
+
+                fetch('/analyze')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("status-message").innerText = "Analisi completata!";
+                })
+                .catch(() => {
+                    document.getElementById("status-message").innerText = "Errore durante l'analisi.";
                 });
             }
 
-            function aggiornaListaGiocatori() {
-                fetch('/api/players')
-                    .then(response => response.json())
-                    .then(players => {
-                        let container = document.getElementById("heatmap-container");
-                        container.innerHTML = '<h2>Seleziona giocatore per visualizzare la Heatmap</h2>';
-                        players.forEach(player => {
-                            let btn = document.createElement("button");
-                            btn.className = "btn btn-joystick";
-                            btn.textContent = player;
-                            btn.onclick = () => showHeatmap(player);
-                            container.appendChild(btn);
-                        });
-                    });
-            }
 
-            function showHeatmap(player_id) {
-                document.getElementById("heatmap-container").innerHTML = '<img src="/heatmap/' + player_id + '" alt="Heatmap ' + player_id + '" style="max-width: 80%; border: 2px solid #333;">';
+            function uploadVideo() {
+                const fileInput = document.getElementById('videoFile');
+                const file = fileInput.files[0];
+                if (!file) {
+                    document.getElementById("upload-status").innerText = "Seleziona un file video prima di caricare.";
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("file", file);
+
+                fetch('/upload_video', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("upload-status").innerText = data.message;
+                })
+                .catch(() => {
+                    document.getElementById("upload-status").innerText = "Errore durante il caricamento.";
+                });
             }
 
             function caricaVoronoi() {

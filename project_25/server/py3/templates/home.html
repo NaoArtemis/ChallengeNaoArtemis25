@@ -29,28 +29,31 @@
             <button id="partita" class="large-homebutton"><span>Match</span></button>
             <button id="competition" class="large-homebutton"><span>Competition</span></button>
             <button id="joystick" class="large-homebutton"><span>Joystick</span></button>
-            <button id="" class="large-homebutton"><span>Squad</span></button>
+            <button id="salute" class="large-homebutton"><span>Salute</span></button>
         </div>
     </div>
 
     <div class="logo-strap">
         <div class="logo-scroll">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}"> 
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
           <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
-          <img src="{{ url_for('static', filename='img/audace_logo.pdf') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
         </div>
       </div>
 
@@ -109,6 +112,19 @@
                     window.location.href = response.url;
                 } else {
                     window.location.href = "/registra";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#salute").addEventListener("click", function() {
+            fetch("/salute", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } 
+                else{
+                    window.location.href = "/salute";
                 }
             })
             .catch(error => console.error("Errore:", error));

@@ -182,9 +182,6 @@ class DB:
                 return cur.fetchall()
 
     def select_positions_by_player(self, player_id):
-        """
-        Restituisce tutte le posizioni (x, y) per un singolo player.
-        """
         with self.connection:
             with self.connection.cursor() as cur:
                 cur.execute("""
@@ -192,3 +189,16 @@ class DB:
                     WHERE player_id = %s
                 """, (player_id,))
                 return cur.fetchall()
+            
+
+    def select_all_dati(self):
+        try:
+            with self.connection:
+                with self.connection.cursor() as cur:
+                    cur.execute("SELECT * FROM dati;")
+                    rows = cur.fetchall()
+                    print(rows)
+                    return rows
+        except Exception as e:
+            print(f"Errore nella select_all_dati: {e}")
+            return []
