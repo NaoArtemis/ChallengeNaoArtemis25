@@ -87,7 +87,7 @@ class User {
 }
 
 class ServerConfig {
-  static String serverIP = "192.168.1.21"; // Default IP, will be updated
+  static String serverIP = "192.168.0.103"; // Default IP, will be updated
   static const int serverPort = 5010;
 
   static Future<void> updateServerIP(String newIP) async {
