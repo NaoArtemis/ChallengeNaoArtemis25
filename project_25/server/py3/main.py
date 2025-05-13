@@ -1128,24 +1128,24 @@ def api_app_infortuni(id):
 
 @app.route('/api/app/utenti/<id>', methods=['POST'])
 def api_app_utenti(id):
-    if (id != None and id != ''):
-        if request.method == 'POST':
-            try:
-                #{"username:mt, password:0987, nome:marco, cognome:tomazzoli, posizione:laterale"}
-                json = request.json
-                username = json["username"]
-                password = json["password"]
-                nome = json["nome"]
-                cognome = json["cognome"]
-                posizione = json["posizione"]
-                db_helper.insert_utente(username, password, nome, cognome, posizione)
-                return jsonify({'code': 200, 'message': 'OK',}), 200
-            except Exception as e:
-                logger.error(str(e))
-                return jsonify({'code': 500, 'message': str(e)}), 500
-        else:
-            logger.error('No id argument passed')
-            return jsonify({'code': 500, 'message': 'No id was passed'}), 500
+    try:
+        #{"username:mt, password:0987, nome:marco, cognome:tomazzoli, posizione:laterale"}
+        data = request.get_json()
+
+        username = data["username"]
+        password = data["password"]
+        nome = data["nome"]
+        cognome = data["cognome"]
+        posizione = data["posizione"]
+
+        db_helper.insert_utente(username, password, nome, cognome, posizione)
+
+        return jsonify({'code': 200, 'message': 'OK'}), 200
+
+    except Exception as e:
+        logger.error(f"Errore in /api/app/utenti/{id}: {str(e)}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
 
 @app.route('/api/db/dati', methods=['GET'])
 def get_all_dati():
