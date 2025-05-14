@@ -199,7 +199,39 @@ function back() {
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
 };
-
+function fake1(){
+    testo="Sostituire la giocatrice col bracciale nero"
+    fetch("/tts_to_nao", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "message=" + encodeURIComponent(testo)
+    })
+    .then(response => response.json())
+    .then(data => console.log("Testo inviato con successo al NAO!"))
+    .catch(error => console.error("Errore:", error));
+}
+function fake2(){
+    testo="Sostituire la giocatrice col bracciale marrone"
+    fetch("/tts_to_nao", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "message=" + encodeURIComponent(testo)
+    })
+    .then(response => response.json())
+    .then(data => console.log("Testo inviato con successo al NAO!"))
+    .catch(error => console.error("Errore:", error));
+}
+function fake3(){
+    testo="prova prova " 
+    fetch("/tts_to_nao", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "message=" + encodeURIComponent(testo)
+    })
+    .then(response => response.json())
+    .then(data => console.log("Testo inviato con successo al NAO!"))
+    .catch(error => console.error("Errore:", error));
+}
 // Funzioni per inviare testo al NAO
 function inviaTestoAlNAO() {
     const testo = document.getElementById("testoInput").value;

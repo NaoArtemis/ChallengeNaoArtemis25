@@ -455,11 +455,12 @@ def nao_seat():
 @app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
     global task_2
-    time= get_status()
-    if time[0]==0 and time[1]==0:
+    time_= get_status()
+    time__=time_['time']
+    if time__=="00:00":
         text ="La partita non è ancora iniziata"
     else:
-        text = "La partita è iniziata da "+str(time[0])+"minuti e "str(time[1])+"secondi"
+        text = "La partita è iniziata da "+ str(time__)+"minuti"
     nao_animatedSayText(text)
     tempo_di_pausa()
 
