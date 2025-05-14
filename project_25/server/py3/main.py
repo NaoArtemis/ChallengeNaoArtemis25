@@ -287,7 +287,7 @@ def analyze():
 
 @app.route('/stream_voronoi', methods=['GET'])
 def stream_voronoi():
-    path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
+    path = os.path.join(script_dir, "recordings", "annotato_video.mp4")
     if os.path.exists(path):
         return send_file(path, mimetype='video/mp4')
     return "Video non trovato", 404
@@ -1189,7 +1189,7 @@ def api_app_dati(id):
     if (id != None and id != ''):
         if request.method == 'POST':
             try:
-                #{"id_player:n, bpm:98, passi:72, velocità:4m/s"}
+                #{"id_player":id, "bpm":98, "passi":72, "velocita":4"}
                 json = request.json
                 id_player = json["id_player"]
                 bpm = json["bpm"]
@@ -1209,7 +1209,7 @@ def api_app_infortuni(id):
     if (id != None and id != ''):
         if request.method == 'POST':
             try:
-                #{"id_player:n, ammonizone:False, infortunio:True"}
+                #{"id_player":n, "ammonizone":False, "infortunio":True}
                 json = request.json
                 id_player = json["id_player"]
                 ammonizione = json["ammonizione"]
@@ -1227,7 +1227,7 @@ def api_app_infortuni(id):
 @app.route('/api/app/utenti/<id>', methods=['POST'])
 def api_app_utenti(id):
     try:
-        #{"username:mt, password:0987, nome:marco, cognome:tomazzoli, posizione:laterale"}
+        #{"username":mt, "password":0987, "nome":marco, "cognome":tomazzoli, "posizione:"laterale"}
         data = request.get_json()
 
         username = data["username"]
