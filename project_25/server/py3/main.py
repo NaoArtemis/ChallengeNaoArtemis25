@@ -19,7 +19,6 @@ from flask import Flask, render_template, Response, jsonify, request, redirect, 
 from hashlib import md5, sha256
 from datetime import datetime
 import requests
-import time
 import os
 import csv
 import cv2
@@ -296,7 +295,8 @@ def stream_voronoi():
 #            Tribuna            #
 #################################
 # VARIABILI GLOBALI task 2
-global time 
+global time_1
+global time_2
 task_2 = False
 global global_timer_running 
 global_timer_running = False
@@ -331,15 +331,15 @@ def stop_timer():
 
 @app.route('/api/get_status', methods=['GET'])
 def get_status():
-    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time
+    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time_1
     current_time = global_game_time
     if global_timer_running:
         current_time = time.time() - global_timer_start
     minutes = int(current_time // 60)
     seconds = int(current_time % 60)
-    time = f"{minutes:02d}:{seconds:02d}"
+    time_1 = f"{minutes:02d}:{seconds:02d}"
     return jsonify({
-        "time": f"{minutes:02d}:{seconds:02d}",
+        "time_1": f"{minutes:02d}:{seconds:02d}",
         "audace": global_score_audace,
         "ospite": global_score_ospite
     })
@@ -353,7 +353,7 @@ def increment_score(team):
         global_score_ospite += 1
     return jsonify({"status": "score updated"})
 
-@app.route('/api/reset_game', methods=['GET'])
+@app.route('/api/reset_game', methods=['POST'])
 def reset_game():
     global global_timer_running, global_timer_start, global_game_time
     global global_score_audace, global_score_ospite,counter,posto_t,riga_t
@@ -454,13 +454,13 @@ def nao_seat():
 
 @app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
-    global task_2
-    time_= get_status()
-    time__=time_['time']
-    if time__=="00:00":
+    global task_2,time_1,time_2
+    time_1= get_status()
+    time_2=time_1['time_1']
+    if time_2=="00:00":
         text ="La partita non è ancora iniziata"
     else:
-        text = "La partita è iniziata da "+ str(time__)+"minuti"
+        text = "La partita è iniziata da "+ str(time_2)+"minuti"
     nao_animatedSayText(text)
     tempo_di_pausa()
 
