@@ -921,16 +921,20 @@ a:focus {
 
 /* footer section*/
 .footer_section {
-  margin: 25px 0;
+  position: absolute;
+  left: 180px;
+
+  width: 100%;
+  background-color: #1f2a66; /* colore di sfondo */
+  color: #ccc;
+  text-align: center;
+  padding: 40px 20px;
 }
 
 .footer_section .social_box {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  justify-content: center;
+  gap: 10px; /* spazio tra le icone */
 }
 
 .footer_section .social_box a {
@@ -951,6 +955,30 @@ a:focus {
 .footer_section a {
   color: #1c1b1b;
 }
+
+.social_box {
+  display: flex;
+  justify-content: center;   /* centra le icone orizzontalmente */
+  flex-wrap: wrap;           /* permette di andare a capo su schermi piccoli */
+  gap: 20px;                 /* spazio tra le icone */
+  margin: 0 auto;            /* fallback per sicurezza */
+  padding: 20px;
+}
+
+.social_box a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  font-size: 26px;
+  background-color: #ccc;
+  border-radius: 12px;
+  color: #000;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
 
 /* end footer section*/
 /*# sourceMappingURL=style.css.map */
