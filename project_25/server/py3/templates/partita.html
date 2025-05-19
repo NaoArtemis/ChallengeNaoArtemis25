@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <!-- Heatmap giocatori -->
+
             <div class="joystick-panel">
                 <h2 class="text">Video da Analizzare</h2>
                 <button class="btn btn-joystick" onclick="uploadVideo()">Carica Video</button>
@@ -49,41 +49,8 @@
                 <div id="upload-status" style="margin-top: 15px; font-weight: bold;"></div>
             </div>
         </div>
-        <div class = "dashboard">
-            <div class = "joystick-panel">
-                <h1 class="text">Gestione Partita</h1>
-                <div style = "color: black;", id="time_1">00:00</div>
-                <div class="mb-4">
-                    <button onclick="startTimer()" class="btn btn-volume">Start</button>
-                    <button onclick="stopTimer()" class="btn btn-volume">Pausa</button>
-                    <button onclick="resetGame()" class="btn btn-volume">Fine Partita</button>
-                </div>
-                <div class="flex justify-center items-center space-x-8 text-2xl">
-                    <div>
-                        <div style = "color: black;">audace</div>
-                        <button onclick="incrementScore('audace')" class="bg-red-500 text-white px-4 py-2 rounded">+</button>
-                    </div>
-                    <div id="score" , style = "color: black;">0:0</div>
-                    <div>
-                        <div style = "color: black;">Ospite</div>
-                        <button onclick="incrementScore('ospite')" class="bg-blue-500 text-white px-4 py-2 rounded">+</button>
-                    </div>
-                </div>
-            </div>
-            <div class = "joystick-panel">
-                <h1 class="text">Nao Tribuna</h1>
-                <div>
-                    <button id ="avvio_task_2"class="btn btn-joystick" onclick="avvio_task_2()">task 2</button>
-                    <button id ="avvio_counter"class="btn btn-joystick" onclick="avvio_counter()">avvio counter</button>
-                </div>
-                <div class = "button-row">
-                <button id ="cori"class="btn btn-joystick" onclick="cori()">Cori</button>
-                <button id ="posti"class="btn btn-joystick" onclick="seat()">Posti</button>
-                <button id ="tempo_match"class="btn btn-joystick" onclick="time_match()">Tempo match</button>
-                <button id ="gol"class="btn btn-joystick" onclick="points()">Points</button>
-                </div>
-            </div>
         </div>
+
 
 
 
@@ -136,73 +103,6 @@
                     'Il tuo browser non supporta il video.' +
                     '</video>';
             }
-            function avvio_task_2(){
-                fetch("/webcam_aruco", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-
-            function avvio_counter(){
-                fetch("/nao_touch_head_counter", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-
-            function cori(){
-                fetch("/nao_cori", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-            function time_match(){
-                fetch("/nao_time_match", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-            function seat(){
-                fetch("/nao_seat", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-            function points(){
-                fetch("/nao_points", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-            // parte score e time
-               
-            async function updateStatus() {
-                const res = await fetch('/api/get_status');
-                const data = await res.json();
-                document.getElementById('time_1').innerText = data.time_1;
-                document.getElementById('score').innerText = `${data.audace}:${data.ospite}`;
-            }
-
-            async function startTimer() {
-                await fetch('/api/start_timer', { method: 'POST' });
-            }
-
-            async function stopTimer() {
-                await fetch('/api/stop_timer', { method: 'POST' });
-            }
-
-            async function resetGame() {
-                await fetch('/api/reset_game', { method: 'POST' });
-            }
-
-            async function incrementScore(team) {
-                await fetch(`/api/increment_score/${team}`, { method: 'POST' });
-            }
-
-            if (window.location.pathname === "/partita"){
-            setInterval(updateStatus, 1000);
-            }
-
         </script>
 
     </div>

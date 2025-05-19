@@ -26,10 +26,11 @@
             <object type="image/svg+xml" data="{{ url_for('static', filename='img/ball.svg') }}"></object>
         </h1>
         <div class="large-buttons-container">
+            <button id="fans" class="large-homebutton"><span>fans</span></button>
             <button id="partita" class="large-homebutton"><span>Match</span></button>
             <button id="competition" class="large-homebutton"><span>Competition</span></button>
             <button id="joystick" class="large-homebutton"><span>Joystick</span></button>
-            <button id="salute" class="large-homebutton"><span>Salute</span></button>
+            <button id="salute" class="large-homebutton"><span>Health</span></button>
         </div>
     </div>
 
@@ -59,6 +60,7 @@
 
     <!-- Javascript -->
     <script>
+
         document.querySelector("#logout").addEventListener("click", function() {
             fetch("/logout", { method: "GET" })
             .then(response => {
@@ -125,6 +127,19 @@
                 } 
                 else{
                     window.location.href = "/salute";
+                }
+            })
+            .catch(error => console.error("Errore:", error));
+        });
+
+        document.querySelector("#fans").addEventListener("click", function() {
+            fetch("/fans", { method: "GET" })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+                else{
+                    window.location.href = "/fans";
                 }
             })
             .catch(error => console.error("Errore:", error));

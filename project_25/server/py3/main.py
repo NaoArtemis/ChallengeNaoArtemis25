@@ -969,6 +969,11 @@ def partita():
 def database():
     return render_template('registra.html')
 
+@app.route('/fans', methods = ['GET'])
+@login_required 
+def fans():
+    return render_template('fans.html')
+
 # API
 @app.route('/api', methods=['GET'])
 def api():
