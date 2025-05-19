@@ -297,6 +297,7 @@ def stream_voronoi():
 # VARIABILI GLOBALI task 2
 global time_1
 global time_2
+global time_3
 task_2 = False
 global global_timer_running 
 global_timer_running = False
@@ -331,7 +332,7 @@ def stop_timer():
 
 @app.route('/api/get_status', methods=['GET'])
 def get_status():
-    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time_1
+    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time_1,time_3
     current_time = global_game_time
     if global_timer_running:
         current_time = time.time() - global_timer_start
@@ -454,9 +455,9 @@ def nao_seat():
 
 @app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
-    global task_2,time_1,time_2
-    time_1= get_status()
-    time_2=time_1['time_1']
+    global task_2,time_3,time_2
+    time_3= get_status()
+    time_2=time_3['time_1']
     if time_2=="00:00":
         text ="La partita non è ancora iniziata"
     else:

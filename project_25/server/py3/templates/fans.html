@@ -79,40 +79,38 @@
                 .catch(err => console.error("Errore:", err));
         }
 
-        function cori() {
-            fetch("/nao_cori")
-                .then(res => res.json())
-                .then(data => console.log("Risposta API:", data))
-                .catch(err => console.error("Errore:", err));
-        }
-
-        function time_match() {
-            fetch("/nao_time_match")
-                .then(res => res.json())
-                .then(data => console.log("Risposta API:", data))
-                .catch(err => console.error("Errore:", err));
-        }
-
-        function seat() {
-            fetch("/nao_seat")
-                .then(res => res.json())
-                .then(data => console.log("Risposta API:", data))
-                .catch(err => console.error("Errore:", err));
-        }
-
-        function points() {
-            fetch("/nao_points")
-                .then(res => res.json())
-                .then(data => console.log("Risposta API:", data))
-                .catch(err => console.error("Errore:", err));
-        }
-
-        async function updateStatus() {
-            const res = await fetch('/api/get_status');
-            const data = await res.json();
-            document.getElementById('time_1').innerText = data.time_1;
-            document.getElementById('score').innerText = `${data.audace}:${data.ospite}`;
-        }
+            function cori(){
+                fetch("/nao_cori", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            function time_match(){
+                fetch("/nao_time_match", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            function seat(){
+                fetch("/nao_seat", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            function points(){
+                fetch("/nao_points", { method: "GET" })
+                    .then(response => response.json())
+                    .then(data => console.log("Risposta API:", data))
+                    .catch(error => console.error("Errore:", error));
+            }
+            // parte score e time
+               
+            async function updateStatus() {
+                const res = await fetch('/api/get_status');
+                const data = await res.json();
+                document.getElementById('time_1').innerText = data.time_1;
+                document.getElementById('score').innerText = `${data.audace}:${data.ospite}`;
+            }
 
         async function startTimer() {
             await fetch('/api/start_timer', { method: 'POST' });
