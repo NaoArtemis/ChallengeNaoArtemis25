@@ -110,7 +110,7 @@
             async function updateStatus() {
                 const res = await fetch('/api/get_status');
                 const data = await res.json();
-                document.getElementById('time_1').innerText = data.time_1;
+                document.getElementById('time_1').innerText = data.time_3;
                 document.getElementById('score').innerText = `${data.audace}:${data.ospite}`;
             }
 
