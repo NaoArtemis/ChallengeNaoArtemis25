@@ -15,7 +15,8 @@ CREATE TABLE utenti (
 );
 
 CREATE TABLE dati (
-    id_player INT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    id_player INT ,
     bpm INTEGER,
     passi INTEGER,
     velocità INTEGER,

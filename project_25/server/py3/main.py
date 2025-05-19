@@ -592,7 +592,7 @@ def webcam_aruco():
                             #Statistiche della partita
                             elif 185 in marker_ids.flatten() and not task_2:
                                 task_2 = True
-                                nao_stats() #time
+                                #nao_stats() #time
 
                             #Posti a sedere
                             elif 186 in marker_ids.flatten() and not task_2:
@@ -602,7 +602,7 @@ def webcam_aruco():
                             #cori
                             elif 187 in marker_ids.flatten() and not task_2:
                                 task_2 = True
-                                nao_coro() #festeggiamo
+                                #nao_coro() #festeggiamo
 
                         #ricodifica e invia il frame
                         _, buffer = cv2.imencode('.jpg', frame)
@@ -1202,6 +1202,12 @@ def api_app_dati(id):
                 passi = json["passi"]
                 velocità = json["velocita"]
                 db_helper.insert_dati(id_player, bpm, passi, velocità)
+                
+                if bpm >= 185:
+                    player = db_helper.get_user_by_id(id_player) # ricevo una lista con [nome, cognome]
+                    text = f"il giocatore {player[0]} {player[1]} deve abbassare il ritmo"
+                    nao_animatedSayText(text)
+
                 return jsonify({'code': 200, 'message': 'OK',}), 200
             except Exception as e:
                 logger.error(str(e))
@@ -1259,6 +1265,12 @@ def get_all_dati():
     except Exception as e:
         logger.error(str(e))
         return jsonify({'code': 500, 'message': str(e)}), 500
+    
+@app.route('/api/db/dati/clear', methods = ['GET'])
+def clear_dati():
+        db_helper.delete_dati()
+        return jsonify({'code': 200}), 200
+
 
 '''
 CODICI JSON

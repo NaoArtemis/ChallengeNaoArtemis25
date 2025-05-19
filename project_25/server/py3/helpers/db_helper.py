@@ -52,11 +52,13 @@ class DB:
             with self.connection.cursor() as cur:
                 cur.execute(
                     '''
-                    INSERT INTO dati(id_player, bpm, passi, velocità)
+                    INSERT INTO dati (id_player, bpm, passi, velocità)
                     VALUES (%s, %s, %s, %s)
                     ''',
                     (id_player, bpm, passi, velocità)
                 )
+
+
 
     def insert_convocazioni(self, id_player, convocazione):
         with self.connection:
@@ -203,3 +205,32 @@ class DB:
         except Exception as e:
             print(f"Errore nella select_all_dati: {e}")
             return []
+
+
+    def get_user_by_id(self, id):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    '''
+                    SELECT nome, cognome 
+                    FROM utenti 
+                    WHERE id = %s
+                    ''',
+                    (id,)
+                )
+                result = cur.fetchone()
+                if result:
+                    return [result[0],result[1]]
+                else:
+                    return None
+
+
+    
+    def delete_dati(self):
+        with self.connection:
+            with self.connection.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM dati"
+                )
+
+    
