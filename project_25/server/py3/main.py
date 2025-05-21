@@ -618,7 +618,9 @@ def nao_cori():
     nao_dance_1()
     
     tempo_di_pausa() 
-
+def nao_best_meteria():
+    text="Ovviamente informatica col professor Bellorio"
+    nao_SayText(text)
 
  
 #################################
@@ -954,10 +956,30 @@ def nao_touch_head_audiorecorder():
         logger.error("File audio non ricevuto: " + str(response.status_code))
 
     # Utilizzo della libreria openai-whisper per eseguire lo speech-to-text
-    model=whisper.load_model("base")
-    result = model.transcribe(local_path)
-    ORDINE = result['text']
-    print(ORDINE)
+    model = whisper.load_model("base")
+    
+    try:
+        result = model.transcribe(path_audio, language="it")
+    except Exception as e:
+        print(f"Errore durante la trascrizione: {e}")
+        raise # In caso di errore, stampa e rilancia
+    
+    # Estrai la trascrizione
+    ordine = result.get("text", "").strip()
+    punteggiatura = "!.?;,:-–—'\"()[]{}<>/\\@#€%&*+_=^°§"
+    for simbolo in punteggiatura:
+        ordine = ordine.replace(simbolo, "")
+
+    if ordine =="dove posso sedermi" or ordine =="nao dove posso sedermi":
+        nao_seat()
+    elif ordine == "nao a quano siamo" or ordine == "a quanto siamo":
+        nao_points()
+    elif ordine == "nao festeggiamo":
+        nao_cori()
+    elif ordine == "nao quanto tempo è passato da inizio partita" or ordine == "quanto tempo è passato da inizio partita":
+        nao_time_match()
+    elif ordine =="nao qual è la miglior materia del mondo":
+        nao_best_materia()
 
 @app.route('/nao_touch_head_counter', methods=['GET'])
 def nao_touch_head_counter():
