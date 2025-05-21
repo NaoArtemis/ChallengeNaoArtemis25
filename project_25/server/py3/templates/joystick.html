@@ -13,11 +13,8 @@
         <div class="logo">
             <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" alt="BetterNao Logo">
         </div>
-        <div class="top-bar-buttons">
-            <div class="btn btn-battery">
-                <span id="battery-icon" class="battery-icon">Battery</span>
-                <div id="battery-level" class="battery-level"></div>
-            </div>
+        <div class="top-bar-buttons">   
+            <button id="battery-icon" class="btn btn-logout" onmouseover="battery()">battery</button>
             <button id="volume" class="btn btn-volume">Volume</button>
             <button id="home" class="btn btn-logout">Home</button>
             <button id="logout" class="btn btn-logout">Logout</button>
@@ -131,6 +128,26 @@
 
 
     <script src = "{{ url_for('static', filename='script/script.js') }}" > 
+    </script>
+
+    <script> 
+    function battery() {
+        const show_battery = document.getElementById("battery-icon");
+        fetch('/nao/battery')
+        .then(response => {
+            if (!response.ok) {
+            throw new Error('Errore nel recupero del livello di batteria');
+            }
+            return response.json();
+        })
+        .then(data => {
+            show_battery.innerHTML = data.battery_level + '%';
+        })
+        .catch(error => {
+            console.error('Errore durante il recupero:', error);
+            show_battery.innerHTML = 'Errore nel recupero';
+        });
+    }
     </script>
 </body>
 </html>

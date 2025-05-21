@@ -51,7 +51,7 @@ from sklearn.cluster import KMeans
 import shutil
 import seaborn as sns
 import matplotlib
-matplotlib.use("Agg")    # 👈 AGGIUNGI QUESTO!
+matplotlib.use("Agg")    
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
 import random
@@ -118,85 +118,76 @@ def inizializza_modelli():
 
 
 
-import os
-import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from scipy.spatial import Voronoi
-from mplsoccer import Pitch
-
-import matplotlib.pyplot as plt
-from scipy.spatial import Voronoi, voronoi_plot_2d
-import os
+import cv2
 
 
 def genera_video_voronoi(all_positions, output_path):
-    import matplotlib.pyplot as plt
-    from scipy.spatial import Voronoi, voronoi_plot_2d
+    """
+    Genera un video con diagrammi di Voronoi su un campo da calcio stilizzato.
 
-    campo_larghezza = 30  # metri
-    campo_altezza = 15    # metri
-    frame_width, frame_height = 1280, 720
-    fps = 30
+    Parametri:
+        all_positions: lista di frame, ciascuno contenente una lista di tuple (x, y, team)
+        output_path
+    """
+    field_length, field_width = 30, 15  # Dimensioni del campo in metri
+    video_width, video_height = 600, 300  # Risoluzione del video in pixel
+    fps = 10  # Fotogrammi al secondo
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    video_writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(output_path, fourcc, fps, (video_width, video_height))
 
     for frame_data in all_positions:
-        if len(frame_data) < 4:
-            continue  # serve almeno 4 punti per Voronoi
+        fig, ax = plt.subplots(figsize=(6, 3))
+        ax.set_xlim(0, field_length)
+        ax.set_ylim(0, field_width)
+        ax.set_aspect('equal')
+        ax.axis('off')
 
-        points = np.array([[x, y] for x, y, _ in frame_data])
-        teams = [team for _, _, team in frame_data]
+        # Sfondo verde
+        ax.add_patch(patches.Rectangle((0, 0), field_length, field_width, color='green'))
 
-        fig, ax = plt.subplots(figsize=(12.8, 7.2), dpi=100)
-        ax.set_facecolor('green')  # sfondo campo verde
-        ax.set_xlim(0, campo_larghezza)
-        ax.set_ylim(0, campo_altezza)
-        ax.invert_yaxis()  # per allineare asse Y al tuo sistema
-        ax.set_xticks([])
-        ax.set_yticks([])
+        # Linee del campo
+        # Linea di metà campo
+        ax.plot([field_length / 2, field_length / 2], [0, field_width], color='white', linewidth=1)
+        # Cerchio di centrocampo
+        ax.add_patch(patches.Circle((field_length / 2, field_width / 2), 1, edgecolor='white', facecolor='none', linewidth=1))
+        # Aree di rigore
+        ax.add_patch(patches.Rectangle((0, (field_width - 16.5) / 2), 16.5, 16.5, edgecolor='white', facecolor='none', linewidth=1))
+        ax.add_patch(patches.Rectangle((field_length - 16.5, (field_width - 16.5) / 2), 16.5, 16.5, edgecolor='white', facecolor='none', linewidth=1))
+        # Aree di porta
+        ax.add_patch(patches.Rectangle((0, (field_width - 7.32) / 2), 5.5, 7.32, edgecolor='white', facecolor='none', linewidth=1))
+        ax.add_patch(patches.Rectangle((field_length - 5.5, (field_width - 7.32) / 2), 5.5, 7.32, edgecolor='white', facecolor='none', linewidth=1))
 
-        # --- DISEGNA RIGHE CAMPO ---
-        # Linee laterali
-        ax.plot([0, 30], [0, 0], color='white', linewidth=2)          # linea fondo (bassa)
-        ax.plot([0, 30], [15, 15], color='white', linewidth=2)        # linea fondo (alta)
-        ax.plot([0, 0], [0, 15], color='white', linewidth=2)          # linea laterale sinistra
-        ax.plot([30, 30], [0, 15], color='white', linewidth=2)        # linea laterale destra
+        # Estrai le posizioni e i team
+        points = [(x, y) for x, y, team in frame_data if team in ["blue", "red"]]
+        teams = [team for x, y, team in frame_data if team in ["blue", "red"]]
 
-        # Centrocampo
-        ax.plot([15, 15], [0, 15], color='white', linewidth=2)        # linea metà campo
-        cerchio_centro = plt.Circle((15, 7.5), 2, color='white', fill=False, linewidth=2)
-        ax.add_artist(cerchio_centro)
+        if len(points) > 2:
+            vor = Voronoi(points)
+            for point_idx, region_idx in enumerate(vor.point_region):
+                region = vor.regions[region_idx]
+                if not -1 in region and len(region) > 0:
+                    polygon = [vor.vertices[i] for i in region]
+                    team = teams[point_idx]
+                    color = 'blue' if team == 'blue' else 'red'
+                    ax.fill(*zip(*polygon), alpha=0.3, color=color)
 
-        # Area di rigore (esempio semplificato futsal)
-        ax.plot([2, 2], [4, 11], color='white', linewidth=2)          # area sx verticale
-        ax.plot([28, 28], [4, 11], color='white', linewidth=2)        # area dx verticale
-        ax.plot([2, 10], [4, 4], color='white', linewidth=2)          # area sx orizzontale bassa
-        ax.plot([2, 10], [11, 11], color='white', linewidth=2)        # area sx orizzontale alta
-        ax.plot([20, 28], [4, 4], color='white', linewidth=2)         # area dx orizzontale bassa
-        ax.plot([20, 28], [11, 11], color='white', linewidth=2)       # area dx orizzontale alta
+            for (x, y), team in zip(points, teams):
+                ax.plot(x, y, 'o', color='blue' if team == 'blue' else 'red')
 
-        # --- DIAGRAMMA VORONOI ---
-        vor = Voronoi(points)
-        voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='white', line_width=1)
-
-        # --- DISEGNA GIOCATORI ---
-        colors = {'blue': 'blue', 'red': 'red', 'unknown': 'gray'}
-        for (x, y), team in zip(points, teams):
-            ax.plot(x, y, 'o', color=colors.get(team, 'gray'), markersize=8)
-
-        plt.tight_layout(pad=0)
         fig.canvas.draw()
-        img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-        img = cv2.resize(img, (frame_width, frame_height))
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-        video_writer.write(img)
+        frame = np.frombuffer(fig.canvas.buffer_rgba(), dtype=np.uint8)
+        frame = frame.reshape(fig.canvas.get_width_height()[::-1] + (4,))
+        frame = frame[:, :, :3]  # rimuove canale alpha (RGBA → RGB)
+        frame = cv2.resize(frame, (video_width, video_height))
+        out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         plt.close(fig)
 
-    video_writer.release()
+    out.release()
 
 
 def analizza_partita():
@@ -301,7 +292,7 @@ def sostituzione():
         id_player = player['id_player']
         total = 0
         for bpm, passi, velocita, id in player['dati']:
-            total += bpm + velocita  #più alto bpm+velocità più alto rendimento giocatore
+            total += bpm + velocita  #più alto il valore (bpm+velocità) più alto rendimento giocatore
         media = total / len(player['dati'])
         performance[id_player] = media
 
@@ -345,7 +336,7 @@ def tactics():
             giocatori_stanchi.append(id_player)
 
 
-    # Scelta modulo in base a numero di giocatori stanchi
+    # Scelta in base a numero di giocatori stanchi e score
     modulo = ""
     tattica = ""
 
@@ -978,8 +969,6 @@ def nao_touch_head_audiorecorder():
         nao_cori()
     elif ordine == "nao quanto tempo è passato da inizio partita" or ordine == "quanto tempo è passato da inizio partita":
         nao_time_match()
-    elif ordine =="nao qual è la miglior materia del mondo":
-        nao_best_materia()
 
 @app.route('/nao_touch_head_counter', methods=['GET'])
 def nao_touch_head_counter():
@@ -1319,11 +1308,15 @@ def nao_eye_white():
 def nao_battery_level():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
     url      = "http://127.0.0.1:5011/nao_battery/" + str(data)
-    response = requests.get(url, json=data)
-    logger.info(str(response.text))
-    battery_info = response.json()
-    battery_level = battery_info["battery_level"]
-    return jsonify({'battery_level': battery_level}), 200
+    try:
+        response = requests.get(url, json=data)
+        logger.info(str(response.text))
+        battery_info = response.json()
+        battery_level = battery_info["battery_level"]
+        return jsonify({'battery_level': battery_level}), 200
+    except Exception as e:
+        logger.error(str(e))
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/nao_animatedSayText', methods = ['GET'])
 def nao_animatedSayText(text_to_say):
