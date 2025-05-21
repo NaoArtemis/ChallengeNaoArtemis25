@@ -433,8 +433,10 @@ a:focus {
 
 /* end slider section */
 .about_section {
+  background-color: #223069;
   color: #ffffff;
 }
+
 
 .about_section .heading_container h2 {
   color: #ffffff;
@@ -444,6 +446,9 @@ a:focus {
   padding: 45px;
   background-image: url(../images/NaoOK.jpg);
   background-size: cover;
+  /*background-image: linear-gradient(#223069, #223069), url(../images/NaoOK.jpg);
+  background-blend-mode: multiply;*/
+
 }
 
 .about_section .about_container .detail-box {
