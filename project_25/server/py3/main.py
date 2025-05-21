@@ -592,7 +592,7 @@ def webcam_aruco():
                             #Statistiche della partita
                             elif 185 in marker_ids.flatten() and not task_2:
                                 task_2 = True
-                                #nao_stats() #time
+                                nao_time_match() #time
 
                             #Posti a sedere
                             elif 186 in marker_ids.flatten() and not task_2:
@@ -602,7 +602,7 @@ def webcam_aruco():
                             #cori
                             elif 187 in marker_ids.flatten() and not task_2:
                                 task_2 = True
-                                #nao_coro() #festeggiamo
+                                nao_cori() #festeggiamo
 
                         #ricodifica e invia il frame
                         _, buffer = cv2.imencode('.jpg', frame)
