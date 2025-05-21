@@ -79,18 +79,16 @@
     </div>
 
     <!-- Contenuto principale -->
-     <div class = "dashboard">
-    <h1>Dati Salute - Giocatori</h1>
-    <p id="lastUpdate">Ultimo aggiornamento: mai</p>
+    <div class = "dashboard">
+        <h1>Dati Salute - Giocatori</h1>
+        <p id="lastUpdate">Ultimo aggiornamento: mai</p>
 
-    <table id="datiTable">
-        <thead>
-            <tr id="headerRow"></tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-    </body>
-    </html>
+        <table id="datiTable">
+            <thead>
+                <tr id="headerRow"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 
 
@@ -122,11 +120,11 @@
                 tableBody.innerHTML = '';
 
                 if (!dati || dati.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="4">Nessun dato disponibile</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="5">Nessun dato disponibile</td></tr>';
                     return;
                 }
 
-                const colonne = ["ID Player", "BPM", "Passi", "Velocità"];
+                const colonne = ["Len","ID Player", "BPM", "Passi", "Velocità"];
                 colonne.forEach(nome => {
                     let th = document.createElement('th');
                     th.textContent = nome;

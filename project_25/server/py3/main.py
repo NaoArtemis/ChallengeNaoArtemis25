@@ -105,7 +105,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 video_path_mp4 = os.path.join(script_dir, "recordings", "partita", "partita.mp4")
 all_positions = []  # <-- Memorizziamo le posizioni dei giocatori 
 voronoi_path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
-
+tactics = "iniziale"
 
 MODEL_PLAYERS = None
 MODEL_LINES = None
@@ -290,6 +290,145 @@ def stream_voronoi():
     if os.path.exists(path):
         return send_file(path, mimetype='video/mp4')
     return "Video non trovato", 404
+
+
+@app.route('/sostituzione', methods=['GET'])
+def sostituzione():
+    dati = get_player_details()
+    
+    performance = {}
+    for player in dati:
+        id_player = player['id_player']
+        total = 0
+        for bpm, passi, velocita, id in player['dati']:
+            total += bpm + velocita  #più alto bpm+velocità più alto rendimento giocatore
+        media = total / len(player['dati'])
+        performance[id_player] = media
+
+    # Trova il giocatore con la performance media più bassa
+    peggior_id = min(performance, key=performance.get)
+    giocatore = db_helper.get_player_by_id(peggior_id)
+
+    text = f"Sostituire il giocatore {giocatore[0]} {giocatore[1]}"
+
+    nao_animatedSayText(text)
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route('/tactics', methods=['GET'])
+def tactics():
+    dati = get_player_details()  # lista di giocatori con dati biometrici
+    score = {
+        "audace": global_score_audace,
+        "ospiti": global_score_ospite
+    }
+
+    giocatori_stanchi = []
+
+    for player in dati:
+        id_player = player['id_player']
+        dati = player['dati']
+
+        bpm_tot = sum([x[0] for x in dati])
+        passi_tot = sum([x[1] for x in dati])
+        velocita_tot = sum([x[2] for x in dati])
+
+        n = len(dati)
+
+        media_bpm = bpm_tot / n
+        media_passi = passi_tot / n
+        media_velocita = velocita_tot / n
+
+
+        # Definizione di "stanco"
+        if media_bpm > 130 or media_velocita < 4.2 :
+            giocatori_stanchi.append(id_player)
+
+
+    # Scelta modulo in base a numero di giocatori stanchi
+    modulo = ""
+    tattica = ""
+
+    num_stanchi = len(giocatori_stanchi)
+    differenza = score["audace"] - score["ospiti"]
+
+    modulo = ""
+    tattica = ""
+
+    num_stanchi = len(giocatori_stanchi)
+
+    if num_stanchi >= 4:
+        if differenza >= 1:
+            # Vantaggio + squadra stanca 
+            modulo = "2-2"
+            tattica = "Difesa compatta, ritmo lento e possesso palla"
+        elif differenza <= -1:
+            # Svantaggio + stanchezza 
+            modulo = "1-2-1"
+            tattica = "Costruzione ragionata ed evitare sprint"
+        else:
+            # Parità + stanchezza
+            modulo = "2-2"
+            tattica = "Gestione equilibrata con rotazioni frequenti"
+
+    elif num_stanchi >= 2 and num_stanchi <= 3:
+        if differenza >= 1:
+            # Vantaggio + fatica moderata
+            modulo = "2-1-1"
+            tattica = "Difesa solida, ripartenze rapide ma non esagerare"
+        elif differenza <= -1:
+            # Svantaggio + fatica moderata
+            modulo = "1-2-1"
+            tattica = "Pressing organizzato e sfruttare gli spazi"
+        else:
+            # Parità
+            modulo = "1-2-1"
+            tattica = "Tattica bilanciata e cercare di ottnere il  controllo del centrocampo"
+
+    elif num_stanchi == 1:
+        giocatore = giocatore = db_helper.get_player_by_id(id_player)
+        sub = f"sostituire il giocatore {giocatore[0]} {giocatore[1]}"
+        if differenza >= 1:
+            # Vantaggio + squadra fresca
+            modulo = "2-1-1"
+            tattica = "Controllo palla con avanzate sicure ad alta intesnità"
+        elif differenza <= -1:
+            # Svantaggio + squadra fresca
+            modulo = "0-2-2"
+            tattica = "Pressing alto con attacco diretto"
+        else:
+            # Parità + squadra fresca
+            modulo = "1-1-2"
+            tattica = "Pressing medio con attacchi improvvisi e lanci lunghi"
+
+    elif num_stanchi < 1:
+        if differenza >= 1:
+            # Vantaggio + squadra fresca
+            modulo = "2-1-1"
+            tattica = "Controllo palla con avanzate sicure ad alta intesnità"
+        elif differenza <= -1:
+            # Svantaggio + squadra fresca
+            modulo = "0-2-2"
+            tattica = "Pressing alto con attacco diretto"
+        else:
+            # Parità + squadra fresca
+            modulo = "1-1-2"
+            tattica = "Pressing medio con attacchi improvvisi e lanci lunghi"
+
+    else:
+        modulo = "1-2-1"
+        tattica = "Modulo standard con gestione flessibile, badare agli errori"
+
+    
+    if num_stanchi == 1:
+        text = f"sostituire {sub} e poi gochiamo con un {modulo} e {tattica}"
+    else:
+        text = f"gochiamo con un {modulo} e {tattica}"
+
+    nao_animatedSayText(text)
+    return jsonify({"status": "ok"}), 200
+
+
 
 #################################
 #            Tribuna            #
@@ -1204,7 +1343,7 @@ def api_app_dati(id):
                 db_helper.insert_dati(id_player, bpm, passi, velocità)
                 
                 if bpm >= 185:
-                    player = db_helper.get_user_by_id(id_player) # ricevo una lista con [nome, cognome]
+                    player = db_helper.get_player_by_id(id_player) # ricevo una lista con [nome, cognome]
                     text = f"il giocatore {player[0]} {player[1]} deve abbassare il ritmo"
                     nao_animatedSayText(text)
 
@@ -1235,11 +1374,10 @@ def api_app_infortuni(id):
             logger.error('No id argument passed')
             return jsonify({'code': 500, 'message': 'No id was passed'}), 500
 
-
-@app.route('/api/app/utenti/<id>', methods=['POST'])
-def api_app_utenti(id):
+@app.route('/api/app/utenti', methods=['POST'])
+def api_app_utenti():
     try:
-        #{"username":mt, "password":0987, "nome":marco, "cognome":tomazzoli, "posizione:"laterale"}
+        # Esempio JSON: {"username": "mt", "password": "0987", "nome": "marco", "cognome": "tomazzoli", "posizione": "laterale"}
         data = request.get_json()
 
         username = data["username"]
@@ -1253,8 +1391,9 @@ def api_app_utenti(id):
         return jsonify({'code': 200, 'message': 'OK'}), 200
 
     except Exception as e:
-        logger.error(f"Errore in /api/app/utenti/{id}: {str(e)}")
+        logger.error(f"Errore in /api/app/utenti: {str(e)}")
         return jsonify({'code': 500, 'message': str(e)}), 500
+
 
 
 @app.route('/api/db/dati', methods=['GET'])
@@ -1266,11 +1405,42 @@ def get_all_dati():
         logger.error(str(e))
         return jsonify({'code': 500, 'message': str(e)}), 500
     
+
 @app.route('/api/db/dati/clear', methods = ['GET'])
 def clear_dati():
         db_helper.delete_dati()
         return jsonify({'code': 200}), 200
 
+
+def get_player_details():
+    dati = db_helper.get_players_with_last5()
+    '''
+    dati ha questa struttura:
+    [
+    {
+        'id_player': 1,
+        'dati': [
+            (78, 1200, 4.5, 105),
+            (80, 1300, 4.7, 104),
+            (76, 1100, 4.2, 103),
+            (82, 1250, 4.6, 102),
+            (79, 1180, 4.4, 101)
+        ]
+    },
+    {
+        'id_player': 2,
+        'dati': [
+            (90, 1500, 5.0, 205),
+            (88, 1480, 4.9, 204),
+            (92, 1520, 5.1, 203),
+            (89, 1490, 5.0, 202),
+            (91, 1510, 5.2, 201)
+        ]
+    },
+          .......
+    ]
+    '''
+    return dati
 
 '''
 CODICI JSON

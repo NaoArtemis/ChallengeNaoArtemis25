@@ -24,8 +24,8 @@
     <div class="main-content">
         <h1 class="main-text">Creazione account</h1>
         <div class="container_creazione_account">
-        <p id = "d1", class ="text"></p>
-        <form mothod="post" action="/">
+        <p id = "d1" class ="text"></p>
+        <form method="post" action="#">
             <input type="text" name="nome" id="nome" placeholder="Nome" required>
             <input type="text" name="cognome" id="cognome" placeholder="Cognome" required>
             <input type="text" list="posizioni" name="posizione" id="posizione" placeholder="Posizione" required>
@@ -38,8 +38,10 @@
             </datalist>
             <input type="text" name="username" id="username" placeholder="Username" required>
             <input type="password" name="password" id="password" placeholder="Password" required>
-            <button id="crea_account" class="btn btn-joystick" onclick="crea_account()">crea</button>
         </form>
+
+                    <button id="crea_account" class="btn btn-joystick" onclick="crea_account()">crea</button>
+
         </div> 
     </div>
 
@@ -101,7 +103,7 @@
 
         function crea_account() {
             salvaDatiGlobali();
-            fetch(`/api/app/utenti/${userId}`, {
+            fetch(`/api/app/utenti`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({

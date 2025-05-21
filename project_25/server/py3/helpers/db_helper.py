@@ -45,7 +45,7 @@ class DB:
                     ''',
                     (username, password, nome, cognome, posizione)
                 )
-                print("salvataggio avvenuto con sucesso")
+
 
     def insert_dati(self, id_player, bpm, passi, velocità):
         with self.connection:
@@ -207,7 +207,7 @@ class DB:
             return []
 
 
-    def get_user_by_id(self, id):
+    def get_player_by_id(self, id):
         with self.connection:
             with self.connection.cursor() as cur:
                 cur.execute(
@@ -233,4 +233,34 @@ class DB:
                     "DELETE FROM dati"
                 )
 
-    
+    def get_players_with_last5(self):
+        with self.connection:
+
+            # Prima prendi tutti gli id_player dalla tabella utenti
+            with self.connection.cursor() as cur:
+                cur.execute(''' SELECT DISTINCT id_player 
+                                FROM utenti 
+                                ORDER BY id_player;
+                            ''')
+                rows = cur.fetchall()
+            players = []
+            for row in rows:
+                players.append(row[0])
+
+            # Per ogni player, prendi le ultime 5 righe da dati
+            result = []
+            with self.connection.cursor() as cur:
+                for id_player in players:
+                    cur.execute(''' SELECT bpm, passi, velocità, id
+                                    FROM dati
+                                    WHERE id_player = %s
+                                    ORDER BY id DESC
+                                    LIMIT 5;
+                                ''', (id_player,))
+                    dati = cur.fetchall()
+                    result.append({
+                        'id_player': id_player,
+                        'dati': dati
+                    })
+
+            return result
