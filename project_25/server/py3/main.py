@@ -428,6 +428,8 @@ def tactics():
 global time_1
 global time_2
 global time_3
+global minutes
+global seconds
 task_2 = False
 global global_timer_running 
 global_timer_running = False
@@ -462,7 +464,7 @@ def stop_timer():
 
 @app.route('/api/get_status', methods=['GET'])
 def get_status():
-    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time_1,time_3
+    global global_timer_running, global_game_time, global_score_audace, global_score_ospite, time_1,time_3,minutes,seconds
     current_time = global_game_time
     if global_timer_running:
         current_time = time.time() - global_timer_start
@@ -585,13 +587,14 @@ def nao_seat():
 
 @app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
-    global task_2,time_3,time_2
-    time_3= get_status()
-    time_2=time_3['time_1']
+    global task_2, time_3, time_2, minutes,seconds
+    time_3 = get_status()
+    time_3_data = f"{minutes:02d}:{seconds:02d}"
+    time_2 = time_3_data
     if time_2=="00:00":
         text ="La partita non è ancora iniziata"
     else:
-        text = "La partita è iniziata da "+ str(time_2)+"minuti"
+        text = "La partita è iniziata da "+ str(minutes)+"minuti "+ str(seconds)+"secondi"
     nao_animatedSayText(text)
     tempo_di_pausa()
 
@@ -609,9 +612,6 @@ def nao_cori():
     nao_dance_1()
     
     tempo_di_pausa() 
-def nao_best_meteria():
-    text="Ovviamente informatica col professor Bellorio"
-    nao_SayText(text)
 
  
 #################################
@@ -955,7 +955,7 @@ def nao_touch_head_audiorecorder():
         print(f"Errore durante la trascrizione: {e}")
         raise # In caso di errore, stampa e rilancia
     
-    # Estrai la trascrizione
+    
     ordine = result.get("text", "").strip()
     punteggiatura = "!.?;,:-–—'\"()[]{}<>/\\@#€%&*+_=^°§"
     for simbolo in punteggiatura:
