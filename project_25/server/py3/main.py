@@ -930,12 +930,23 @@ def nao_audiorecorder(sec_sleep):
     logger.info("nao_audiorecorder: " + str(speech_recognition.result))
     return str(speech_recognition.result)
 
+@app.route('/nao_touch_head', methods=['GET'])
+def nao_touch_head():
+    if request.method == 'GET':
+        try:
+            ordine = nao_touch_head_audiorecorder()
+            nao_analisi_audio(ordine)
+            return jsonify({'code': 200, 'message': 'OK'}), 200
+        except Exception as e:
+            logger.error(str(e))
+            return jsonify({'code': 500, 'message': str(e)}), 500
+    
+
 @app.route('/nao_touch_head_audiorecorder', methods=['GET'])
 def nao_touch_head_audiorecorder():
     data     = {"nao_ip":nao_ip, "nao_port":nao_port, "nao_user":nao_user, "nao_password":nao_password}
     url      = "http://127.0.0.1:5011/nao_touch_head_audiorecorder/" + str(data) 
     response = requests.get(url, json=data, stream=True)
-    print("Ordine ricevuto")
     local_path = f'recordings/microphone_audio.wav'
     if response.status_code == 200:
         with open(local_path, 'wb') as f:
@@ -946,28 +957,27 @@ def nao_touch_head_audiorecorder():
     else:
         logger.error("File audio non ricevuto: " + str(response.status_code))
 
-    # Utilizzo della libreria openai-whisper per eseguire lo speech-to-text
-    model = whisper.load_model("base")
+    while True:
+        speech_recognition = SpeechRecognition(local_path)
+        if (speech_recognition.result != None or speech_recognition.result != ''):
+            break
     
-    try:
-        result = model.transcribe(path_audio, language="it")
-    except Exception as e:
-        print(f"Errore durante la trascrizione: {e}")
-        raise # In caso di errore, stampa e rilancia
-    
-    
-    ordine = result.get("text", "").strip()
+    logger.info("nao_touch_head_audiorecorder: " + str(speech_recognition.result))
+    ordine=str(speech_recognition.result)
+    return(ordine)
+
+def nao_analisi_audio(ordine):
     punteggiatura = "!.?;,:-–—'\"()[]{}<>/\\@#€%&*+_=^°§"
     for simbolo in punteggiatura:
         ordine = ordine.replace(simbolo, "")
-
-    if ordine =="dove posso sedermi" or ordine =="nao dove posso sedermi":
+    ordine=ordine.lower()
+    if ordine in "dove posso sedermi" :
         nao_seat()
-    elif ordine == "nao a quano siamo" or ordine == "a quanto siamo":
+    elif ordine in "nao a quanto siamo" :
         nao_points()
-    elif ordine == "nao festeggiamo":
+    elif ordine in "nao festeggiamo":
         nao_cori()
-    elif ordine == "nao quanto tempo è passato da inizio partita" or ordine == "quanto tempo è passato da inizio partita":
+    elif ordine in "nao quanto tempo è passato da inizio partita" :
         nao_time_match()
 
 @app.route('/nao_touch_head_counter', methods=['GET'])

@@ -159,11 +159,12 @@ def nao_get_audio(params):
 
 
 service_active = False
-@app.route('/nao_touch_head_audiorecorder/<params>', methods=['GET'])
+@app.route('/nao_touch_head_audiorecorder/<params>', methods=['GET'])  
 def nao_touch_head_audiorecorder(params):
     if (params != None and params != ''):
         if request.method == 'GET':
             try:
+                #{"nao_ip":value, "nao_port":value, "nao_user":value, "nao_password":value}
                 json         = eval(params)
                 nao_ip       = json['nao_ip']
                 nao_port     = json['nao_port']
@@ -172,29 +173,26 @@ def nao_touch_head_audiorecorder(params):
 
                 memory_proxy       = ALProxy("ALMemory", nao_ip, nao_port)
                 audio_device_proxy = ALProxy("ALAudioRecorder", nao_ip, nao_port)
-                remote_path        = "/data/home/nao/recordings/microphones/microphone_audio.wav"  # sul nao
+                remote_path        = "/data/home/nao/recordings/microphones/microphone_audio.wav" # sul nao
                 sample_rate        = 16000
-
-                # var globali
-                global service_active
-                service_active = False
 
                 def on_middle_tactil_touched(value):
                     if value == 1.0:
                         print("Middle Tactil Touched - attivato.")
 
+                        global service_active
                         if service_active:
                             print("stopMicrophonesRecording - Il servizio è stato disattivato.")
                             service_active = False
-                            # Ferma la registrazione
+                            # Inserisci qui il codice per fermare il servizio
                             audio_device_proxy.stopMicrophonesRecording()
-                            raise Exception("Sensore centrale toccato!")
+                            raise Exception("Sensore centrale toccato!") 
                         else:
                             print("startMicrophonesRecording - Il servizio è stato attivato.")
                             service_active = True
-                            # Avvia la registrazione
-                            audio_device_proxy.startMicrophonesRecording(remote_path, "wav", sample_rate, [0, 0, 1, 0])
-                
+                            # Inserisci qui il codice per avviare il servizio
+                            audio_data = audio_device_proxy.startMicrophonesRecording(remote_path, "wav", sample_rate, [0, 0, 1, 0])
+                        
                 try:
                     while True:
                         is_touched = memory_proxy.getData("MiddleTactilTouched")
@@ -203,7 +201,7 @@ def nao_touch_head_audiorecorder(params):
                 except Exception as e:
                     print("Middle Tactil Touched - disattivato.")
 
-                # Connessione SSH al NAO per scaricare il file audio
+                # Connessione SSH al Nao
                 try:
                     transport = paramiko.Transport((nao_ip, 22))                 
                     transport.connect(username=nao_user, password=nao_password)  
@@ -218,8 +216,6 @@ def nao_touch_head_audiorecorder(params):
                     transport.close()   
 
                 audio_device_proxy = None
-
-
                 return send_file(local_path, as_attachment=True)
             except Exception as e:
                 logger.error(str(e))
@@ -228,6 +224,8 @@ def nao_touch_head_audiorecorder(params):
             return jsonify({'code': 500, 'message': 'methods error'}), 500  
     else:
         return jsonify({'code': 500, 'message': 'params error'}), 500
+
+
 
 
 global touch_counter

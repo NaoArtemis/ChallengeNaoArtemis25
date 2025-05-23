@@ -131,7 +131,7 @@ function stand_init() {
 };
 
 function head_touch() {
-    fetch("/nao_touch_head_audiorecorder", { method: "GET" })
+    fetch("/nao_touch_head", { method: "GET" })
         .then(response => response.json())
         .then(data => console.log("Risposta API:", data))
         .catch(error => console.error("Errore:", error));
