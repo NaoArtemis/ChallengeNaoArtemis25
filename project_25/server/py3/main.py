@@ -302,7 +302,7 @@ def sostituzione():
 
     text = f"Sostituire il giocatore {giocatore[0]} {giocatore[1]}"
 
-    nao_animatedSayText(text)
+    speech_ai(text)
     return jsonify({"status": "ok"}), 200
 
 
@@ -414,7 +414,7 @@ def tactics():
     if num_stanchi == 1:
         text = f"sostituire {sub} e poi gochiamo con un {modulo} e {tattica}"
     else:
-        text = f"gochiamo con un {modulo} e {tattica}"
+        text = f"giochiamo con un {modulo} e {tattica}"
 
     nao_animatedSayText(text)
     return jsonify({"status": "ok"}), 200
@@ -519,22 +519,22 @@ def nao_points():
     global global_score_audace, global_score_ospite
     if global_score_audace ==global_score_ospite and global_score_audace==0:
         text = "Siamo ancora 0 pari, forza audace presto segneremo"
-        nao_animatedSayText(text)
+        speech_ai(text)
     elif global_score_audace ==global_score_ospite:
         text = "Siamo "+ str(global_score_audace) +"pari, forza audace presto segneremo"
-        nao_animatedSayText(text)
+        speech_ai(text)
     elif global_score_audace<global_score_ospite and (global_score_ospite-global_score_audace)==1:
         text = "Siamo sotto di un solo gol, possiamo recuperare"
-        nao_animatedSayText(text)
+        speech_ai(text)
     elif global_score_audace<global_score_ospite and (global_score_ospite-global_score_audace)>1:
         text = "Peccato siamo sotto di"+str(global_score_ospite-global_score_audace)+"gol, non perdiamo la speranza audace"
-        nao_animatedSayText(text)
+        speech_ai(text)
     elif global_score_audace>global_score_ospite and (global_score_audace-global_score_ospite)==1:
         text = "Siamo in vantaggio di un gol, evviva"
-        nao_animatedSayText(text)
+        speech_ai(text)
     elif global_score_audace>global_score_ospite and (global_score_audace-global_score_ospite)>1:
         text = "Siamo in vantaggio di " + str(global_score_audace - global_score_ospite) + " gol, nessuno ci può battere, evviva"
-        nao_animatedSayText(text)
+        speech_ai(text)
     tempo_di_pausa()
 
 
@@ -1170,11 +1170,22 @@ def tts_to_nao_ai():
         text = request.form["message_ai"]
         client = OpenAI(api_key = nao_api_openai)
         speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
-        response = client.audio.speech.create(model="tts-1",voice="alloy",input=text)
+        response = client.audio.speech.create(model="tts-1",voice="nova",input=text)
         response.stream_to_file(speech_file_path)
         nao_tts_audiofile("speech.mp3")
         
     return redirect('/home')
+
+
+# funione da usare a livello locale nel server
+def speech_ai(text):
+    client = OpenAI(api_key = nao_api_openai)
+    speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
+    response = client.audio.speech.create(model="tts-1",voice="nova",input=text)
+    response.stream_to_file(speech_file_path)
+    nao_tts_audiofile("speech.mp3")
+
+    return redirect("#")
 
 
 @app.route('/set_volume', methods=['POST'])
@@ -1481,7 +1492,37 @@ def nao_start():
 if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
-   
+
+    db_helper.insert_dati(1, 150, 1320, 4.5)
+    db_helper.insert_dati(1, 153, 1350, 4.6)
+    db_helper.insert_dati(1, 151, 1330, 4.4)
+    db_helper.insert_dati(1, 149, 1300, 4.3)
+    db_helper.insert_dati(1, 155, 1370, 4.7)
+
+    db_helper.insert_dati(2, 165, 1460, 5.0)
+    db_helper.insert_dati(2, 168, 1490, 5.1)
+    db_helper.insert_dati(2, 170, 1510, 5.2)
+    db_helper.insert_dati(2, 166, 1470, 5.0)
+    db_helper.insert_dati(2, 169, 1500, 5.1)
+
+    db_helper.insert_dati(3, 142, 1150, 3.9)
+    db_helper.insert_dati(3, 144, 1160, 4.0)
+    db_helper.insert_dati(3, 140, 1130, 3.8)
+    db_helper.insert_dati(3, 143, 1140, 3.9)
+    db_helper.insert_dati(3, 145, 1170, 4.0)
+
+    db_helper.insert_dati(4, 160, 1280, 4.4)
+    db_helper.insert_dati(4, 162, 1300, 4.5)
+    db_helper.insert_dati(4, 158, 1260, 4.3)
+    db_helper.insert_dati(4, 161, 1290, 4.4)
+    db_helper.insert_dati(4, 159, 1270, 4.3)
+
+    db_helper.insert_dati(5, 134, 960, 3.3)
+    db_helper.insert_dati(5, 136, 980, 3.4)
+    db_helper.insert_dati(5, 133, 950, 3.2)
+    db_helper.insert_dati(5, 135, 970, 3.3)
+    db_helper.insert_dati(5, 137, 990, 3.4)
+
     #nao_start()
     #nao_autonomous_life()
     #nao_eye_white()

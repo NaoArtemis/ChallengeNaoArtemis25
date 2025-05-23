@@ -73,13 +73,22 @@
         <script src="https://cdn.tailwindcss.com"></script> <!-- carico liberria tailwind-->
         <script>
 
-            function sostituzioni(){
-
+            function sostituzione(){
+                fetch("/sostituzione", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+                
             }
 
             function tactics(){
+                fetch("/tactics", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
                 
             }
+            
 
             function clear_dati(){
                 fetch("/api/db/dati/clear", { method: "GET" })

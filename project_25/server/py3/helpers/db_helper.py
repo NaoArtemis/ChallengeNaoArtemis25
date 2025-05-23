@@ -238,9 +238,9 @@ class DB:
 
             # Prima prendi tutti gli id_player dalla tabella utenti
             with self.connection.cursor() as cur:
-                cur.execute(''' SELECT DISTINCT id_player 
+                cur.execute(''' SELECT DISTINCT id 
                                 FROM utenti 
-                                ORDER BY id_player;
+                                ORDER BY id;
                             ''')
                 rows = cur.fetchall()
             players = []
