@@ -103,8 +103,8 @@ def make_sha256(s):
 # variabili globali
 script_dir = os.path.dirname(os.path.abspath(__file__))
 video_path_mp4 = os.path.join(script_dir, "recordings", "partita", "partita.mp4")
-all_positions = []  # <-- Memorizziamo le posizioni dei giocatori 
-voronoi_path = os.path.join(script_dir, "recordings", "voronoi", "voronoi_video.mp4")
+all_positions = []  # Memorizziamo le posizioni dei giocatori 
+voronoi_path = os.path.join(script_dir, "recordings", "voronoi_map.png")
 tactics = "iniziale"
 
 MODEL_PLAYERS = None
@@ -118,76 +118,84 @@ def inizializza_modelli():
 
 
 
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from scipy.spatial import Voronoi
-import cv2
+import numpy as np
+from scipy.ndimage import gaussian_filter
+from skimage import measure
 
-
-def genera_video_voronoi(all_positions, output_path):
+def genera_voronoi(all_positions, output_path_img):
     """
-    Genera un video con diagrammi di Voronoi su un campo da calcio stilizzato.
-
+    Genera un'immagine del campo con area di maggiore attività evidenziata.
+    
     Parametri:
         all_positions: lista di frame, ciascuno contenente una lista di tuple (x, y, team)
-        output_path
+        output_path_img: path dell'immagine da salvare
+
     """
-    field_length, field_width = 30, 15  # Dimensioni del campo in metri
-    video_width, video_height = 600, 300  # Risoluzione del video in pixel
-    fps = 10  # Fotogrammi al secondo
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_path, fourcc, fps, (video_width, video_height))
+    field_length, field_width = 30, 15
+    bins_x, bins_y = 100, 50  # risoluzione heatmap
 
-    for frame_data in all_positions:
-        fig, ax = plt.subplots(figsize=(6, 3))
-        ax.set_xlim(0, field_length)
-        ax.set_ylim(0, field_width)
-        ax.set_aspect('equal')
-        ax.axis('off')
+    # Raggruppa tutti i punti
+    all_points = [(x, y) for frame in all_positions for (x, y, team) in frame]
+    x_vals, y_vals = zip(*all_points)
+    
+    # Crea la mappa di densità e la sfuma
+    heatmap, _, _ = np.histogram2d(x_vals, y_vals, bins=[bins_x, bins_y], range=[[0, 30], [0, 15]])
+    heatmap_smooth = gaussian_filter(heatmap, sigma=2)
 
-        # Sfondo verde
-        ax.add_patch(patches.Rectangle((0, 0), field_length, field_width, color='green'))
+    # Prepara il grafico
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.set_xlim(0, field_length)
+    ax.set_ylim(0, field_width)
+    ax.set_aspect('equal')
+    ax.axis('off')
 
-        # Linee del campo
-        # Linea di metà campo
-        ax.plot([field_length / 2, field_length / 2], [0, field_width], color='white', linewidth=1)
-        # Cerchio di centrocampo
-        ax.add_patch(patches.Circle((field_length / 2, field_width / 2), 1, edgecolor='white', facecolor='none', linewidth=1))
-        # Aree di rigore
-        ax.add_patch(patches.Rectangle((0, (field_width - 16.5) / 2), 16.5, 16.5, edgecolor='white', facecolor='none', linewidth=1))
-        ax.add_patch(patches.Rectangle((field_length - 16.5, (field_width - 16.5) / 2), 16.5, 16.5, edgecolor='white', facecolor='none', linewidth=1))
-        # Aree di porta
-        ax.add_patch(patches.Rectangle((0, (field_width - 7.32) / 2), 5.5, 7.32, edgecolor='white', facecolor='none', linewidth=1))
-        ax.add_patch(patches.Rectangle((field_length - 5.5, (field_width - 7.32) / 2), 5.5, 7.32, edgecolor='white', facecolor='none', linewidth=1))
+    # Sfondo verde
+    ax.add_patch(patches.Rectangle((0, 0), field_length, field_width, color='green'))
 
-        # Estrai le posizioni e i team
-        points = [(x, y) for x, y, team in frame_data if team in ["blue", "red"]]
-        teams = [team for x, y, team in frame_data if team in ["blue", "red"]]
+    # Linee campo
+    def disegna_linee():
+        ax.plot([15, 15], [0, 15], color='white', linewidth=2)
+        ax.add_patch(patches.Circle((15, 7.5), 1, edgecolor='white', facecolor='none', linewidth=2))
+        ax.add_patch(patches.Rectangle((0, 3.75), 5, 7.5, edgecolor='white', facecolor='none', linewidth=2))
+        ax.add_patch(patches.Rectangle((25, 3.75), 5, 7.5, edgecolor='white', facecolor='none', linewidth=2))
+        ax.add_patch(patches.Rectangle((0, 5.85), 1.5, 3.3, edgecolor='white', facecolor='none', linewidth=2))
+        ax.add_patch(patches.Rectangle((28.5, 5.85), 1.5, 3.3, edgecolor='white', facecolor='none', linewidth=2))
+        ax.plot([0, 0, 30, 30, 0], [0, 15, 15, 0, 0], color='white', linewidth=2)
+    
+    disegna_linee()
 
-        if len(points) > 2:
-            vor = Voronoi(points)
-            for point_idx, region_idx in enumerate(vor.point_region):
-                region = vor.regions[region_idx]
-                if not -1 in region and len(region) > 0:
-                    polygon = [vor.vertices[i] for i in region]
-                    team = teams[point_idx]
-                    color = 'blue' if team == 'blue' else 'red'
-                    ax.fill(*zip(*polygon), alpha=0.3, color=color)
+    # Trova il contorno della zona più intensa (oltre l'80% del massimo)
+    threshold = 0.8 * np.max(heatmap_smooth)
+    contours = measure.find_contours(heatmap_smooth.T, threshold)
 
-            for (x, y), team in zip(points, teams):
-                ax.plot(x, y, 'o', color='blue' if team == 'blue' else 'red')
+    zona = "centro"  # default
 
-        fig.canvas.draw()
-        frame = np.frombuffer(fig.canvas.buffer_rgba(), dtype=np.uint8)
-        frame = frame.reshape(fig.canvas.get_width_height()[::-1] + (4,))
-        frame = frame[:, :, :3]  # rimuove canale alpha (RGBA → RGB)
-        frame = cv2.resize(frame, (video_width, video_height))
-        out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-        plt.close(fig)
+    if contours:
+        # Seleziona il contorno più grande
+        largest_contour = max(contours, key=len)
+        x_poly = largest_contour[:, 1] * (30 / bins_x)
+        y_poly = largest_contour[:, 0] * (15 / bins_y)
+        polygon = list(zip(x_poly, y_poly))
+        ax.add_patch(patches.Polygon(polygon, closed=True, facecolor='yellow', alpha=0.6, edgecolor='none'))
 
-    out.release()
+        # Calcola centroide x
+        centroide_x = np.mean(x_poly)
+        if centroide_x < 10:
+            zona = "difesa"
+        elif centroide_x > 20:
+            zona = "attacco"
+        else:
+            zona = "centro"
+
+    # Salva l'immagine
+    plt.savefig(output_path_img, bbox_inches='tight', dpi=300)
+    plt.close()
+
+    return zona
+
 
 
 def analizza_partita():
@@ -258,7 +266,7 @@ def analizza_partita():
 
     cap.release()
     out.release()
-    genera_video_voronoi(all_positions, voronoi_path)
+    genera_voronoi(all_positions, voronoi_path)
                 
 @app.route('/upload_video', methods=['POST'])
 def upload_video():
@@ -1180,7 +1188,8 @@ def tts_to_nao_ai():
         text = request.form["message_ai"]
         client = OpenAI(api_key = nao_api_openai)
         speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
-        response = client.audio.speech.create(model="tts-1",voice="nova",input=text)
+        instructions = instructions = "Speak in a warm and instructive tone, like a confident AI guide. Maintain clarity, joyful, and a natural Italian accent."
+        response = client.audio.speech.create(model="tts-1",voice="fable",instructions = instructions,input=text)
         response.stream_to_file(speech_file_path)
         nao_tts_audiofile("speech.mp3")
         
@@ -1189,13 +1198,10 @@ def tts_to_nao_ai():
 
 # funione da usare a livello locale nel server
 def speech_ai(text):
-    client = OpenAI(api_key = nao_api_openai)
-    speech_file_path = Path(__file__).parent.parent / "py2/tts_audio/speech.mp3"
-    response = client.audio.speech.create(model="tts-1",voice="nova",input=text)
-    response.stream_to_file(speech_file_path)
-    nao_tts_audiofile("speech.mp3")
-
-    return redirect("#")
+    data = {"message_ai" : text}
+    url      = "http://127.0.0.1:5010/tts_to_nao_ai" + str(data)
+    response = requests.post(url, json=data)
+    logger.info(str(response.text))
 
 
 @app.route('/set_volume', methods=['POST'])
@@ -1503,35 +1509,6 @@ if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
 
-    db_helper.insert_dati(1, 150, 1320, 4.5)
-    db_helper.insert_dati(1, 153, 1350, 4.6)
-    db_helper.insert_dati(1, 151, 1330, 4.4)
-    db_helper.insert_dati(1, 149, 1300, 4.3)
-    db_helper.insert_dati(1, 155, 1370, 4.7)
-
-    db_helper.insert_dati(2, 165, 1460, 5.0)
-    db_helper.insert_dati(2, 168, 1490, 5.1)
-    db_helper.insert_dati(2, 170, 1510, 5.2)
-    db_helper.insert_dati(2, 166, 1470, 5.0)
-    db_helper.insert_dati(2, 169, 1500, 5.1)
-
-    db_helper.insert_dati(3, 142, 1150, 3.9)
-    db_helper.insert_dati(3, 144, 1160, 4.0)
-    db_helper.insert_dati(3, 140, 1130, 3.8)
-    db_helper.insert_dati(3, 143, 1140, 3.9)
-    db_helper.insert_dati(3, 145, 1170, 4.0)
-
-    db_helper.insert_dati(4, 160, 1280, 4.4)
-    db_helper.insert_dati(4, 162, 1300, 4.5)
-    db_helper.insert_dati(4, 158, 1260, 4.3)
-    db_helper.insert_dati(4, 161, 1290, 4.4)
-    db_helper.insert_dati(4, 159, 1270, 4.3)
-
-    db_helper.insert_dati(5, 134, 960, 3.3)
-    db_helper.insert_dati(5, 136, 980, 3.4)
-    db_helper.insert_dati(5, 133, 950, 3.2)
-    db_helper.insert_dati(5, 135, 970, 3.3)
-    db_helper.insert_dati(5, 137, 990, 3.4)
 
     #nao_start()
     #nao_autonomous_life()
