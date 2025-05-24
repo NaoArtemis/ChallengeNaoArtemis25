@@ -624,6 +624,7 @@ def nao_seat():
     text="Puoi sederti nel posto {} della fila {}".format(posto_t, riga_t)
     nao_animatedSayText(text)
     tempo_di_pausa()
+    return jsonify({'code': 200, 'message': 'OK'}), 200
     
 
 @app.route('/nao_time_match', methods=['GET'])

@@ -272,6 +272,7 @@ def nao_touch_head_counter(params):
 
 @app.route('/get_seat', methods=['GET'])
 def get_seat():
+    global touch_counter
     try:
         return jsonify({
             'code': 200,
