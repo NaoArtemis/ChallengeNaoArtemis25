@@ -15,7 +15,7 @@ Questo server si interfaccia con l'utente, il database e AI attraverso python3.
 # Modules
 import time
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
-from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, send_file
+from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, send_file, send_from_directory
 from hashlib import md5, sha256
 from datetime import datetime
 import requests
@@ -55,6 +55,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
 import random
+import re
 
 
 
@@ -283,12 +284,44 @@ def analyze():
     analizza_partita()
     return jsonify({"status": "ok", "message": "Analisi completata."}), 200
 
-@app.route('/stream_voronoi', methods=['GET'])
-def stream_voronoi():
-    path = os.path.join(script_dir, "recordings", "annotato_video.mp4")
-    if os.path.exists(path):
-        return send_file(path, mimetype='video/mp4')
-    return "Video non trovato", 404
+@app.route('/diagram_voronoi', methods=['GET'])
+def diagram_voronoi():
+    return send_from_directory('recordings', "voronoi_map.png")
+
+
+@app.route('/stream_annotato')
+def stream_annotato():
+    path = "recordings/annotato.mp4"
+    range_header = request.headers.get('Range', None)
+    if not range_header:
+        return Response(open(path, 'rb'), mimetype='video/mp4')
+
+    size = os.path.getsize(path)
+    byte1, byte2 = 0, None
+
+    m = re.search(r'bytes=(\d+)-(\d*)', range_header)
+    if m:
+        g = m.groups()
+        byte1 = int(g[0])
+        if g[1]:
+            byte2 = int(g[1])
+
+    length = size - byte1
+    if byte2 is not None:
+        length = byte2 - byte1 + 1
+
+    with open(path, 'rb') as f:
+        f.seek(byte1)
+        data = f.read(length)
+
+    rv = Response(data,
+                  206,
+                  mimetype='video/mp4',
+                  content_type='video/mp4',
+                  direct_passthrough=True)
+    rv.headers.add('Content-Range', f'bytes {byte1}-{byte1 + length - 1}/{size}')
+    rv.headers.add('Accept-Ranges', 'bytes')
+    return rv
 
 
 @app.route('/sostituzione', methods=['GET'])

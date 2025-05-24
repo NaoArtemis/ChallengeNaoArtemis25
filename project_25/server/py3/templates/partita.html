@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ongoing Match</title>
-    <link rel="website icon" type="png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -22,86 +22,88 @@
 
     <!-- main -->
     <div class="main-content">
-        <h1 class = "main-text">Gestione Partita</h1>
-        <div class = "dashboard">
-            <div class = "joystick-panel">
-                <div class = "button-row">
-                    <button class = "btn btn-joystick" onclick="clear_dati()">clear math records</button>
-                    <button class = "btn btn-logout" onclick="tactics()">tactics</button>
-                    <button class = "btn btn-joystick" onclick="sostituzione()">Substitution</button>
-                </div>
-                <div class = "button-row">
-                    <button class = "btn btn-joystick" onclick="time_match()">time</button>
-                    <button class = "btn btn-joystick" onclick="points()">points</button>
-                </div>
-            </div>
-        </div>
+        <h1 class="main-text">Gestione Partita</h1>
 
         <!-- Messaggio di stato -->
         <div id="status-message" style="margin-top: 15px; font-weight: bold; color: #333;"></div>
 
+        <div class="dashboard">
 
-        <div class = "dashboard">
-            <div class = "joystick-panel">
-
-                <!-- Video Voronoi -->        
+            <div class="joystick-panel"> 
                 <div>
-                    <h2 class = "text">Video Voronoi</h2>
+                    <h2 class="text">Voronoi Map</h2>
                     <!-- Nuovo container per caricare video solo al click -->
                     <div id="voronoi-container"></div>
                     <button class="btn btn-joystick" onclick="caricaVoronoi()">Carica Video Voronoi</button>
-                </div>
-            </div>
 
+                    <h2 class="text">annotated</h2>
+                    <div id="annotated-container"></div>
+                    <button class="btn btn-joystick" onclick="caricaAnnotated()">Carica Video annotato</button>
+
+
+                </div>
+            </div> 
 
             <div class="joystick-panel">
-                <h2 class="text">Video da Analizzare</h2>
-                <button class="btn btn-joystick" onclick="uploadVideo()">Carica Video</button>
-                <button class="btn btn-joystick" onclick="analyze()">Analyze</button>
-                <input type="file" id="videoFile" accept="video/*" style="margin-top: 10px;" />
-                <div id="upload-status" style="margin-top: 15px; font-weight: bold;"></div>
+                <h2 class="text">Match</h2>
+
+                <div class = "button-row">
+                    <button class="btn btn-joystick" onclick="inzia_registrazione()">start recording</button>
+                    <button class="btn btn-joystick" onclick="fine_registrazione()">stop recoding</button>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn btn-joystick" onclick="clear_dati()">clear match records</button>
+                    <button class="btn btn-logout" onclick="tactics()">tactics</button>
+                    <button class="btn btn-joystick" onclick="sostituzione()">Substitution</button>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn btn-joystick" onclick="time_match()">time</button>
+                    <button class="btn btn-joystick" onclick="points()">points</button>
+                </div>
+
+                    <h2 class="text">Analzye Video</h2>
+                    <button class="btn btn-joystick" onclick="uploadVideo()">Carica Video</button>
+                    <div class = "button-row"><input type="file" id="videoFile" accept="video/*" style="margin-top: 10px;" /></div>
+                    <div id="upload-status" style="margin-top: 15px; font-weight: bold;"></div>
+                    <div class = "button-row">
+                    <button class="btn btn-joystick" onclick="analyze()">Analyze</button>
+                    </div>
+
             </div>
-        </div>
-
 
         </div>
 
+    </div>
 
-
-
-        <!-- Script -->
-        <script src="https://cdn.tailwindcss.com"></script> <!-- carico liberria tailwind-->
-        <script>
-
-            function sostituzione(){
-                fetch("/sostituzione", { method: "GET" })
+    <!-- Script -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> carico liberria tailwind -->
+    <script>
+        function sostituzione() {
+            fetch("/sostituzione", { method: "GET" })
                 .then(response => response.json())
                 .then(data => console.log("Risposta API:", data))
                 .catch(error => console.error("Errore:", error));
-                
-            }
+        }
 
-            function tactics(){
-                fetch("/tactics", { method: "GET" })
+        function tactics() {
+            fetch("/tactics", { method: "GET" })
                 .then(response => response.json())
                 .then(data => console.log("Risposta API:", data))
                 .catch(error => console.error("Errore:", error));
-                
-            }
-            
+        }
 
-            function clear_dati(){
-                fetch("/api/db/dati/clear", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-                
-            }
+        function clear_dati() {
+            fetch("/api/db/dati/clear", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        }
 
-            function analyze() {
-                document.getElementById("status-message").innerText = "Analisi in corso...";
-
-                fetch('/analyze')
+        function analyze() {
+            document.getElementById("status-message").innerText = "Analisi in corso...";
+            fetch('/analyze')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById("status-message").innerText = "Analisi completata!";
@@ -109,59 +111,74 @@
                 .catch(() => {
                     document.getElementById("status-message").innerText = "Errore durante l'analisi.";
                 });
+        }
+
+        function uploadVideo() {
+            // Pulisce eventuali video già presenti
+            document.getElementById("voronoi-container").innerHTML = "";
+            document.getElementById("annotated-container").innerHTML = "";
+
+            const fileInput = document.getElementById('videoFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                document.getElementById("upload-status").innerText = "Seleziona un file video prima di caricare.";
+                return;
             }
 
+            const formData = new FormData();
+            formData.append("file", file);
 
-            function uploadVideo() {
-                const fileInput = document.getElementById('videoFile');
-                const file = fileInput.files[0];
-                if (!file) {
-                    document.getElementById("upload-status").innerText = "Seleziona un file video prima di caricare.";
-                    return;
+            fetch('/upload_video', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("upload-status").innerText = data.message;
+
+                // Se il server salva il video in una posizione fissa e visibile (es: /static/uploads/video.mp4)
+                if (data.video_url) {
+                    document.getElementById("voronoi-container").innerHTML =
+                        '<video controls style="max-width: 80%; border: 2px solid #333;">' +
+                        '<source src="' + data.video_url + '" type="video/mp4">' +
+                        'Il tuo browser non supporta il video.' +
+                        '</video>';
                 }
+            })
+            .catch(() => {
+                document.getElementById("upload-status").innerText = "Errore durante il caricamento.";
+            });
+        }
 
-                const formData = new FormData();
-                formData.append("file", file);
+        function caricaVoronoi() {
+            document.getElementById("voronoi-container").innerHTML =
+                '<img src="/diagram_voronoi" alt="Voronoi Map" style="max-width: 80%; border: 2px solid #333;" />';
+        }
 
-                fetch('/upload_video', {
-                    method: 'POST',
-                    body: formData
-                })
+        function caricaAnnotated() {
+            document.getElementById("annotated-container").innerHTML =
+                '<video controls style="max-width: 80%; border: 2px solid #333;">' +
+                '<source src="/stream_annotato" type="video/mp4">' +
+                'Il tuo browser non supporta il video.' +
+                '</video>';
+        }
+
+        function time_match() {
+            fetch("/nao_time_match", { method: "GET" })
                 .then(response => response.json())
-                .then(data => {
-                    document.getElementById("upload-status").innerText = data.message;
-                })
-                .catch(() => {
-                    document.getElementById("upload-status").innerText = "Errore durante il caricamento.";
-                });
-            }
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        }
 
-            function caricaVoronoi() {
-                document.getElementById("voronoi-container").innerHTML =
-                    '<video controls style="max-width: 80%; border: 2px solid #333;">' +
-                    '<source src="/stream_voronoi" type="video/mp4">' +
-                    'Il tuo browser non supporta il video.' +
-                    '</video>';
-            }
+        function points() {
+            fetch("/nao_points", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        }
+    </script>
 
-            function time_match(){
-                fetch("/nao_time_match", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-
-            function points(){
-                fetch("/nao_points", { method: "GET" })
-                    .then(response => response.json())
-                    .then(data => console.log("Risposta API:", data))
-                    .catch(error => console.error("Errore:", error));
-            }
-        </script>
-
-    </div>
-
-    <!--  JS -->
+    <!-- JS -->
     <script src="{{ url_for('static', filename='script/script.js') }}"></script>
 
 </body>
