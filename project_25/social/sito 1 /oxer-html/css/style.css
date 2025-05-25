@@ -57,7 +57,7 @@ body {
 /*header section*/
 .hero_area {
   height: 100vh;
-  background-image: url(../images/home.jpg);
+  /* background-image: url(../images/home.jpg); */             /*  modificare immagine?     */
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
@@ -277,7 +277,7 @@ a:focus {
 }
 
 .slider_section .slider_heading h2 span {
-  color: #223069;
+  color: #92140C;          /* rosso */
 }
 
 .slider_section .detail-box h1 {
