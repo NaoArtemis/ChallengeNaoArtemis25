@@ -313,13 +313,26 @@ def analyze():
 @app.route('/diagram_voronoi', methods=['GET'])
 def diagram_voronoi():
     if reading_vonroi == "centrocampo":
-        text ="La maggior parte del gioco si è sviluppata a centrocampo. Abbiamo mantenuto il possesso ma senza creare occasioni nitide."
+        text = (
+            "La maggior parte del gioco si è sviluppata a centrocampo. "
+            "Abbiamo mantenuto il possesso, ma senza creare occasioni nitide. "
+            "Dobbiamo lavorare di più sulla costruzione offensiva."
+        )
     elif reading_vonroi == "difesa":
-        text = "Siamo rimasti troppo nella nostra metà campo. Abbiamo subito la pressione avversaria e faticato a ripartire."
+        text = (
+            "Siamo rimasti troppo nella nostra metà campo. "
+            "Abbiamo subito la pressione avversaria e faticato a ripartire. "
+            "Serve migliorare l'uscita palla al piede e la gestione degli spazi stretti."
+        )
     else:
-        text = "Abbiamo giocato prevalentemente nella metà campo avversaria. Buon pressing alto e propensione offensiva."
+        text = (
+            "Abbiamo giocato prevalentemente nella metà campo avversaria. "
+            "Buon pressing alto e buona propensione offensiva. "
+            "Dobbiamo però essere più precisi nelle conclusioni."
+        )
     speech_ai(text)
     return send_from_directory('recordings', "voronoi_map.png")
+
 
 
 @app.route('/stream_annotato')
@@ -1599,7 +1612,7 @@ if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
 
-    
+
     #nao_start()
     #nao_autonomous_life()
     #nao_eye_white()
