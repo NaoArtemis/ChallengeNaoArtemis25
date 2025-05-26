@@ -313,13 +313,26 @@ def analyze():
 @app.route('/diagram_voronoi', methods=['GET'])
 def diagram_voronoi():
     if reading_vonroi == "centrocampo":
-        text ="La maggior parte del gioco si è sviluppata a centrocampo. Abbiamo mantenuto il possesso ma senza creare occasioni nitide."
+        text = (
+            "La maggior parte del gioco si è sviluppata a centrocampo. "
+            "Abbiamo mantenuto il possesso, ma senza creare occasioni nitide. "
+            "Dobbiamo lavorare di più sulla costruzione offensiva."
+        )
     elif reading_vonroi == "difesa":
-        text = "Siamo rimasti troppo nella nostra metà campo. Abbiamo subito la pressione avversaria e faticato a ripartire."
+        text = (
+            "Siamo rimasti troppo nella nostra metà campo. "
+            "Abbiamo subito la pressione avversaria e faticato a ripartire. "
+            "Serve migliorare l'uscita palla al piede e la gestione degli spazi stretti."
+        )
     else:
-        text = "Abbiamo giocato prevalentemente nella metà campo avversaria. Buon pressing alto e propensione offensiva."
+        text = (
+            "Abbiamo giocato prevalentemente nella metà campo avversaria. "
+            "Buon pressing alto e buona propensione offensiva. "
+            "Dobbiamo però essere più precisi nelle conclusioni."
+        )
     speech_ai(text)
     return send_from_directory('recordings', "voronoi_map.png")
+
 
 
 @app.route('/stream_annotato')
@@ -1582,35 +1595,6 @@ if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
 
-    db_helper.insert_dati(1, 152, 1340, 4.6)
-    db_helper.insert_dati(1, 160, 1400, 4.8)
-    db_helper.insert_dati(1, 158, 1370, 4.5)
-    db_helper.insert_dati(1, 155, 1300, 4.4)
-    db_helper.insert_dati(1, 162, 1450, 4.9)
-
-    db_helper.insert_dati(2, 170, 1500, 5.2)
-    db_helper.insert_dati(2, 168, 1480, 5.0)
-    db_helper.insert_dati(2, 174, 1530, 5.3)
-    db_helper.insert_dati(2, 165, 1490, 5.1)
-    db_helper.insert_dati(2, 172, 1510, 5.2)
-
-    db_helper.insert_dati(3, 140, 1100, 3.9)
-    db_helper.insert_dati(3, 145, 1080, 3.8)
-    db_helper.insert_dati(3, 138, 1070, 3.7)
-    db_helper.insert_dati(3, 142, 1090, 3.8)
-    db_helper.insert_dati(3, 144, 1060, 3.6)
-
-    db_helper.insert_dati(4, 155, 1250, 4.3)
-    db_helper.insert_dati(4, 160, 1270, 4.4)
-    db_helper.insert_dati(4, 158, 1240, 4.2)
-    db_helper.insert_dati(4, 157, 1260, 4.3)
-    db_helper.insert_dati(4, 159, 1280, 4.4)
-
-    db_helper.insert_dati(5, 135, 1000, 3.5)
-    db_helper.insert_dati(5, 138, 1020, 3.6)
-    db_helper.insert_dati(5, 140, 980, 3.4)
-    db_helper.insert_dati(5, 137, 990, 3.5)
-    db_helper.insert_dati(5, 136, 1010, 3.5)
     #nao_start()
     #nao_autonomous_life()
     #nao_eye_white()
