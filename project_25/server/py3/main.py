@@ -1582,35 +1582,7 @@ if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
 
-    db_helper.insert_dati(1, 152, 1340, 4.6)
-    db_helper.insert_dati(1, 160, 1400, 4.8)
-    db_helper.insert_dati(1, 158, 1370, 4.5)
-    db_helper.insert_dati(1, 155, 1300, 4.4)
-    db_helper.insert_dati(1, 162, 1450, 4.9)
-
-    db_helper.insert_dati(2, 170, 1500, 5.2)
-    db_helper.insert_dati(2, 168, 1480, 5.0)
-    db_helper.insert_dati(2, 174, 1530, 5.3)
-    db_helper.insert_dati(2, 165, 1490, 5.1)
-    db_helper.insert_dati(2, 172, 1510, 5.2)
-
-    db_helper.insert_dati(3, 140, 1100, 3.9)
-    db_helper.insert_dati(3, 145, 1080, 3.8)
-    db_helper.insert_dati(3, 138, 1070, 3.7)
-    db_helper.insert_dati(3, 142, 1090, 3.8)
-    db_helper.insert_dati(3, 144, 1060, 3.6)
-
-    db_helper.insert_dati(4, 155, 1250, 4.3)
-    db_helper.insert_dati(4, 160, 1270, 4.4)
-    db_helper.insert_dati(4, 158, 1240, 4.2)
-    db_helper.insert_dati(4, 157, 1260, 4.3)
-    db_helper.insert_dati(4, 159, 1280, 4.4)
-
-    db_helper.insert_dati(5, 135, 1000, 3.5)
-    db_helper.insert_dati(5, 138, 1020, 3.6)
-    db_helper.insert_dati(5, 140, 980, 3.4)
-    db_helper.insert_dati(5, 137, 990, 3.5)
-    db_helper.insert_dati(5, 136, 1010, 3.5)
+    
     #nao_start()
     #nao_autonomous_life()
     #nao_eye_white()
