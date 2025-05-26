@@ -104,26 +104,227 @@
         <div class="col-md-10 ml-auto">
           <div class="heading_container">
             <h2>
-              Project
+              NAO Coach & Car
             </h2>
             <p>
               Innovation in motion: robotics for athletes
             </p>
-            <p class="text-white">
-              Imagine a robot that revolutionizes workouts, monitors performance and corrects movements in real time. With NAO, every athlete receives personalized support, from technical improvement to injury prevention. But not only! NAO motivates, guides and makes the sport accessible to all by supporting athletes with disabilities and animating fans in the stands. With artificial intelligence, augmented reality and telepresence, NaoArtemis redefines the concept of inclusion and performance.
+              <br>
+              <br>
+              <br>
             </p>
+            <!--<img src="images/computer.png">-->
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <title>Immagine computer web app</title>
+              <style>
+                .container {
+                  display: flex;
+                  align-items: center;
+                  gap: 20px;
+                }
+                .image {
+                  max-width: 700px;
+                  height: auto;
+                }
+                .content {
+                  max-width: 300px;
+                }
+                .text {
+                  margin-bottom: 10px;
+                }
+                .controls {
+                  display: flex;
+                  gap: 10px;
+                }
+                button {
+                  cursor: pointer;
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background-color: black;
+                  border: none;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                }
+                button svg {
+                  fill: white;
+                  width: 20px;
+                  height: 20px;
+                }
+              </style>
+              </head>
+              <body>
+
+              <div class="container">
+                <img id="image" class="image" src="images/computer 2.png" alt="Immagine" />
+                <div class="content">
+                  <div id="text" class="text">Testo associato all'immagine 1</div>
+                  <div class="controls">
+                    <button id="prevBtn" aria-label="Indietro">
+                      <!-- Freccia sinistra -->
+                      <svg viewBox="0 0 24 24" >
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                      </svg>
+                    </button>
+                    <button id="nextBtn" aria-label="Avanti">
+                      <!-- Freccia destra -->
+                      <svg viewBox="0 0 24 24">
+                        <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <script>
+                const images = [
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 1" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 2" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 3" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 4" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 5" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 6" },
+                ];
+
+                let currentIndex = 0;
+
+                const imgEl = document.getElementById("image");
+                const textEl = document.getElementById("text");
+                const prevBtn = document.getElementById("prevBtn");
+                const nextBtn = document.getElementById("nextBtn");
+
+                function updateContent() {
+                  imgEl.src = images[currentIndex].src;
+                  textEl.textContent = images[currentIndex].text;
+                }
+
+                prevBtn.addEventListener("click", () => {
+                  currentIndex = (currentIndex - 1 + images.length) % images.length;
+                  updateContent();
+                });
+
+                nextBtn.addEventListener("click", () => {
+                  currentIndex = (currentIndex + 1) % images.length;
+                  updateContent();
+                });
+              </script>
+
+              </body>
+
+
+
+<br>
+<br>
+<br>
+<br>
+
+
+
+              <!-- app telefono-->
+
+                        <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <title>Immagine computer web app</title>
+              <style>
+                .container {
+                  display: flex;
+                  align-items: center;
+                  gap: 20px;
+                }
+                .image {
+                  max-width: 500px;
+                  height: auto;
+                }
+                .content {
+                  max-width: 300px;
+                }
+                .text {
+                  margin-bottom: 10px;
+                }
+                .controls {
+                  display: flex;
+                  gap: 10px;
+                }
+                button {
+                  cursor: pointer;
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background-color: black;
+                  border: none;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                }
+                button svg {
+                  fill: white;
+                  width: 20px;
+                  height: 20px;
+                }
+              </style>
+              </head>
+              <body>
+
+              <div class="container">
+                <img id="image" class="image" src="images/telefono 2.png" alt="Immagine" />
+                <div class="content">
+                  <div id="text" class="text">Testo associato all'immagine 1</div>
+                  <div class="controls">
+                    <button id="prevBtn" aria-label="Indietro">
+                      <!-- Freccia sinistra -->
+                      <svg viewBox="0 0 24 24" >
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                      </svg>
+                    </button>
+                    <button id="nextBtn" aria-label="Avanti">
+                      <!-- Freccia destra -->
+                      <svg viewBox="0 0 24 24">
+                        <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <script>
+                const images = [
+                  { src: "images/telefono 2.png", text: "Testo associato all'immagine 1" },
+                  { src: "images/telefono 2.png", text: "Testo associato all'immagine 2" },
+                  { src: "images/telefono 2.png", text: "Testo associato all'immagine 3" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 4" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 5" },
+                  { src: "images/computer 2.png", text: "Testo associato all'immagine 6" },
+                ];
+
+                let currentIndex = 0;
+
+                const imgEl = document.getElementById("image");
+                const textEl = document.getElementById("text");
+                const prevBtn = document.getElementById("prevBtn");
+                const nextBtn = document.getElementById("nextBtn");
+
+                function updateContent() {
+                  imgEl.src = images[currentIndex].src;
+                  textEl.textContent = images[currentIndex].text;
+                }
+
+                prevBtn.addEventListener("click", () => {
+                  currentIndex = (currentIndex - 1 + images.length) % images.length;
+                  updateContent();
+                });
+
+                nextBtn.addEventListener("click", () => {
+                  currentIndex = (currentIndex + 1) % images.length;
+                  updateContent();
+                });
+              </script>
+
+              </body>
+            </div>
           </div>
         </div>
-          <!-- Immagine a destra -->
-        <div class="col-md-4">
-          <img src="images/foto1.png" class="img-fluid" style="border-radius: 8px;">
-        </div>
-      </div>        
-    </div>
-  </div>
-      
-  </section>
-
+      </div>
+    </section>
 
   <!--bottoni-->
   <section> 
