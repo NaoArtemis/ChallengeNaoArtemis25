@@ -107,6 +107,7 @@ video_path_mp4 = os.path.join(script_dir, "recordings", "partita", "partita.mp4"
 all_positions = []  # Memorizziamo le posizioni dei giocatori 
 voronoi_path = os.path.join(script_dir, "recordings", "voronoi_map.png")
 tactics = "iniziale"
+reading_vonroi = "centrocampo"
 
 MODEL_PLAYERS = None
 MODEL_LINES = None
@@ -119,80 +120,83 @@ def inizializza_modelli():
 
 
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import numpy as np
-from scipy.ndimage import gaussian_filter
-from skimage import measure
-
 def genera_voronoi(all_positions, output_path_img):
-    """
-    Genera un'immagine del campo con area di maggiore attività evidenziata.
-    
-    Parametri:
-        all_positions: lista di frame, ciascuno contenente una lista di tuple (x, y, team)
-        output_path_img: path dell'immagine da salvare
-
-    """
+    import matplotlib.pyplot as plt
+    from matplotlib import patches
+    import numpy as np
+    from scipy.ndimage import gaussian_filter
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     field_length, field_width = 30, 15
-    bins_x, bins_y = 100, 50  # risoluzione heatmap
+    bins_x, bins_y = 100, 50
 
-    # Raggruppa tutti i punti
     all_points = [(x, y) for frame in all_positions for (x, y, team) in frame]
-    x_vals, y_vals = zip(*all_points)
-    
-    # Crea la mappa di densità e la sfuma
-    heatmap, _, _ = np.histogram2d(x_vals, y_vals, bins=[bins_x, bins_y], range=[[0, 30], [0, 15]])
-    heatmap_smooth = gaussian_filter(heatmap, sigma=2)
+    if not all_points:
+        print("⚠️ Nessun punto da disegnare.")
+        return "nessuna_azione"
 
-    # Prepara il grafico
+    x_vals, y_vals = zip(*all_points)
+    heatmap, xedges, yedges = np.histogram2d(
+        x_vals, y_vals,
+        bins=[bins_x, bins_y],
+        range=[[0, field_length], [0, field_width]]
+    )
+    heatmap_smooth = gaussian_filter(heatmap, sigma=1)
+
+    max_val = np.max(heatmap_smooth)
+    center_val = heatmap_smooth[bins_x // 2, bins_y // 2]
+    print(f"📈 Max heatmap: {max_val:.3f}, center value: {center_val:.3f}")
+
+    # 🧠 Calcolo della zona di attività
+    soglia = 0.7 * max_val
+    idx = np.where(heatmap_smooth > soglia)
+    x_indices = idx[0]
+    y_indices = idx[1]
+    if len(x_indices) > 0:
+        x_mean_bin = np.mean(x_indices)
+        x_mean_meters = x_mean_bin * (field_length / bins_x)
+        if x_mean_meters < 10:
+            zona = "difesa"
+        elif x_mean_meters > 20:
+            zona = "attacco"
+        else:
+            zona = "centrocampo"
+    else:
+        zona = "centrocampo"
+
     fig, ax = plt.subplots(figsize=(12, 6))
     ax.set_xlim(0, field_length)
     ax.set_ylim(0, field_width)
     ax.set_aspect('equal')
     ax.axis('off')
+    ax.add_patch(patches.Rectangle((0, 0), field_length, field_width, color='green', zorder=0))
 
-    # Sfondo verde
-    ax.add_patch(patches.Rectangle((0, 0), field_length, field_width, color='green'))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="3%", pad=0.1)
 
-    # Linee campo
+    img = ax.imshow(
+        heatmap_smooth.T,
+        extent=[0, 30, 0, 15],
+        origin='lower',
+        cmap='hot',
+        alpha=0.9,
+        interpolation='nearest',
+        zorder=1
+    )
+    plt.colorbar(img, cax=cax)
+
     def disegna_linee():
-        ax.plot([15, 15], [0, 15], color='white', linewidth=2)
-        ax.add_patch(patches.Circle((15, 7.5), 1, edgecolor='white', facecolor='none', linewidth=2))
-        ax.add_patch(patches.Rectangle((0, 3.75), 5, 7.5, edgecolor='white', facecolor='none', linewidth=2))
-        ax.add_patch(patches.Rectangle((25, 3.75), 5, 7.5, edgecolor='white', facecolor='none', linewidth=2))
-        ax.add_patch(patches.Rectangle((0, 5.85), 1.5, 3.3, edgecolor='white', facecolor='none', linewidth=2))
-        ax.add_patch(patches.Rectangle((28.5, 5.85), 1.5, 3.3, edgecolor='white', facecolor='none', linewidth=2))
-        ax.plot([0, 0, 30, 30, 0], [0, 15, 15, 0, 0], color='white', linewidth=2)
-    
+        ax.plot([15, 15], [0, 15], color='white', linewidth=2, zorder=2)
+        ax.add_patch(patches.Circle((15, 7.5), 1, edgecolor='white', facecolor='none', linewidth=2, zorder=2))
+        ax.add_patch(patches.Rectangle((0, 3.75), 5, 7.5, edgecolor='white', facecolor='none', linewidth=2, zorder=2))
+        ax.add_patch(patches.Rectangle((25, 3.75), 5, 7.5, edgecolor='white', facecolor='none', linewidth=2, zorder=2))
+        ax.add_patch(patches.Rectangle((0, 5.85), 1.5, 3.3, edgecolor='white', facecolor='none', linewidth=2, zorder=2))
+        ax.add_patch(patches.Rectangle((28.5, 5.85), 1.5, 3.3, edgecolor='white', facecolor='none', linewidth=2, zorder=2))
+        ax.plot([0, 0, 30, 30, 0], [0, 15, 15, 0, 0], color='white', linewidth=2, zorder=2)
+
     disegna_linee()
 
-    # Trova il contorno della zona più intensa (oltre l'80% del massimo)
-    threshold = 0.8 * np.max(heatmap_smooth)
-    contours = measure.find_contours(heatmap_smooth.T, threshold)
-
-    zona = "centro"  # default
-
-    if contours:
-        # Seleziona il contorno più grande
-        largest_contour = max(contours, key=len)
-        x_poly = largest_contour[:, 1] * (30 / bins_x)
-        y_poly = largest_contour[:, 0] * (15 / bins_y)
-        polygon = list(zip(x_poly, y_poly))
-        ax.add_patch(patches.Polygon(polygon, closed=True, facecolor='yellow', alpha=0.6, edgecolor='none'))
-
-        # Calcola centroide x
-        centroide_x = np.mean(x_poly)
-        if centroide_x < 10:
-            zona = "difesa"
-        elif centroide_x > 20:
-            zona = "attacco"
-        else:
-            zona = "centro"
-
-    # Salva l'immagine
-    plt.savefig(output_path_img, bbox_inches='tight', dpi=300)
+    plt.savefig(output_path_img, bbox_inches='tight', dpi=300, facecolor=fig.get_facecolor())
     plt.close()
 
     return zona
@@ -230,8 +234,26 @@ def analizza_partita():
             lines = MODEL_LINES(frame, conf=0.3)
             det = sv.Detections.from_ultralytics(lines[0])
             points = [[(b[0]+b[2])/2, b[3]] for b in det.xyxy[:4]]
+
             if len(points) == 4:
-                homography_matrix, _ = cv2.findHomography(np.array(points, np.float32), np.array([[0,0],[30,0],[0,15],[30,15]], np.float32))
+                print("MODEL_LINES worked for homography 200.")
+                homography_matrix, _ = cv2.findHomography(
+                    np.array(points, np.float32),
+                    np.array([[0, 0], [30, 0], [0, 15], [30, 15]], np.float32)
+                )
+            else:
+                print("MODEL_LINES didn't work 206.")
+                h, w = frame.shape[:2]
+                scale_x = 30.0 / w
+                scale_y = 15.0 / h
+
+                homography_matrix = np.array([
+                    [scale_x, 0, 0],
+                    [0, scale_y, 0],
+                    [0,     0, 1]
+                ])
+
+
 
         results = MODEL_PLAYERS(frame, conf=0.2)
         det = sv.Detections.from_ultralytics(results[0])
@@ -253,7 +275,9 @@ def analizza_partita():
             annotated = label_annotator.annotate(scene=annotated, detections=tracked, labels=labels)
 
             for i, box in enumerate(tracked.xyxy):
-                center = np.array([(box[0]+box[2])/2, box[3], 1])
+                center_x = (box[0] + box[2]) / 2
+                center_y = (box[1] + box[3]) / 2       
+                center = np.array([center_x, center_y, 1])
                 if homography_matrix is not None:
                     pt = homography_matrix @ center
                     pt /= pt[2]
@@ -267,7 +291,9 @@ def analizza_partita():
 
     cap.release()
     out.release()
-    genera_voronoi(all_positions, voronoi_path)
+    global reading_vonroi
+    reading_vonroi = genera_voronoi(all_positions, voronoi_path)
+
                 
 @app.route('/upload_video', methods=['POST'])
 def upload_video():
@@ -286,16 +312,33 @@ def analyze():
 
 @app.route('/diagram_voronoi', methods=['GET'])
 def diagram_voronoi():
+    if reading_vonroi == "centrocampo":
+        text ="La maggior parte del gioco si è sviluppata a centrocampo. Abbiamo mantenuto il possesso ma senza creare occasioni nitide."
+    elif reading_vonroi == "difesa":
+        text = "Siamo rimasti troppo nella nostra metà campo. Abbiamo subito la pressione avversaria e faticato a ripartire."
+    else:
+        text = "Abbiamo giocato prevalentemente nella metà campo avversaria. Buon pressing alto e propensione offensiva."
+    speech_ai(text)
     return send_from_directory('recordings', "voronoi_map.png")
 
 
 @app.route('/stream_annotato')
 def stream_annotato():
-    path = "recordings/annotato.mp4"
+    path = os.path.join(script_dir, "recordings", "annotato.mp4")
+
+    def generate():
+        with open(path, "rb") as f:
+            while True:
+                chunk = f.read(8192)
+                if not chunk:
+                    break
+                yield chunk
+
     range_header = request.headers.get('Range', None)
     if not range_header:
-        return Response(open(path, 'rb'), mimetype='video/mp4')
+        return Response(generate(), mimetype="video/mp4")
 
+    # Gestione richieste parziali (Range)
     size = os.path.getsize(path)
     byte1, byte2 = 0, None
 
@@ -310,18 +353,15 @@ def stream_annotato():
     if byte2 is not None:
         length = byte2 - byte1 + 1
 
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         f.seek(byte1)
         data = f.read(length)
 
-    rv = Response(data,
-                  206,
-                  mimetype='video/mp4',
-                  content_type='video/mp4',
-                  direct_passthrough=True)
-    rv.headers.add('Content-Range', f'bytes {byte1}-{byte1 + length - 1}/{size}')
-    rv.headers.add('Accept-Ranges', 'bytes')
-    return rv
+    resp = Response(data, 206, mimetype='video/mp4', content_type='video/mp4')
+    resp.headers.add('Content-Range', f'bytes {byte1}-{byte1 + length - 1}/{size}')
+    resp.headers.add('Accept-Ranges', 'bytes')
+
+    return resp
 
 
 @app.route('/sostituzione', methods=['GET'])
@@ -457,7 +497,7 @@ def tactics():
     else:
         text = f"giochiamo con un {modulo} e {tattica}"
 
-    nao_animatedSayText(text)
+    speech_ai(text)
     return jsonify({"status": "ok"}), 200
 
 
@@ -1227,14 +1267,13 @@ def tts_to_nao_ai():
         response.stream_to_file(speech_file_path)
         nao_tts_audiofile("speech.mp3")
         
-    return redirect('/home')
 
 
 # funione da usare a livello locale nel server
 def speech_ai(text):
-    data = {"message_ai" : text}
-    url      = "http://127.0.0.1:5010/tts_to_nao_ai" + str(data)
-    response = requests.post(url, json=data)
+    data = {"message_ai": text}
+    url = "http://127.0.0.1:5010/tts_to_nao_ai"
+    response = requests.post(url, data=data)
     logger.info(str(response.text))
 
 
@@ -1255,7 +1294,7 @@ def set_volume():
         return jsonify({"error": "Errore interno"}), 500
 
 
-# MOVEMENTS (Haseeb ha pagato gente per lavorare al suo posto)
+# MOVEMENTS
 @app.route('/api/movement/start', methods=['GET'])
 def api_movement_start():
     nao_move_fast(0)
@@ -1543,7 +1582,35 @@ if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
 
+    db_helper.insert_dati(1, 152, 1340, 4.6)
+    db_helper.insert_dati(1, 160, 1400, 4.8)
+    db_helper.insert_dati(1, 158, 1370, 4.5)
+    db_helper.insert_dati(1, 155, 1300, 4.4)
+    db_helper.insert_dati(1, 162, 1450, 4.9)
 
+    db_helper.insert_dati(2, 170, 1500, 5.2)
+    db_helper.insert_dati(2, 168, 1480, 5.0)
+    db_helper.insert_dati(2, 174, 1530, 5.3)
+    db_helper.insert_dati(2, 165, 1490, 5.1)
+    db_helper.insert_dati(2, 172, 1510, 5.2)
+
+    db_helper.insert_dati(3, 140, 1100, 3.9)
+    db_helper.insert_dati(3, 145, 1080, 3.8)
+    db_helper.insert_dati(3, 138, 1070, 3.7)
+    db_helper.insert_dati(3, 142, 1090, 3.8)
+    db_helper.insert_dati(3, 144, 1060, 3.6)
+
+    db_helper.insert_dati(4, 155, 1250, 4.3)
+    db_helper.insert_dati(4, 160, 1270, 4.4)
+    db_helper.insert_dati(4, 158, 1240, 4.2)
+    db_helper.insert_dati(4, 157, 1260, 4.3)
+    db_helper.insert_dati(4, 159, 1280, 4.4)
+
+    db_helper.insert_dati(5, 135, 1000, 3.5)
+    db_helper.insert_dati(5, 138, 1020, 3.6)
+    db_helper.insert_dati(5, 140, 980, 3.4)
+    db_helper.insert_dati(5, 137, 990, 3.5)
+    db_helper.insert_dati(5, 136, 1010, 3.5)
     #nao_start()
     #nao_autonomous_life()
     #nao_eye_white()

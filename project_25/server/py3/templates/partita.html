@@ -35,17 +35,16 @@
                     <!-- Nuovo container per caricare video solo al click -->
                     <div id="voronoi-container"></div>
                     <button class="btn btn-joystick" onclick="caricaVoronoi()">Carica Video Voronoi</button>
-
+                    <!--
                     <h2 class="text">annotated</h2>
                     <div id="annotated-container"></div>
                     <button class="btn btn-joystick" onclick="caricaAnnotated()">Carica Video annotato</button>
-
-
+                    -->
                 </div>
             </div> 
 
             <div class="joystick-panel">
-                <h2 class="text">Match</h2>
+                <h2 class="text">Match</h2>x
 
                 <div class = "button-row">
                     <button class="btn btn-joystick" onclick="inzia_registrazione()">start recording</button>
@@ -156,11 +155,23 @@
         }
 
         function caricaAnnotated() {
-            document.getElementById("annotated-container").innerHTML =
-                '<video controls style="max-width: 80%; border: 2px solid #333;">' +
+            const container = document.getElementById("annotated-container");
+            
+            if (!container) {
+                console.error("Container 'annotated-container' non trovato!");
+                return;
+            }
+            
+            // Mostra un loading mentre carica
+            container.innerHTML = '<p>Caricamento video...</p>';
+            
+            const videoHtml = 
+                '<video controls style="max-width: 80%; border: 2px solid #333;" onloadstart="console.log(\'Video iniziato\')" onerror="console.log(\'Errore video\')">' +
                 '<source src="/stream_annotato" type="video/mp4">' +
                 'Il tuo browser non supporta il video.' +
                 '</video>';
+            
+            container.innerHTML = videoHtml;
         }
 
         function time_match() {
