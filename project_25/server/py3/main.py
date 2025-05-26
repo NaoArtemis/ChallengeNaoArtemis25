@@ -640,6 +640,7 @@ def get_seat():
     logger.info(str(response.text))
     if response.status_code == 200:
         data = response.json()
+        print(data.get("counter", 0)  )
         return data.get("counter", 0)  
     else:
         app.logger.error("Errore nella risposta: %s", response.status_code)
