@@ -460,7 +460,8 @@ a:focus {
       a {
         @include hero_btn($black, $white, 8px, 35px, 35px);
         margin: 35px auto 0 auto;
-        box-shadow: 0 0 35px 0 rgba($color: #92140C, $alpha: .7);
+        /*box-shadow: 0 0 35px 0 rgba($color: #92140C, $alpha: .7);*/
+        box-shadow: 0 0 20px 5px rgba(0, 255, 0, 0.3); /* verde */
       }
     }
   }
