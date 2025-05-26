@@ -638,7 +638,12 @@ def get_seat():
     url      = "http://127.0.0.1:5011/get_seat"
     response = requests.get(url)
     logger.info(str(response.text))
-    return response.json()['counter']
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("counter", 0)  
+    else:
+        app.logger.error("Errore nella risposta: %s", response.status_code)
+        return 0
     
 
 @app.route('/nao_seat', methods=['GET'])
@@ -1594,6 +1599,7 @@ def nao_start():
 if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
+
 
     #nao_start()
     #nao_autonomous_life()
