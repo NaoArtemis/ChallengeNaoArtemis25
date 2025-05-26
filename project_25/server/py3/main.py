@@ -627,6 +627,7 @@ def get_seat():
     logger.info(str(response.text))
     if response.status_code == 200:
         data = response.json()
+        print(f" marco tomazzoli gaymer {data.get("counter", 0)}")
         return data.get("counter", 0)  
     else:
         app.logger.error("Errore nella risposta: %s", response.status_code)
@@ -634,42 +635,53 @@ def get_seat():
     
 
 @app.route('/nao_seat', methods=['GET'])
+
+
 def nao_seat():
     counter = get_seat()
 
     global task_2
     global prima_disponibile
+    prima_disponibile = False  
+
     # Numero di righe e colonne
     righe = 6
     colonne = 10
-    riga_t=1
-    posto_t=1
-    matrice = [[True for _ in range(colonne)] for _ in range(righe)]
-    posti_max = righe*colonne
-    posti_occupati =  counter
+    riga_t = 1
+    posto_t = 1
 
-    # Imposta a False i primi 'posti_occupati' posti, riga per riga
+    matrice = [[True for _ in range(colonne)] for _ in range(righe)]
+    posti_max = righe * colonne
+    posti_occupati = counter
+
+    # Imposta a False i primi 'posti_occupati' posti
     contatore = 0
     for i in range(righe):
         for j in range(colonne):
-            if (contatore < posti_occupati and posti_occupati<=posti_max) or posti_occupati!=0:
+            if contatore < posti_occupati and posti_occupati <= posti_max:
                 matrice[i][j] = False
                 contatore += 1
-            else:
-                break
+
+    # Cerca il primo posto disponibile
     for i in range(righe):
         for j in range(colonne):
-            if matrice[i][j] == True:
-                riga_t=i+1
-                posto_t=j+1
-                prima_disponibile=True
+            if matrice[i][j]:
+                riga_t = i + 1
+                posto_t = j + 1
+                prima_disponibile = True
                 break
         if prima_disponibile:
             break
-    text="Puoi sederti nel posto {} della fila {}".format(posto_t, riga_t)
-    nao_animatedSayText(text)
+
+    if prima_disponibile:
+        text = "Puoi sederti nel posto {} della fila {}".format(posto_t, riga_t)
+    else:
+        text = "Mi dispiace, tutti i posti sono occupati."
+
+    speech_ai(text)
     tempo_di_pausa()
     return jsonify({'code': 200, 'message': 'OK'}), 200
+
     
 
 @app.route('/nao_time_match', methods=['GET'])
