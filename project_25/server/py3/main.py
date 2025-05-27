@@ -476,7 +476,71 @@ def tactics():
     speech_ai(text)
     return jsonify({"status": "ok"}), 200
 
+### registrazione video webcam nao ###
+# Variabili globali di controllo
 
+is_recording = False
+recording_thread = None
+#il file output lva salvato in: video_path_mp4
+
+
+def record_video():
+    global is_recording
+
+    data = {"nao_ip": nao_ip, "nao_port": nao_port}
+    url = "http://127.0.0.1:5011/nao_webcam/" + str(data)
+
+    cap = cv2.VideoCapture(url)
+    if not cap.isOpened():
+        print("Impossibile aprire lo stream, 500")
+        is_recording = False
+        return
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 640)
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 480)
+    fps = int(cap.get(cv2.CAP_PROP_FPS) or 10)
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(video_path_mp4, fourcc, fps, (width, height))
+
+    while is_recording:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error 505")
+            break
+        out.write(frame)
+
+    cap.release()
+    out.release()
+    print(f"Registrazione salvata: {video_path_mp4}")
+
+@app.route('/start_recording', methods=['GET'])
+def start_recording():
+    try:
+        global is_recording, recording_thread
+
+        if is_recording:
+            return jsonify({"status": "already recording"}), 200
+
+        is_recording = True
+        recording_thread = threading.Thread(target=record_video)
+        recording_thread.start()
+
+        return jsonify({"status": "recording started"}), 200
+    except Exception as e:
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+@app.route('/stop_recording', methods=['GET'])
+def stop_recording():
+    global is_recording, recording_thread
+
+    if not is_recording:
+        return jsonify({"status": "not recording"}), 200
+
+    is_recording = False
+    recording_thread.join()
+
+    return jsonify({"status": "recording stopped", "file": video_path_mp4}), 200
 
 #################################
 #            Tribuna            #

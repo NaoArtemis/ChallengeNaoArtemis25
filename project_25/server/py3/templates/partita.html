@@ -47,7 +47,7 @@
                 <h2 class="text">Match</h2>x
 
                 <div class = "button-row">
-                    <button class="btn btn-joystick" onclick="inzia_registrazione()">start recording</button>
+                    <button class="btn btn-joystick" onclick="inizia_registrazione()">start recording</button>
                     <button class="btn btn-joystick" onclick="fine_registrazione()">stop recoding</button>
                 </div>
 
@@ -183,6 +183,19 @@
 
         function points() {
             fetch("/nao_points", { method: "GET" })
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        }
+        function inizia_registrazione() {
+            fetch("/start_recording", {method:"GET"})
+                .then(response => response.json())
+                .then(data => console.log("Risposta API:", data))
+                .catch(error => console.error("Errore:", error));
+        }
+
+        function fine_registrazione(){
+            fetch("/stop_recording", {method:"GET"})
                 .then(response => response.json())
                 .then(data => console.log("Risposta API:", data))
                 .catch(error => console.error("Errore:", error));
