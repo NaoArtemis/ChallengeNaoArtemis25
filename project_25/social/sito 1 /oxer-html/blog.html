@@ -176,257 +176,303 @@
 
 
 
-  <section class="blog_section layout_padding">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-10 ml-auto">
-          <div class="heading_container">
-            <h2>
-              TASK 1 
-            </h2>
-            <p>
-              Innovation in motion: robotics for athletes
-            </p>
+<section class="blog_section layout_padding">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-10 ml-auto">
+        <div class="heading_container">
+          <h2>
+            TASK 1 
+          </h2>
+          <p>
+            Innovation in motion: robotics for athletes
+          </p>
 
-            <style>
-              .container-custom {
-                display: flex;
-                align-items: flex-start;
-                gap: 40px;
-                margin-top: 40px;
-              }
+          <style>
+            .container-custom {
+              display: flex;
+              align-items: flex-start;
+              gap: 40px;
+              margin-top: 40px;
+            }
 
-              .left-column {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-              }
+            .left-column {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
 
-              .image {
-                width: 700px;
-                height: auto;
-              }
+            .image {
+              width: 700px;
+              height: auto;
+            }
 
-              .right-column {
-                max-width: 300px;
-                font-size: 18px;
-              }
+            .right-column {
+              max-width: 300px;
+              font-size: 18px;
+            }
 
-              .text {
-                margin-bottom: 10px;
-                font-weight: bold;
-              }
+            .text {
+              margin-bottom: 10px;
+              font-weight: bold;
+            }
 
-              .controls {
-                margin-top: 20px;
-                display: flex;
-                gap: 10px;
-                justify-content: center;
-              }
+            .controls {
+              margin-top: 20px;
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+            }
 
-              button {
-                cursor: pointer;
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background-color: black;
-                border: none;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
+            button {
+              cursor: pointer;
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              background-color: black;
+              border: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
 
-              button svg {
-                fill: white;
-                width: 30px;
-                height: 30px;
-              }
-            </style>
+            button svg {
+              fill: white;
+              width: 30px;
+              height: 30px;
+            }
 
-            <div class="container-custom">
-              <!-- Colonna sinistra: immagine + frecce -->
-              <div class="left-column">
-                <img id="image" class="image" src="images/web-app/lockscreen.png" alt="Immagine" />
-                <div class="controls">
-                  <button id="prevBtn" aria-label="Indietro">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                    </svg>
-                  </button>
-                  <button id="nextBtn" aria-label="Avanti">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+            /* 🔧 MODIFICA FATTA QUI */
+            .container-custom-small {
+              display: flex;
+              align-items: flex-start;
+              gap: 40px;
+              margin-top: 200px;
+              margin-left: 210px; /*  Aggiunto per spostare a destra il telefono */
+            }
 
-              <!-- Colonna destra: testo -->
-              <div class="right-column">
-                <div id="text" class="text">VIEW OUR WEB APP</div>
+            .left-column-small {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+
+            .image-small {
+              width: 300px;
+              height: auto;
+            }
+
+            .right-column-small {
+              max-width: 300px;
+              font-size: 18px;
+            }
+
+            .text-small {
+              margin-bottom: 10px;
+              font-weight: bold;
+            }
+
+            .controls-small {
+              margin-top: 20px;
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+            }
+
+            button {
+              cursor: pointer;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              background-color: black;
+              border: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            button svg {
+              fill: white;
+              width: 20px;
+              height: 20px;
+            }
+          </style>
+
+          <div class="container-custom">
+            <div class="left-column">
+              <img id="image" class="image" src="images/web-app/lockscreen.png" alt="Immagine" />
+              <div class="controls">
+                <button id="prevBtn" aria-label="Indietro">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                <button id="nextBtn" aria-label="Avanti">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                  </svg>
+                </button>
               </div>
             </div>
+            <div class="right-column">
+              <div id="text" class="text">VIEW OUR WEB APP</div>
+            </div>
+          </div>
 
-            <script>
-              const images = [
-                { src: "images/web-app/lockscreen.png", text: "LOCKSCREEN"},
-                { src: "images/web-app/audace.png", text: "AUDACE"},
-                { src: "images/web-app/gestione_tribuna.png", text: "GESTIONE TRIBUNA"},
-                { src: "images/web-app/salute.png", text: "SALUTE"},
-                { src: "images/web-app/joystick.png", text: "JOYSTICK"},
-              ];
+          <div class="container-custom-small">
+            <div class="left-column-small">
+              <img id="image2" class="image-small" src="images/app/app_lockscreen.png" alt="Immagine" />
+              <div class="controls-small">
+                <button id="prevBtn2" aria-label="Indietro">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                <button id="nextBtn2" aria-label="Avanti">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="right-column-small">
+              <div id="text2" class="text-small">LOCKSCREEN - MOBILE APP</div>
+            </div>
+          </div>
 
-              let currentIndex = 0;
+          <script>
+            const images = [
+              { src: "images/web-app/lockscreen.png", text: "LOCKSCREEN"},
+              { src: "images/web-app/audace.png", text: "AUDACE"},
+              { src: "images/web-app/gestione_tribuna.png", text: "GESTIONE TRIBUNA"},
+              { src: "images/web-app/salute.png", text: "SALUTE"},
+              { src: "images/web-app/joystick.png", text: "JOYSTICK"},
+            ];
 
-              const imgEl = document.getElementById("image");
-              const textEl = document.getElementById("text");
-              const prevBtn = document.getElementById("prevBtn");
-              const nextBtn = document.getElementById("nextBtn");
+            let currentIndex = 0;
 
-              function updateContent() {
-                imgEl.src = images[currentIndex].src;
-                textEl.textContent = images[currentIndex].text;
-              }
+            const imgEl = document.getElementById("image");
+            const textEl = document.getElementById("text");
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
 
-              prevBtn.addEventListener("click", () => {
-                currentIndex = (currentIndex - 1 + images.length) % images.length;
-                updateContent();
-              });
+            function updateContent() {
+              imgEl.src = images[currentIndex].src;
+              textEl.textContent = images[currentIndex].text;
+            }
 
-              nextBtn.addEventListener("click", () => {
-                currentIndex = (currentIndex + 1) % images.length;
-                updateContent();
-              });
-
-              // Carica inizialmente il contenuto corretto
+            prevBtn.addEventListener("click", () => {
+              currentIndex = (currentIndex - 1 + images.length) % images.length;
               updateContent();
-            </script>
-          </div>
+            });
+
+            nextBtn.addEventListener("click", () => {
+              currentIndex = (currentIndex + 1) % images.length;
+              updateContent();
+            });
+
+            const images2 = [
+              { src: "images/app/app_lockscreen.png", text: "LOCKSCREEN - MOBILE APP" },
+              { src: "images/app/app_homescreen.png", text: "HOMESCREEN - MOBILE APP" }
+            ];
+
+            let currentIndex2 = 0;
+
+            const imgEl2 = document.getElementById("image2");
+            const textEl2 = document.getElementById("text2");
+            const prevBtn2 = document.getElementById("prevBtn2");
+            const nextBtn2 = document.getElementById("nextBtn2");
+
+            function updateContent2() {
+              imgEl2.src = images2[currentIndex2].src;
+              textEl2.textContent = images2[currentIndex2].text;
+            }
+
+            prevBtn2.addEventListener("click", () => {
+              currentIndex2 = (currentIndex2 - 1 + images2.length) % images2.length;
+              updateContent2();
+            });
+
+            nextBtn2.addEventListener("click", () => {
+              currentIndex2 = (currentIndex2 + 1) % images2.length;
+              updateContent2();
+            });
+
+            updateContent();
+            updateContent2();
+          </script>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="blog_section layout_padding">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-10 ml-auto">
-          <div class="heading_container">
-            <style>
-              .container-custom-small {
-                display: flex;
-                align-items: flex-start;
-                gap: 40px;
-                margin-top: 40px;
-              }
+<section class="blog_section layout_padding">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-10 ml-auto">
+        <div class="heading_container">
+          <h2>
+            TASK 2
+          </h2>
+          <p>
+            Innovation in motion: robotics for athletes
+          </p>
 
-              .left-column-small {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-              }
+          <style>
+            .container-task2 {
+              display: flex;
+              align-items: flex-start;
+              gap: 40px;
+              margin-top: 40px;
+            }
 
-              .image-small {
-                width: 300px;
-                height: auto;
-              }
+            .left-column-task2 {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
 
-              .right-column-small {
-                max-width: 300px;
-                font-size: 18px;
-              }
+            .image-task2 {
+              width: 700px;
+              height: auto;
+            }
 
-              .text-small {
-                margin-bottom: 10px;
-                font-weight: bold;
-              }
+            .right-column-task2 {
+              max-width: 400px;
+              font-size: 18px;
+              color: white;
+            }
+          </style>
 
-              .controls-small {
-                margin-top: 20px;
-                display: flex;
-                gap: 10px;
-                justify-content: center;
-              }
-
-              button {
-                cursor: pointer;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background-color: black;
-                border: none;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-
-              button svg {
-                fill: white;
-                width: 20px;
-                height: 20px;
-              }
-            </style>
-
-            <div class="container-custom-small">
-              <!-- Colonna sinistra -->
-              <div class="left-column-small">
-                <img id="image2" class="image-small" src="images/app/app_lockscreen.png" alt="Immagine" />
-                <div class="controls-small">
-                  <button id="prevBtn2" aria-label="Indietro">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                    </svg>
-                  </button>
-                  <button id="nextBtn2" aria-label="Avanti">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Colonna destra -->
-              <div class="right-column-small">
-                <div id="text2" class="text-small">LOCKSCREEN - MOBILE APP</div>
-              </div>
+          <div class="container-task2">
+            <!-- Immagine computer -->
+            <div class="left-column-task2">
+              <img class="image-task2" src="images/web-app/gestione_tribuna.png" alt="Web App Task 2" />
+              <br>
+              <img class="image-task2" src="images/caa.png" style="border-radius: 20px;">
             </div>
 
-            <script>
-              const images2 = [
-                { src: "images/app/app_lockscreen.png", text: "LOCKSCREEN - MOBILE APP" },
-                { src: "images/app/app_homescreen.png", text: "HOMESCREEN - MOBILE APP" }
-              ];
-
-              let currentIndex2 = 0;
-
-              const imgEl2 = document.getElementById("image2");
-              const textEl2 = document.getElementById("text2");
-              const prevBtn2 = document.getElementById("prevBtn2");
-              const nextBtn2 = document.getElementById("nextBtn2");
-
-              function updateContent2() {
-                imgEl2.src = images2[currentIndex2].src;
-                textEl2.textContent = images2[currentIndex2].text;
-              }
-
-              prevBtn2.addEventListener("click", () => {
-                currentIndex2 = (currentIndex2 - 1 + images2.length) % images2.length;
-                updateContent2();
-              });
-
-              nextBtn2.addEventListener("click", () => {
-                currentIndex2 = (currentIndex2 + 1) % images2.length;
-                updateContent2();
-              });
-
-              updateContent2();
-            </script>
-
+            <!-- Testo (identico a TASK 1) -->
+            <div class="right-column-task2">
+              <p>
+                NaoArtemis introduces an AI- and robotics-based system featuring two NAO robots with distinct roles.
+                <br><br>
+                Task 1 acts as an assistant coach for athletes. Using computer vision and biometric sensors, it analyzes player movements, generates heatmaps, suggests strategies, and monitors physical conditions to prevent injuries. It also provides motivational support to enhance focus and teamwork.
+                <br><br>
+                Task 2 is designed for fans, especially those with disabilities. Positioned in the stands, it offers voice guidance for accessibility and promotes inclusive cheering. It uses AAC and ArUco markers to interpret fan messages, especially from individuals with autism, and responds with related voice outputs.
+                <br><br>
+                NaoArtemis also aims to raise awareness by using the robots in campaigns that promote inclusion and respect in sports events.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
+
 
   <!--bottoni-->
   <section> 
