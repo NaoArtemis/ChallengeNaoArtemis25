@@ -132,8 +132,8 @@ def genera_voronoi(all_positions, output_path_img):
 
     all_points = [(x, y) for frame in all_positions for (x, y, team) in frame]
     if not all_points:
-        print("⚠️ Nessun punto da disegnare.")
-        return "nessuna_azione"
+        print("Nessun punto da disegnare.")
+        return None
 
     x_vals, y_vals = zip(*all_points)
     heatmap, xedges, yedges = np.histogram2d(
@@ -145,7 +145,7 @@ def genera_voronoi(all_positions, output_path_img):
 
     max_val = np.max(heatmap_smooth)
     center_val = heatmap_smooth[bins_x // 2, bins_y // 2]
-    print(f"📈 Max heatmap: {max_val:.3f}, center value: {center_val:.3f}")
+    print(f"Max heatmap: {max_val:.3f}, center value: {center_val:.3f}")
 
     # 🧠 Calcolo della zona di attività
     soglia = 0.7 * max_val
@@ -335,46 +335,9 @@ def diagram_voronoi():
 
 
 
-@app.route('/stream_annotato')
-def stream_annotato():
-    path = os.path.join(script_dir, "recordings", "annotato.mp4")
-
-    def generate():
-        with open(path, "rb") as f:
-            while True:
-                chunk = f.read(8192)
-                if not chunk:
-                    break
-                yield chunk
-
-    range_header = request.headers.get('Range', None)
-    if not range_header:
-        return Response(generate(), mimetype="video/mp4")
-
-    # Gestione richieste parziali (Range)
-    size = os.path.getsize(path)
-    byte1, byte2 = 0, None
-
-    m = re.search(r'bytes=(\d+)-(\d*)', range_header)
-    if m:
-        g = m.groups()
-        byte1 = int(g[0])
-        if g[1]:
-            byte2 = int(g[1])
-
-    length = size - byte1
-    if byte2 is not None:
-        length = byte2 - byte1 + 1
-
-    with open(path, "rb") as f:
-        f.seek(byte1)
-        data = f.read(length)
-
-    resp = Response(data, 206, mimetype='video/mp4', content_type='video/mp4')
-    resp.headers.add('Content-Range', f'bytes {byte1}-{byte1 + length - 1}/{size}')
-    resp.headers.add('Accept-Ranges', 'bytes')
-
-    return resp
+@app.route('/record')
+def record():
+    None
 
 
 @app.route('/sostituzione', methods=['GET'])
@@ -1610,7 +1573,35 @@ def nao_start():
 if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
+    db_helper.insert_dati(12, 150, 1320, 4.5)
+    db_helper.insert_dati(12, 153, 1350, 4.6)
+    db_helper.insert_dati(12, 151, 1330, 4.4)
+    db_helper.insert_dati(12, 149, 1300, 4.3)
+    db_helper.insert_dati(12, 155, 1370, 4.7)
 
+    db_helper.insert_dati(13, 165, 1460, 5.0)
+    db_helper.insert_dati(13, 168, 1490, 5.1)
+    db_helper.insert_dati(13, 170, 1510, 5.2)
+    db_helper.insert_dati(13, 166, 1470, 5.0)
+    db_helper.insert_dati(13, 169, 1500, 5.1)
+
+    db_helper.insert_dati(14, 142, 1150, 3.9)
+    db_helper.insert_dati(14, 144, 1160, 4.0)
+    db_helper.insert_dati(14, 140, 1130, 3.8)
+    db_helper.insert_dati(14, 143, 1140, 3.9)
+    db_helper.insert_dati(14, 145, 1170, 4.0)
+
+    db_helper.insert_dati(15, 160, 1280, 4.4)
+    db_helper.insert_dati(15, 162, 1300, 4.5)
+    db_helper.insert_dati(15, 158, 1260, 4.3)
+    db_helper.insert_dati(15, 161, 1290, 4.4)
+    db_helper.insert_dati(15, 159, 1270, 4.3)
+
+    db_helper.insert_dati(16, 134, 960, 3.3)
+    db_helper.insert_dati(16, 136, 980, 3.4)
+    db_helper.insert_dati(16, 133, 950, 3.2)
+    db_helper.insert_dati(16, 135, 970, 3.3)
+    db_helper.insert_dati(16, 137, 990, 3.4)
 
     #nao_start()
     #nao_autonomous_life()
