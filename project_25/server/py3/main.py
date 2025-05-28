@@ -15,7 +15,7 @@ Questo server si interfaccia con l'utente, il database e AI attraverso python3.
 # Modules
 import time
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
-from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, send_file, send_from_directory
+from flask import Flask, render_template, Response, jsonify, request, redirect, url_for, send_from_directory
 from hashlib import md5, sha256
 from datetime import datetime
 import requests
@@ -34,30 +34,19 @@ from pathlib import Path
 from flask_cors import CORS
 import whisper
 import threading
-import sqlite3
 import supervision as sv
-from supervision import EllipseAnnotator, LabelAnnotator, ColorLookup, Position
+from supervision import EllipseAnnotator, LabelAnnotator, Position
 from ultralytics import YOLO
 import logging
 logging.getLogger("ultralytics").setLevel(logging.CRITICAL)
-import torch
-from transformers import AutoProcessor, AutoModel
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-from scipy.spatial import Voronoi, voronoi_plot_2d
-import io
 from sklearn.cluster import KMeans
-import shutil
-import seaborn as sns
 import matplotlib
 matplotlib.use("Agg")    
-import matplotlib.pyplot as plt
-from mplsoccer import Pitch
 import random
-import re
-
-
+import matplotlib.pyplot as plt
+from matplotlib import patches
+from scipy.ndimage import gaussian_filter
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 
@@ -121,11 +110,6 @@ def inizializza_modelli():
 
 
 def genera_voronoi(all_positions, output_path_img):
-    import matplotlib.pyplot as plt
-    from matplotlib import patches
-    import numpy as np
-    from scipy.ndimage import gaussian_filter
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     field_length, field_width = 30, 15
     bins_x, bins_y = 100, 50
@@ -1634,9 +1618,8 @@ def nao_start():
     else:
         nao_stop_face_tracker()
 
-if __name__ == "__main__":
-    startTime  = time.time()
-    #nao_autonomous_life_state()
+
+def dati_simulati():
     db_helper.insert_dati(12, 150, 1320, 4.5)
     db_helper.insert_dati(12, 153, 1350, 4.6)
     db_helper.insert_dati(12, 151, 1330, 4.4)
@@ -1666,6 +1649,12 @@ if __name__ == "__main__":
     db_helper.insert_dati(16, 133, 950, 3.2)
     db_helper.insert_dati(16, 135, 970, 3.3)
     db_helper.insert_dati(16, 137, 990, 3.4)
+
+if __name__ == "__main__":
+    startTime  = time.time()
+    #nao_autonomous_life_state()
+
+    #dati_simulati
 
     #nao_start()
     #nao_autonomous_life()

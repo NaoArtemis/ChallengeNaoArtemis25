@@ -274,10 +274,6 @@ body {
 
 /* =============== WEBCAM STYLES =============== */
 
-
-
-
-
 .webcam-container {
     position: relative;
     width: 100%;
@@ -434,12 +430,6 @@ body {
     color: #333;
 }
 
-    /* -------------------- VIDEO PLAYER -------------------- */
-video {
-    max-width: 80%;
-    border: 2px solid #333;
-    margin-top: 20px;
-}
 
     /* -------------------- HEATMAP IMAGE -------------------- */
 #heatmap-container img {
