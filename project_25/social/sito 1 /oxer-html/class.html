@@ -20,12 +20,78 @@
   <!-- bootstrap core css -->
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
 
-  <!-- fonts style -->
-  <link href="https://fonts.googleapis.com/css?family=Baloo+Chettan|Dosis:400,600,700|Poppins:400,600,700&display=swap" rel="stylesheet" />
+  <!-- Montserrat font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
   <!-- Custom styles for this template -->
   <link href="css/style.css" rel="stylesheet" />
   <!-- responsive style -->
   <link href="css/responsive.css" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .button-container a.button {
+      padding: 12px 24px;
+      background-color: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .button-container a.button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Divisore animato */
+    .custom-divider {
+      height: 5px;
+      width: 70%;
+      background: linear-gradient(to right, #92140C 0%, transparent 100%);
+      margin: 50px auto;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .custom-divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, #92140C, #D43D3D);
+      animation: slide 2s linear infinite;
+      border-radius: 10px;
+    }
+
+    @keyframes slide {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Fade-in per info_section */
+    .info_section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .info_section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
 
 <body class="sub_page">
@@ -35,7 +101,7 @@
       <div class="container">
         <div class="header_nav">
           <a class="navbar-brand brand_desktop" href="index.html">
-            <img src="images/logo_v3.png" alt="" style="width: 195px; height: 32px;"/>
+            <img src="images/logo_v3.png" alt="" style="width: 195px; height: 32px;" />
           </a>
           <div class="main_nav">
             <div class="top_nav">
@@ -48,7 +114,7 @@
                 </li>
                 <li class="">
                   <a class="" href="https://www.google.com/maps/place/Scuole+alle+Stimate/@45.4369228,10.9921635,18z/data=!4m22!1m15!4m14!1m6!1m2!1s0x477f5f46a58e707b:0x3068c6b3aa867ae6!2sScuole+alle+Stimate!2m2!1d10.9933571!2d45.43569!1m6!1m2!1s0x477f5f46a58e707b:0x3068c6b3aa867ae6!2sVia+Carlo+Montanari,+1,+37122+Verona+VR!2m2!1d10.9933571!2d45.43569!3m5!1s0x477f5f46a58e707b:0x3068c6b3aa867ae6!8m2!3d45.43569!4d10.9933571!16s%2Fm%2F0405dxg?entry=ttu&g_ep=EgoyMDI1MDUwNy4wIKXMDSoASAFQAw%3D%3D" target="_blank">
-                    <img src="images/location.png" alt=""/>
+                    <img src="images/location.png" alt="" />
                     <span>Scuole Stimate</span>
                   </a>
                 </li>
@@ -59,7 +125,8 @@
                 <a class="navbar-brand brand_mobile" href="index.html">
                   <img src="images/logo.png" alt="" />
                 </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                  aria-expanded="false" aria-label="Toggle navigation">
                   <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -103,7 +170,7 @@
                 <div class="heading_container">
                   <h2>
                     <br>
-                    NaoArtemis' Team 
+                    NaoArtemis' Team
                   </h2>
                   <p>
                     Friends unitied by a passion
@@ -117,85 +184,73 @@
                   <source src="images/video1.MOV" type="video/mp4">
                   Il tuo browser non supporta il tag video.
                 </video>
-                <!--<div class="video-caption"></div>-->
               </div>
               <div class="video-card">
                 <video autoplay muted loop playsinline>
                   <source src="images/video2.mov" type="video/mp4">
                   Il tuo browser non supporta il tag video.
                 </video>
-                <!--<div class="video-caption"></div>-->
               </div>
               <div class="video-card">
                 <video autoplay muted loop playsinline>
                   <source src="images/video3.MOV" type="video/mp4">
                   Il tuo browser non supporta il tag video.
                 </video>
-                <!--<div class="video-caption"></div>-->
               </div>
               <div class="video-card">
                 <video autoplay muted loop playsinline>
                   <source src="images/video4.mov" type="video/mp4">
                   Il tuo browser non supporta il tag video.
                 </video>
-                <!--<div class="video-caption"></div>-->
               </div>
               <div class="video-card">
                 <video autoplay muted loop playsinline>
                   <source src="images/video5.MOV" type="video/mp4">
                   Il tuo browser non supporta il tag video.
                 </video>
-                <!--<div class="video-caption"></div>-->
               </div>
-              <!-- Aggiungi altri blocchi video come necessario -->
             </div>
-            <!--<div class="button-container">
-              <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/class.html" class="see-more-btn" target="_blank">See more</a>
-            </div>-->
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <br>
-  <br>
-  <br>
-  <br>
+  <br><br><br><br>
 
   <section class="info_section">
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-10 col-lg-8 mx-auto">
-        <div class="heading_container">
-          <h2>
-            Our partership: Audace 
-          </h2>
-        </div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto">
 
-        <div class="row align-items-center mt-4">
-          <!-- Testo a sinistra -->
-          <div class="col-md-6">
-            <p style="font-size: 18px; font-family: Montserrat;" >
-              Our goal is to merge technology, sport, and inclusion through robotics.  
-              With NAO, we aim to support both athletes and fans by enhancing performance and accessibility,  
-              making every game a shared experience for everyone.
-            </p>
+          <!-- Divider before partnership -->
+          <div class="custom-divider"></div>
+
+          <div class="heading_container">
+            <h2>
+              Our partnership: Audace
+            </h2>
           </div>
 
-          <!-- Immagine a destra -->
-          <div class="col-md-6 text-center">
-            <img src="images/IMG_9242.jpg" alt="Our Mission" style="max-width: 100%; height: auto; border-radius: 20px;">
+          <div class="row align-items-center mt-4">
+            <!-- Testo a sinistra -->
+            <div class="col-md-6">
+              <p style="font-size: 18px; font-family: Montserrat;">
+                Our goal is to merge technology, sport, and inclusion through robotics.
+                With NAO, we aim to support both athletes and fans by enhancing performance and accessibility,
+                making every game a shared experience for everyone.
+              </p>
+            </div>
+
+            <!-- Immagine a destra -->
+            <div class="col-md-6 text-center">
+              <img src="images/IMG_9242.jpg" alt="Our Mission" style="max-width: 100%; height: auto; border-radius: 20px;">
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-
-
-
+  </section>
 
   <!-- info section -->
   <div class="info_section">
@@ -208,27 +263,24 @@
               <!-- footer section -->
               <section class="footer_section">
                 <h2>Get in touch:</h2>
-                  <div class="social_box">
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-tiktok"></i></a>
-                    <!--<a href="#"><i class="fab fa-youtube"></i></a>-->
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                    <!--<a href="#"><i class="fab fa-x-twitter"></i></a>-->
-                    <a href="#"><i class="fas fa-envelope"></i></a>
-                  </div>
+                <div class="social_box">
+                  <a href="#"><i class="fab fa-instagram"></i></a>
+                  <a href="#"><i class="fab fa-tiktok"></i></a>
+                  <!--<a href="#"><i class="fab fa-youtube"></i></a>-->
+                  <a href="#"><i class="fab fa-facebook"></i></a>
+                  <a href="#"><i class="fab fa-github"></i></a>
+                  <a href="#"><i class="fab fa-linkedin"></i></a>
+                  <!--<a href="#"><i class="fab fa-x-twitter"></i></a>-->
+                  <a href="#"><i class="fas fa-envelope"></i></a>
+                </div>
                 <p style="color: white;">&copy; 2025 NaoArtemis Team | Designed by <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/index.html" style="color: white;">NaoArtemis Team</a></p>
               </section>
 
               <!-- Font Awesome for icons -->
-              <link
-                rel="stylesheet"
-                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-              />
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
               <!-- footer section -->
             </div>
-            <div class="col-md-6  px-0">
+            <div class="col-md-6 px-0">
               <div class="img-box">
                 <!--<img src="images/footer-img.jpg" alt="">-->
               </div>
@@ -243,8 +295,7 @@
   <script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
   <script type="text/javascript" src="js/bootstrap.js"></script>
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js">
-  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
   <script>
     function openNav() {
@@ -264,17 +315,16 @@
       autoplayHoverPause: true,
       responsive: {
         0: {
-          items: 1
+          items: 1,
         },
         600: {
-          items: 2
+          items: 2,
         },
         1000: {
-          items: 2
-        }
-      }
+          items: 2,
+        },
+      },
     });
-
 
     $(".owl_carousel1").owlCarousel({
       loop: true,
@@ -285,15 +335,15 @@
       autoplayHoverPause: true,
       responsive: {
         0: {
-          items: 1
+          items: 1,
         },
         600: {
-          items: 2
+          items: 2,
         },
         1000: {
-          items: 2
-        }
-      }
+          items: 2,
+        },
+      },
     });
   </script>
   <!-- end owl carousel script -->
@@ -313,7 +363,21 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCh39n5U-4IoWpsVGUHWdqB6puEkhRLdmI&callback=myMap"></script>
   <!-- End Google Map -->
 
+  <script>
+    // Fade-in animation for info_section
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
 
+    document.querySelectorAll(".info_section").forEach((el) => {
+      observer.observe(el);
+    });
+  </script>
 </body>
 
 </html>
