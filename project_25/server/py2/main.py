@@ -247,7 +247,7 @@ def nao_touch_head_counter(params):
                             print("Middle Tactil Touched - attivato.")
                             global touch_counter
                             touch_counter += 1
-                        time.sleep(0.2)
+                        time.sleep(0.5)
                 except KeyboardInterrupt:
                     # Se interrompi manualmente col CTRL+C
                     app.logger.error(str(e))
