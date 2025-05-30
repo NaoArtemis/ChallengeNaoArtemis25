@@ -403,14 +403,20 @@
 
             <script>
               const images = [
-                { src: "images/web-app/lockscreen.png", text: "LOCKSCREEN"},
-                { src: "images/web-app/homescreen.png", text: "LOCKSCREEN"},
-                { src: "images/web-app/gestione_partita.png", 
-                  text: "MATCH:<br>• Match Recording: save and store the match video for future analysis<br>• Voronoi Video: generate a video with Voronoi diagrams to visualize playing zones"},            
-                { src: "images/web-app/gestione_partita.png", text: "VIDEO VORONOI"},
-                { src: "images/web-app/audace.png", text: "COMPETITION"},
-                { src: "images/web-app/joystick.png", text: "JOYSTICK"},
-                { src: "images/web-app/salute.png", text: "HEALTH"},
+                { src: "images/web-app/lockscreen.png", text: "LOCKSCREEN" },
+                { src: "images/web-app/homescreen.png", text: "FOOTBALL HUB" },
+
+                { src: "images/web-app/gestione_partita.png",
+                  text: "MATCH:<br>• Match Recording: save and store the match video for future analysis<br><br>• Voronoi Video: generate a video with Voronoi diagrams to visualize playing zones" },
+
+                { src: "images/web-app/audace.png", 
+                  text: "COMPETITION:<br>• View matchdays with results and details<br><br>• Display the updated standings and the list of players<br><br>• Quick access to the last match played and the next scheduled match" },
+
+                { src: "images/web-app/joystick.png", 
+                  text: "JOYSTICK:<br>• Robot movement control<br><br>• Quick commands for common actions<br><br>• Send custom voice commands<br><br>• Real-time webcam view" },
+
+                { src: "images/web-app/salute.png", 
+                  text: "HEALTH:<br>• Simple interface with a summary table for each player<br><br>• Data retrieved from the app" },
               ];
 
               let currentIndex = 0;
@@ -422,7 +428,7 @@
 
               function updateContent() {
                 imgEl.src = images[currentIndex].src;
-                textEl.textContent = images[currentIndex].text;
+                textEl.innerHTML = images[currentIndex].text; 
               }
 
               prevBtn.addEventListener("click", () => {
@@ -436,8 +442,11 @@
               });
 
               const images2 = [
-                { src: "images/app/app_lockscreen.png", text: "LOCKSCREEN - MOBILE APP" },
-                { src: "images/app/app_homescreen.png", text: "HOMESCREEN - MOBILE APP" }
+                { src: "images/app/app_lockscreen.png", 
+                  text: "LOCKSCREEN - MOBILE APP" },
+
+                { src: "images/app/app_homescreen.png", 
+                  text: "HOMESCREEN - MOBILE APP:<br>• Detects steps, speed, heart rate, and GPS position in real time<br><br>• Login/registration with personal data and player ID<br><br>• Sends data to a server for authentication and display on external dashboards" },
               ];
 
               let currentIndex2 = 0;
@@ -449,7 +458,7 @@
 
               function updateContent2() {
                 imgEl2.src = images2[currentIndex2].src;
-                textEl2.textContent = images2[currentIndex2].text;
+                textEl2.innerHTML = images2[currentIndex2].text; 
               }
 
               prevBtn2.addEventListener("click", () => {
@@ -465,6 +474,7 @@
               updateContent();
               updateContent2();
             </script>
+
           </div>
         </div>
       </div>
@@ -524,13 +534,7 @@
               <!-- Testo (identico a TASK 1) -->
               <div class="right-column-task2">
                 <p>
-                  NaoArtemis introduces an AI- and robotics-based system featuring two NAO robots with distinct roles.
-                  <br><br>
-                  Task 1 acts as an assistant coach for athletes. Using computer vision and biometric sensors, it analyzes player movements, generates heatmaps, suggests strategies, and monitors physical conditions to prevent injuries. It also provides motivational support to enhance focus and teamwork.
-                  <br><br>
-                  Task 2 is designed for fans, especially those with disabilities. Positioned in the stands, it offers voice guidance for accessibility and promotes inclusive cheering. It uses AAC and ArUco markers to interpret fan messages, especially from individuals with autism, and responds with related voice outputs.
-                  <br><br>
-                  NaoArtemis also aims to raise awareness by using the robots in campaigns that promote inclusion and respect in sports events.
+                  NAO brings the stands to life and makes sports accessible to everyone. Thanks to Augmentative and Alternative Communication (AAC) and ArUco symbols, people with autism can interact with the robot in a simple way: just show a symbol, and NAO responds with a personalized spoken phrase, promoting inclusion and participation.
                 </p>
               </div>
             </div>
