@@ -608,7 +608,7 @@ def reset_game():
 
 def tempo_di_pausa():
     print("Ora aspetta")
-    timer = threading.Timer(5, ritorno_a_false)
+    timer = threading.Timer(3, ritorno_a_false)
     timer.start()
 
 def ritorno_a_false():
