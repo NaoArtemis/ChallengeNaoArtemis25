@@ -1654,7 +1654,7 @@ if __name__ == "__main__":
     startTime  = time.time()
     #nao_autonomous_life_state()
 
-    #dati_simulati
+    #dati_simulati()
 
     #nao_start()
     #nao_autonomous_life()
