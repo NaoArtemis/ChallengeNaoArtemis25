@@ -6,6 +6,8 @@ void main() {
 }
 
 class JoystickApp extends StatelessWidget {
+  const JoystickApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,12 +19,14 @@ class JoystickApp extends StatelessWidget {
 }
 
 class JoystickPage extends StatefulWidget {
+  const JoystickPage({super.key});
+
   @override
   _JoystickPageState createState() => _JoystickPageState();
 }
 
 class _JoystickPageState extends State<JoystickPage> {
-  final String _serverAddress = '192.168.1.21:5010'; // IP + Port
+  final String _serverAddress = '192.168.0.103:5010'; // IP + Port
 
   Future<void> _sendMovementCommand(String action) async {
     final Uri uri = Uri.parse('http://$_serverAddress/api/movement/$action');
@@ -46,40 +50,40 @@ class _JoystickPageState extends State<JoystickPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('NAO Robot Controller')),
+      appBar: AppBar(title: const Text('NAO Robot Controller')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
               onPressed: () => _sendMovementCommand('start'),
-              child: Text('↑ AVANTI'),
+              child: const Text('↑ AVANTI'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
                   onPressed: () => _sendMovementCommand('left'),
-                  child: Text('← SINISTRA'),
+                  child: const Text('← SINISTRA'),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: () => _sendMovementCommand('stop'),
-                  child: Text('STOP'),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: Text('STOP'),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: () => _sendMovementCommand('right'),
-                  child: Text('DESTRA →'),
+                  child: const Text('DESTRA →'),
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => _sendMovementCommand('back'),
-              child: Text('↓ DIETRO'),
+              child: const Text('↓ DIETRO'),
             ),
           ],
         ),
