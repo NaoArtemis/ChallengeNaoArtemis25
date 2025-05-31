@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Accesso a FOOTBALL HUB</title>
+    <link rel="website icon" type="png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
+    <style>
+	
+		.nao-artemis {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 50px auto; /* Ridotto lo spazio sopra la tabella */
+            font-family: 'Readex Pro', sans-serif;
+            font-weight: bold;
+            max-width: 800px;
+        }
+		
+        body {
+            background-color: #FFF;
+            color: #FFF8F8;
+            font-family: 'Readex Pro', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #0A0A0A;
+            font-size: 150px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Readex Pro', sans-serif;
+        }
+
+        img {
+            width: 50%;
+            max-width: 300px;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 75px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 300px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border-color: #4b6cb7;
+            
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #92140C;
+            color: #fff
+        }
+
+        #myDiv {
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: 1; /* Imposta z-index su 1 per essere sopra gli altri elementi */
+        }
+
+        #myDiv video {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            pointer-events: none; /* Assicura che il video non interagisca con il puntatore */
+        }
+
+        #myVideo {
+			object-fit:cover;
+			height: 100%;
+            width: 100%;
+            opacity: 1;
+            transition: opacity 1s;
+        }
+
+        .video-hidden {
+            opacity: 0;
+        }
+        /* Barra superiore */
+
+        .top-bar {
+        width: 100%;
+        padding: 15px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #ff4b4b;
+        color: #fff;
+        }
+        .top-bar-buttons {
+        display: flex;
+        gap: 15px;
+            align-items: center;
+        }
+
+
+
+    </style>
+    
+    <!-- Barra superiore -->
+    
+    <script>
+        function removeVideo() {
+    var video = document.getElementById("myVideo");
+    video.style.transition = "opacity 1s";
+    video.style.opacity = "0";
+    video.style.zIndex = "-2"; 
+    setTimeout(function() {
+        video.style.display = "none";
+    }, 1000);
+}
+
+	function removeDiv() {
+    var div = document.getElementById("myDiv");
+    div.style.display = "none";
+	}
+
+    </script>
+</head>
+
+<body>
+    <!--
+	<div id="myDiv">
+        
+			<video id="myVideo" autoplay muted onended="removeVideo()" >
+			  <source src="{{url_for('static', filename='intro_web.mp4')}}" type="video/mp4">
+			</video>
+        
+	</div>
+	<script>
+		setTimeout(removeDiv, 7000);
+	</script>
+-->
+	<div>
+        <img src="{{url_for('static', filename='img/logo_con_scritta.png')}}" alt="Logo" class="nao-artemis">
+    </div>
+
+	
+	
+	<div>
+    <form method="post" action="/">
+        <input type="text" name="username" id="username" placeholder="Username" required>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+        <input type="submit" value="Accedi">
+    </form>
+	</div>
+	
+</body>
+
+</html>

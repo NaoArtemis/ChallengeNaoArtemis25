@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nao Control Panel</title>
+    <link rel="website icon" type="png" href="{{ url_for('static', filename='img/logo_v1.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Collega il file CSS -->
+</head>
+<body>
+    <!-- Barra superiore -->
+    <div class="top-bar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo_con_scritta.png') }}" alt="BetterNao Logo">
+        </div>
+        <div class="top-bar-buttons">   
+            <button id="battery-icon" class="btn btn-battery" onmouseover="battery()">batteria</button>
+            <button id="volume" class="btn btn-volume">Volume</button>
+            <button id="home" class="btn btn-logout">Home</button>
+            <button id="logout" class="btn btn-logout">Logout</button>
+        </div>
+    </div>
+
+
+    <!-- Contenuto principale -->
+    <div class="main-content">
+        <h1 class="main-text">Nao Control Panel</h1>
+        <div class="dashboard">
+            <div class="joystick-panel">
+                <h1 class="text">Joystick</h1>
+                <div class="joystick-controls">
+                    <button id="start" class="btn btn-joystick" onclick="start()">Avanti</button>
+                    <!--
+                    <button id="fake_1" class="btn btn-joystick" onclick="fake_1()">n1</button>
+                    <button id="fake_2" class="btn btn-joystick" onclick="fake_2()">n2</button>
+                    <button id="fake_3" class="btn btn-joystick" onclick="fake_3()">n3</button>
+                    -->
+                    <div class="joystick-middle">
+                        <button id="sinistra" class="btn btn-joystick" onclick="left()">Sinistra</button>
+                        <button id="stop" class="btn btn-stop" onclick="stop()">Stop</button>
+                        <button id="destra" class="btn btn-joystick" onclick="right()">Destra</button>
+                    </div>
+                    <button id="back" class="btn btn-joystick" onclick="back()">Indietro</button>
+                    <div class="button-row">
+                        <button id="color_eye_button" class="btn btn-joystick" onclick="color_eye()">Color Eye</button>
+                        <select id="eye_color_dropdown" style="display: none;">
+                            <option value="">Seleziona il colore</option>
+                            <option value="red_eye">Red Eye</option>
+                            <option value="blue_eye">Blue Eye</option>
+                            <option value="green_eye">Green Eye</option>
+                            <option value="nao_eye">White Eye</option>
+                        </select>
+                        <button id="stand" class="btn btn-joystick" onclick="wake_up()">Wakeup</button>
+                        <button id="Sit_Down" class="btn btn-joystick" onclick="sit_down()">Sit down</button>
+                        <button id="stand_init" class="btn btn-joystick" onclick="stand_init()">Stand Init</button>
+                    </div>
+                    <div class="button-row">
+                        <button id="head_touch" class="btn btn-joystick" onclick="head_touch()">head touch</button>
+                        <button id="stand" class="btn btn-joystick" onclick="stand()">Stand</button>
+                        <button id="autonomus_life" class="btn btn-joystick" onclick="a_life()">A_life</button>
+                        <button id="autonomous_life_state" class="btn btn-joystick" onclick="a_life_stop()">A_life_stop</button>
+                    </div>
+                    <div class="button-row">
+                        <form onsubmit="event.preventDefault(); inviaTestoAlNAOai();">
+                            <label for="testoInput_ai">Testo:</label>
+                            <input type="text" id="testoInput_ai" name="message_ai" required>
+                            <button type="submit" class="btn btn-joystick">Invia al NAO con AI</button>
+                        </form>
+                    </div>
+                    <div class="button-row">
+                        <form onsubmit="event.preventDefault(); inviaTestoAlNAO();">
+                            <label for="testoInput">Testo:</label>
+                            <input type="text" id="testoInput" name="message" required>
+                            <button type="submit" class="btn btn-joystick">Invia al NAO</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="joystick-panel">
+                <h1 class="text">Webcam</h1>
+                <div class="webcam-container">
+                    <div id="webcam-display"> <!--parte da no-feed e poi varria grazie al script.js-->
+                        <img id="webcam-feed" src="{{ url_for('static', filename='img/no_feed.jpg') }}" alt="Webcam Feed" class="webcam-feed">
+                    </div>
+                    <script> // passo qua i link perchè java non interpreta jinja2
+                        const naoCamUrl = "{{ url_for('webcam') }}";
+                        const arucoCamUrl = "{{ url_for('webcam_aruco') }}";
+                        const noCamUrl = "{{ url_for('static', filename='img/no_feed.jpg') }}";
+                    </script>
+                </div>
+                <div class="webcam-controls">
+                    <button id="nao-cam-btn" class="btn btn-joystick" onclick="showNaoCam()"><span>Nao Cam</span></button>
+                    <button id="stop-cam-btn" class="btn btn-logout" onclick="stopCam()"><span>Stop Cam</span></button>
+                    <button id="aruco-cam-btn" class="btn btn-joystick" onclick="showArucoCam()"><span>Aruco Cam</span></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+                <div class="logo-strap">
+        <div class="logo-scroll">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+          <img src="{{ url_for('static', filename='img/logo_v1.png') }}">
+        </div>
+      </div>
+
+    
+    <div id="volume-control" class="volume-control">
+        <label for="volume_slider">Volume:</label>
+        <input type="range" id="volume_slider" min="0" max="100" value="50" />
+        <span id="volume_value">50</span>
+    </div>
+
+
+    <script src = "{{ url_for('static', filename='script/script.js') }}" > 
+    </script>
+
+    <script> 
+    function battery() {
+        const show_battery = document.getElementById("battery-icon");
+        fetch('/nao/battery')
+        .then(response => {
+            if (!response.ok) {
+            throw new Error('Errore nel recupero del livello di batteria');
+            }
+            return response.json();
+        })
+        .then(data => {
+            show_battery.innerHTML = data.battery_level + '%';
+        })
+        .catch(error => {
+            console.error('Errore durante il recupero:', error);
+            show_battery.innerHTML = 'Errore nel recupero';
+        });
+    }
+    </script>
+</body>
+</html>
