@@ -183,7 +183,7 @@
       <div class="row align-items-center">
         <!-- Colonna sinistra: immagine -->
         <div class="col-md-6 text-center">
-          <img src="images/home.jpg" alt="Banner Intro" style="max-width: 100%; height: auto; border-radius: 20px;" />
+          <img src="images/nao4.jpg" alt="Banner Intro" style="max-width: 60%; height: auto; border-radius: 20px;"  />
         </div>
 
         <!-- Colonna destra: titolo e testo -->
@@ -492,7 +492,7 @@
             <h2>
               TASK 2
             </h2>
-            <p>
+            <p style="font-size:18px, font-family: Montserrat">
               Innovation in motion: robotics for athletes
             </p>
 
@@ -522,10 +522,11 @@
               }
             </style>
 
+            <img class="image-task2" src="images/caa.png" style="border-radius: 20px; width: 1100px; height: auto;">
             <div class="container-task2">
               <!-- Immagine computer -->
               <div class="left-column-task2">
-                <img class="image-task2" src="images/caa.png" style="border-radius: 20px;">
+                <!--<img class="image-task2" src="images/caa.png" style="border-radius: 20px; width: 1000px; height: auto;">-->
                 <br>
                 <br>
                 <img class="image-task2" src="images/web-app/gestione_tribuna.png" alt="Web App Task 2" />
@@ -534,6 +535,8 @@
               <!-- Testo (identico a TASK 1) -->
               <div class="right-column-task2">
                 <p>
+                  <br>
+                  <br>
                   NAO brings the stands to life and makes sports accessible to everyone. Thanks to Augmentative and Alternative Communication (AAC) and ArUco symbols, people with autism can interact with the robot in a simple way: just show a symbol, and NAO responds with a personalized spoken phrase, promoting inclusion and participation.
                 </p>
               </div>
@@ -616,7 +619,7 @@
                     <!--<a href="#"><i class="fab fa-youtube"></i></a>-->
                     <a href="#"><i class="fab fa-facebook" target="_blank"></i></a>
                     <a href="#"><i class="fab fa-github" target="_blank"></i></a>
-                    <a href="#"><i class="fab fa-linkedin" target="_blank"></i></a>
+                    <a href=""><i class="fab fa-linkedin" target="_blank"></i></a>
                     <!--<a href="#"><i class="fab fa-x-twitter"></i></a>-->
                     <a href="#"><i class="fas fa-envelope" target="_blank"></i></a>
                   </div>
@@ -713,6 +716,13 @@
     document.querySelectorAll('.fade-in, .custom-divider').forEach(el => {
       observer.observe(el);
     });
+  </script>
+
+    <script>
+  document.querySelector('a[href="#team-member"]').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector('#team-member').scrollIntoView({ behavior: 'smooth' });
+  });
   </script>
 
 </body>
