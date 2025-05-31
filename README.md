@@ -1,10 +1,9 @@
-![alt text](https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_social.jpg)
+
 # NAO coach & care
 ## Contents
 * [NAO Challenge 2025](#nao-challenge-2025)
     * [Project](#project)
         * [Coding](#coding)
-            * [Dataset](#dataset)
             * [App](#app)
             * [Server](#server)
                 * [Database](#database)
@@ -80,7 +79,7 @@ A simplified control **Joystick** interface that allows us to **communicate dire
 
 ### Server:
 
-The repository in the [Server](https://github.com/NaoArtemis/ChallengeNao25/tree/main/coding/server) directory serves as the core of the NaoArtemis 2025 project. The folder contains two separate servers:
+The repository in the [Server](https://github.com/NaoArtemis/ChallengeNaoArtemis25/tree/main/coding/server) directory serves as the core of the NaoArtemis 2025 project. The folder contains two separate servers:
 - A main server which runs on **Python 3 server**.
     - The core script orchestrates the analysis of match recordings by loading pretrained AI models such as YOLO for player detection and KMeans for role clustering. The video is processed frame by frame, with annotated results stored, and a Voronoi diagram is generated to represent the spatial dynamics and positioning of the entire squad. The code initializes key components, including annotators, model paths, and tracking parameters, while also exposing HTTP endpoints via Flask to trigger the analysis externally. Biometric data—such as heart rate, step count, and speed—can be integrated into the analytical output, enhancing performance evaluation. In addition to match analysis, the server manages requests related to audience interaction: it decodes ArUco symbols shown by users in the stands and triggers personalized vocal responses, enabling NAO to communicate through AAC (Augmentative and Alternative Communication). This functionality is specifically designed to support the participation of individuals with autism or communication difficulties. The structure also includes a PostgreSQL-integrated database helper, logging utilities, and configuration loaders, allowing for scalable and modular expansion. In summary, this repository excels not only in database operations, meticulous log management, and efficient HTTP communication, but also leverages Flask for powerful web development capabilities and inclusive interaction strategies.
 
@@ -210,17 +209,17 @@ The repository in the [Server](https://github.com/NaoArtemis/ChallengeNao25/tree
 
 ### Sequence Diagram:
 
-This folder [sequence_diagram](https://github.com/NaoArtemis/ChallengeNao25/tree/main/coding/sequence_diagram) contains the sequence diagrams representing the key interactions and workflows of the NaoArtemis 2025 project.
+This folder [sequence_diagram](https://github.com/NaoArtemis/ChallengeNaoArtemis25/tree/main/coding/sequence_diagram) contains the sequence diagrams representing the key interactions and workflows of the NaoArtemis 2025 project.
 
 The system is structured around two main tasks, each represented by a dedicated diagram:
 
 - **Task 1 – Assistant Coach Functionality**:  
   In this flow, the **coach** uses the web application (WEB-APP) to request tactical support during a match. The request is sent to the AI server (SERVER 3), which processes the current game situation using data such as biometric indicators (heart rate, step count, speed). The server analyzes the distribution of players on the field and their physical condition, then provides suggestions to the coach regarding possible **substitutions** or **tactical adjustments**. These may include replacing tired players, switching roles, or reorganizing the team's spatial balance. The web app displays this feedback in real time, supporting the coach in making informed and strategic decisions during the game.
-  ➤ [Diagramma Coach – Task 1](https://github.com/NaoArtemis/ChallengeNao25/blob/main/coding/sequence_diagram/diagram_coach_task1.svg)
+  ➤ [Diagramma Coach – Task 1](https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/coding/sequence_diagram/task_1.png)
 
 - **Task 2 – Inclusive Fan Interaction**:  
   This flow involves an **audience member** or guest interacting with NAO in the stands. The user shows an ArUco symbol, which is detected by the robot's camera and processed by the Python 2 server (SERVER 2). The system identifies the symbol and triggers a vocal response using AAC (Augmentative and Alternative Communication), allowing NAO to provide messages of encouragement, game commentary, or information. This task is designed to enhance accessibility, especially for individuals with autism or communication difficulties.  
-  ➤ [Diagramma Ospite – Task 2](https://github.com/NaoArtemis/ChallengeNao25/blob/main/coding/sequence_diagram/diagram_ospite_task2.svg)
+  ➤ [Diagramma Ospite – Task 2](https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/coding/sequence_diagram/task_2.png)
 
 These diagrams illustrate how NaoArtemis manages both game-related analysis and inclusive interaction, coordinating data and actions across multiple components: the coach, guest, web app, two servers, database, and the robot.
 
@@ -228,19 +227,19 @@ These diagrams illustrate how NaoArtemis manages both game-related analysis and 
 
 ### logos 
 
-This folder [logos](https://github.com/NaoNexus/ChallengeNao24/tree/main/social/logos) contains the logos of the project
+This folder [logos](https://github.com/NaoArtemis/ChallengeNaoArtemis25/tree/main/social/loghi) contains the logos of the project
 
 <div align="center">
-<img src="https://github.com/NaoNexus/ChallengeNao24/blob/main/social/logos/logo/logo_comp.png" width="600" height="350"/>
+<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v1.png" width="600" height="350"/>
 </div>
 
 ### Merch
 
-The folder [merch](https://github.com/NaoNexus/ChallengeNao24/tree/main/social/merch/felpa_2024) contains the images specifically curated for the production of the team's merchandise line, ensuring high-quality designs and branding consistency across all products.
+The folder [merch](https://github.com/NaoArtemis/ChallengeNaoArtemis25/tree/main/social/tshirt_naoartemis) contains the images specifically curated for the production of the team's merchandise line, ensuring high-quality designs and branding consistency across all products.
 
 ### Website
 
-## Authos 
+## Authors
 
 Suggest us new ideas at:
 
