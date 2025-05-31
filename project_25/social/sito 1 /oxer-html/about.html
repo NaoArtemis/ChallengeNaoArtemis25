@@ -122,8 +122,8 @@
                     NaoArtemis is a team of seven students from “Alle Stimate” in Verona, led by Professor Giovanni Bellorio. Passionate about tech, they develop inclusive, sustainable solutions with real-world impact. Their project focuses on using the NAO robot to make sports more accessible, driven by innovation, teamwork, and a commitment to making a difference.
                   </p>
                   <hr />
-                  <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/about.html" target="_blank">
-                    Read More
+                  <a href="#team-member">
+                    VIEW MORE
                   </a>
                 </div>
               </div>
@@ -139,7 +139,7 @@
       <div class="row">
         <div class="col-md-10 col-lg-8 mx-auto">
           <div class="client_container">
-            <div class="heading_container">
+            <div class="heading_container" id="team-member">
               <h2>
                 Meets our teem memebers
               </h2>
@@ -425,6 +425,13 @@
   <!-- Google Map -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCh39n5U-4IoWpsVGUHWdqB6puEkhRLdmI&callback=myMap"></script>
   <!-- End Google Map -->
+
+  <script>
+  document.querySelector('a[href="#team-member"]').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector('#team-member').scrollIntoView({ behavior: 'smooth' });
+  });
+  </script>
 
 
 </body>
