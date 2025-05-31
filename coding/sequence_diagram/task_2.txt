@@ -1,0 +1,39 @@
+frame#FFFAF0 Progetto NaoArtemis 2025
+
+participantspacing equal
+entryspacing 0.5
+
+actor TIFOSO#F8F8FF
+participant  #F8F8FF
+participant NAO #F8F8FF
+participant SERVER 2 #F8F8FF
+participant SERVER 3
+
+//-------------------------------------------------
+box over TIFOSO,SERVER 3 #B0E0E6: IN TRIBUNA
+
+autonumber 1
+TIFOSO ->> NAO: RICHIESTA
+activate NAO #C0C0C0
+
+autonumber 2
+NAO->>SERVER 2: GET
+activate SERVER 2 #C0C0C0
+
+autonumber 3
+SERVER 2 ->> SERVER 3: INVIO DATI
+activate SERVER 3 #C0C0C0
+
+
+autonumber 4
+SERVER 3 ->> SERVER 2: ANALISI DATI
+deactivate SERVER 3
+
+autonumber 5
+SERVER 2 ->> NAO: INVIO DATI
+deactivate SERVER 2
+
+autonumber 6
+NAO ->> TIFOSO:RISPOSTA
+deactivate NAO
+
