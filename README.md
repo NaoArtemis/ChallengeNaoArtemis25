@@ -246,7 +246,7 @@ The folder [merch](https://github.com/NaoArtemis/ChallengeNaoArtemis25/tree/main
 
 Suggest us new ideas at:
 
-* social@gmail.com (NAOARTEMIS)
+* socialnaoartemis@gmail.com (NAOARTEMIS)
 
 
 ## Social
@@ -254,7 +254,7 @@ Suggest us new ideas at:
 * [YouTube](https://www.youtube.com/@NaoArtemis)
 * [Instagram](https://www.instagram.com/naoartemis/)
 * [TikTok](https://www.tiktok.com/@naoartemis)
-* [LinkedIn]()
+* [LinkedIn](https://www.linkedin.com/in/nao-artemis/)
 
 ## License
 
