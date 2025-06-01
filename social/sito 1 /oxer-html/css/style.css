@@ -476,18 +476,17 @@ a:focus {
 .about_section .about_container .detail-box a {
   display: inline-block;
   padding: 8px 35px;
-  background-color: #000000;
+  background-color: #92140C;
   border: 1px solid transparent;
   border-radius: 35px;
-  color: #ffffff;
+  color: #ffffff; 
   margin: 35px auto 0 auto;
-  -webkit-box-shadow: 0 0 35px 0 rgba(99, 247, 79, 0.7);
-          box-shadow: 0 0 35px 0 rgba(99, 247, 79, 0.7);
+  box-shadow: 0 0 35px 0 rgba(255, 255, 255, 0.7);
 }
 
 .about_section .about_container .detail-box a:hover {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: #ffffff; 
+  color: #92140C;
 }
 
 .class_section {
@@ -511,88 +510,7 @@ a:focus {
           justify-content: center;
 }
 
-.class_section .class_box-container .box {
-  position: relative;
-}
 
-.class_section .class_box-container .box .img-box {
-  position: relative;
-  padding-left: 75px;
-  background-color: #000000;
-}
-
-.class_section .class_box-container .box .img-box img {
-  width: 100%;
-}
-
-.class_section .class_box-container .box .img-box .detail-box {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: end;
-      -ms-flex-align: end;
-          align-items: flex-end;
-  width: 100%;
-  height: 100%;
-  padding: 55px 0;
-  border-radius: 10px;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.class_section .class_box-container .box .img-box .detail-box button {
-  background-color: #292929;
-  border: none;
-  width: 55px;
-  height: 55px;
-  margin: 0 10px;
-  border-radius: 100%;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-}
-
-.class_section .class_box-container .box .img-box .detail-box button img {
-  width: 20px;
-  margin-left: 5px;
-}
-
-.class_section .class_box-container .box .img-box .detail-box h2 {
-  margin: 0;
-  text-transform: uppercase;
-  color: #ffffff;
-  font-weight: bold;
-  line-height: 55px;
-  margin-left: 15px;
-}
-
-.class_section .class_box-container .box .btn-box {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  margin-top: 30px;
-}
-
-.class_section .class_box-container .box .btn-box a {
-  display: inline-block;
-  padding: 10px 45px;
-  background-color: #000000;
-  border: 1px solid transparent;
-  border-radius: 30px;
-  color: #ffffff;
-}
-
-.class_section .class_box-container .box .btn-box a:hover {
-  background-color: #ffffff;
-  color: #000000;
-}
 
 .class_section .owl-carousel {
   position: unset;
