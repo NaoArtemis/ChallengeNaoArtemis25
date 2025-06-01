@@ -53,6 +53,40 @@
       background-color: #333;
       color: #fff;
     }
+
+    /* Divisore animato */
+    .custom-divider {
+      height: 5px;
+      width: 70%;
+      background: linear-gradient(to right, #92140C 0%, transparent 100%);
+      margin: 50px auto;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .custom-divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, #92140C, #D43D3D);
+      animation: slide 2s linear infinite;
+      border-radius: 10px;
+    }
+
+    @keyframes slide {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
   </style>
 </head>
 
@@ -195,6 +229,7 @@
 
 <!-- Divider -->
 <div class="custom-divider"></div>
+<br>
 <!-- end divider -->
 
 <!-- class section -->
@@ -262,6 +297,8 @@
 <!-- end class section -->
 
 <!-- Divider -->
+<br>
+<br>
 <div class="custom-divider"></div>
 <!-- end divider -->
 
