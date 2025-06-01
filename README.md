@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v1.png" width="300" height="200"/>
+<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v1.png" width="300" height="220"/>
 </div>
 
 <h1 align = "center"> NAO coach & care </h1>
@@ -237,7 +237,7 @@ These diagrams illustrate how NaoArtemis manages both game-related analysis and 
 This folder [logos](https://github.com/NaoArtemis/ChallengeNaoArtemis25/tree/main/social/loghi) contains the logos of the project
 
 <div align="center">
-<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v1.png" width="300" height="200"/>
+<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v1.png" width="300" height="220"/>
 </div>
 
 ### Merch
