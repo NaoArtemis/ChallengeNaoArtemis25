@@ -1,4 +1,6 @@
-
+<div align="center">
+<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v1.png" width="600" height="350"/>
+</div>
 # NAO coach & care
 ## Contents
 * [NAO Challenge 2025](#nao-challenge-2025)
