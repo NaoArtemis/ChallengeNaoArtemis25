@@ -639,7 +639,7 @@ a:focus {
 .see-more-btn {
   display: inline-block;
   text-decoration: none;
-  background-color: #000;
+  background-color: #92140C;
   color: #fff;
   padding: 12px 32px;
   font-size: 18px;
@@ -653,8 +653,8 @@ a:focus {
 
 .see-more-btn:hover,
 .see-more-btn:active {
-  background-color: #fff;
-  color: #000;
+  background-color: #92140C;
+  color: #fff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
