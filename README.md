@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v3.png" width="40%" height="60%"/>
+<img src="https://github.com/NaoArtemis/ChallengeNaoArtemis25/blob/main/social/loghi/logo_v3.png" width="400 px" height="60 px"/>
 </div>
 
 <h1 align = "center"> NAO COACH & CARE </h1>
