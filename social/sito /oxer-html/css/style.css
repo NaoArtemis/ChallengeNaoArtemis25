@@ -489,7 +489,7 @@ a:focus {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: rotate(180deg); /* o 270deg, 180deg, ecc. */
+ /* transform: rotate(180deg); o 270deg, 180deg, ecc. */
 }
 
 .video-caption {
