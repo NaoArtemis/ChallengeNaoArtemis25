@@ -53,6 +53,40 @@
       background-color: #333;
       color: #fff;
     }
+
+    .custom-divider {
+      height: 5px;
+      width: 70%; /* stessa lunghezza per entrambe le strisce */
+      background: linear-gradient(to right, #92140C 0%, transparent 100%);
+      margin: 30px auto;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .custom-divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, #92140C, #D43D3D);
+      animation: slide 2s linear infinite;
+      border-radius: 10px;
+    }
+
+    @keyframes slide {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
   </style>
 </head>
 
@@ -181,7 +215,7 @@
                   United by a passion for technology and computer science, they aim to create real-world solutions that are both inclusive and sustainable. Curious and determined, they enjoy facing challenges and working as a team to turn bold ideas into reality. With their project, they’re developing new applications for NAO, a humanoid robot that makes sports more accessible for everyone.
                 </p>
                 <hr />
-                <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/about.html" target="_blank">
+                <a href="about.html" target="_blank">
                   SEE MORE <!--colore linea 461 scss-->
                 </a>
               </div>
@@ -195,7 +229,7 @@
 <!-- end about section -->
 
 <!-- Divider -->
-<div class="custom-divider"></div>
+<div class="custom-divider fade-in"></div>
 <!-- end divider -->
 
 <!-- class section -->
@@ -252,7 +286,7 @@
             </div>
           </div>
           <div class="button-container">
-            <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/class.html" class="see-more-btn" target="_blank">See more</a>
+            <a href="class.html" class="see-more-btn" target="_blank">See more</a>
           </div>
         </div>
       </div>
@@ -263,7 +297,7 @@
 <!-- end class section -->
 
 <!-- Divider -->
-<div class="custom-divider"></div>
+<div class="custom-divider fade-in"></div>
 <!-- end divider -->
 
 <!-- blog section -->
@@ -289,7 +323,7 @@
               <img src="images/home.jpg" class="img-fluid" style="border-radius: 8px;" height="550px" width="550">
             </div>
             <div class="d-flex justify-content-center mt-4">
-              <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/blog.html" class="btn btn-dark rounded-pill px-4 py-2" target="_blank">
+              <a href="blog.html" class="btn btn-dark rounded-pill px-4 py-2" target="_blank">
                 See more
               </a>
             </div>
@@ -355,15 +389,15 @@ document.querySelectorAll('.fade-in, .custom-divider').forEach(el => {
                 <h2>Get in touch:</h2>
                   <div class="social_box">
                     <a href="https://www.instagram.com"><i class="fab fa-instagram" target="_blank"></i></a>
-                    <a href="https://www.tiktok.com/@naoartemis"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://www.tiktok.com/@naoartemis"><i class="fab fa-tiktok" target="_blank"></i></a>
                     <!--<a href="#"><i class="fab fa-youtube"></i></a>-->
-                    <a href="https://www.facebook.com/people/NaoArtemis/61574464567906/"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://www.facebook.com/people/NaoArtemis/61574464567906/"><i class="fab fa-facebook" target="_blank"></i></a>
+                    <a href="https://github.com/NaoArtemis/ChallengeNaoArtemis25"><i class="fab fa-github" target="_blank"></i></a>
+                    <a href="https://www.linkedin.com/in/nao-artemis/"><i class="fab fa-linkedin" target="_blank"></i></a>
                     <!--<a href="#"><i class="fab fa-x-twitter"></i></a>-->
                     <a href="mailto: socialnaoartemis@gmail.com"><i class="fas fa-envelope"></i></a>
                   </div>
-                <p style="color: white;">&copy; 2025 NaoArtemis Team | Designed by <a href="file:///Users/giacomosanti/Documents/GitHub/ChallengeNaoArtemis25/project_25/social/sito%201%20/oxer-html/index.html" style="color: white;">NaoArtemis Team</a></p>
+                <p style="color: white;">&copy; 2025 NaoArtemis Team | Designed by NaoArtemis Team</p>
               </section>
 
               <!-- Font Awesome for icons -->
