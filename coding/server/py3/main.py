@@ -608,11 +608,17 @@ def reset_game():
 
 def tempo_di_pausa():
     print("Ora aspetta")
+    print(task_2)
     timer = threading.Timer(3, ritorno_a_false)
     timer.start()
+    print("adesso parte")
+    print(task_2)
 
 def ritorno_a_false():
+    global task_2
     task_2 = False
+    print(f"stato task2:{task_2}")
+
 
 def nao_dance_1(): #baletto richiamato in nao_coro
     data     = {"nao_ip":nao_ip, "nao_port":nao_port}
@@ -701,7 +707,7 @@ def nao_seat():
     else:
         text = "Mi dispiace, tutti i posti sono occupati."
 
-    speech_ai(text)
+    nao_animatedSayText(text)
     tempo_di_pausa()
     return jsonify({'code': 200, 'message': 'OK'}), 200
 
@@ -709,16 +715,20 @@ def nao_seat():
 
 @app.route('/nao_time_match', methods=['GET'])
 def nao_time_match():
-    global task_2, time_3, time_2, minutes,seconds
-    time_3 = get_status()
-    time_3_data = f"{minutes:02d}:{seconds:02d}"
-    time_2 = time_3_data
-    if time_2=="00:00":
-        text ="La partita non è ancora iniziata"
-    else:
-        text = "La partita è iniziata da "+ str(minutes)+"minuti "+ str(seconds)+"secondi"
-    nao_animatedSayText(text)
-    tempo_di_pausa()
+    try:
+        global task_2, time_3, time_2, minutes,seconds
+        time_3_data = f"{minutes:02d}:{seconds:02d}"
+        time_2 = time_3_data
+        if time_2=="00:00":
+            text ="La partita non è ancora iniziata"
+        else:
+            text = "La partita è iniziata da "+ str(minutes)+"minuti "+ str(seconds)+"secondi"
+        nao_animatedSayText(text)
+        tempo_di_pausa()
+        return jsonify({'code': 200, 'message': 'OK'}), 200
+    except Exception as e:
+        print(e)
+
 
 @app.route('/nao_cori', methods=['GET'])
 def nao_cori():  
@@ -1243,7 +1253,7 @@ def competition():
 @app.route('/partita', methods=['GET'])
 @login_required
 def partita():
-    #players = db_helper.select_players()     , players=players
+    #players = db_helper.select_players()     
     return render_template('partita.html')
 
 @app.route('/registra', methods = ['GET']) 
@@ -1652,6 +1662,7 @@ def dati_simulati():
 
 if __name__ == "__main__":
     startTime  = time.time()
+    nao_volume_sound(100)
     #nao_autonomous_life_state()
 
     #dati_simulati()
