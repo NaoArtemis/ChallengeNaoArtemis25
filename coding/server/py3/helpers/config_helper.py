@@ -24,8 +24,8 @@ class Config:
     nao_password_2: str
 
     def __init__(self):
-        configuration = utilities.read_yaml('config.yaml')
-        # configuration = utilities.read_yaml('configLAN.yaml')
+        #configuration = utilities.read_yaml('config.yaml')
+        configuration = utilities.read_yaml('configLAN.yaml')
 
         if configuration is None:
             logger.error("Failed to load configuration file.")
