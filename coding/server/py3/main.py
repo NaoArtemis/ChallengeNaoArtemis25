@@ -1662,7 +1662,7 @@ def dati_simulati():
 
 if __name__ == "__main__":
     startTime  = time.time()
-    nao_volume_sound(100)
+    #nao_volume_sound(100)
     #nao_autonomous_life_state()
 
     #dati_simulati()
